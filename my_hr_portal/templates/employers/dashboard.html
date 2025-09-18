@@ -1,0 +1,213 @@
+{% extends 'core/base1.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Employer Dashboard" %} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 1200px; margin: 0 auto; padding: 20px;">
+    <div class="dashboard-header" style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 30px;">
+        <h1 style="color: #333; margin-bottom: 10px;">{% trans "Employer Dashboard" %}</h1>
+        <p style="color: #666; margin-bottom: 0;">{% trans "Welcome back" %}, {{ user.first_name|default:user.username }}!</p>
+
+        {% if not has_profile %}
+            <div class="alert alert-warning" style="background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; padding: 15px; border-radius: 5px; margin-top: 20px;">
+                <strong>{% trans "Profile Setup Required" %}</strong><br>
+                {% trans "Please complete your employer profile to access all features." %}
+                <a href="{% url 'employers:profile_setup' %}" class="btn btn-primary" style="margin-left: 15px; background: #007bff; color: white; padding: 8px 15px; text-decoration: none; border-radius: 4px;">
+                    {% trans "Complete Profile" %}
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    {% if has_profile %}
+    <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px;">
+        <a href="{% url 'employers:job_postings_list' %}" class="stat-card clickable-card" style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center; text-decoration: none; color: inherit; display: block;">
+            <div class="stat-icon" style="font-size: 2.5rem; color: #007bff; margin-bottom: 10px;">📝</div>
+            <h3 style="font-size: 1.8rem; margin-bottom: 5px; color: #333;">{{ total_job_postings|default:0 }}</h3>
+            <p style="color: #666; margin: 0;">{% trans "Total Job Postings" %}</p>
+        </a>
+
+        <a href="{% url 'employers:job_postings_list' %}?status=active" class="stat-card clickable-card" style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center; text-decoration: none; color: inherit; display: block;">
+            <div class="stat-icon" style="font-size: 2.5rem; color: #28a745; margin-bottom: 10px;">✅</div>
+            <h3 style="font-size: 1.8rem; margin-bottom: 5px; color: #333;">{{ active_job_postings|default:0 }}</h3>
+            <p style="color: #666; margin: 0;">{% trans "Active Postings" %}</p>
+        </a>
+
+        <div class="stat-card" style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+            <div class="stat-icon" style="font-size: 2.5rem; color: #17a2b8; margin-bottom: 10px;">👥</div>
+            <h3 style="font-size: 1.8rem; margin-bottom: 5px; color: #333;">{{ total_assignments|default:0 }}</h3>
+            <p style="color: #666; margin: 0;">{% trans "Total Employees" %}</p>
+        </div>
+
+        <div class="stat-card" style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+            <div class="stat-icon" style="font-size: 2.5rem; color: #fd7e14; margin-bottom: 10px;">🏃</div>
+            <h3 style="font-size: 1.8rem; margin-bottom: 5px; color: #333;">{{ active_assignments|default:0 }}</h3>
+            <p style="color: #666; margin: 0;">{% trans "Active Employees" %}</p>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="quick-actions" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px;">
+        <div class="action-card" style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <h3 style="color: #333; margin-bottom: 15px;">{% trans "Job Management" %}</h3>
+            <p style="color: #666; margin-bottom: 20px;">{% trans "Post new jobs and manage existing postings" %}</p>
+            <div class="action-buttons">
+                <a href="{% url 'employers:create_job_posting' %}" class="btn btn-primary" style="background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-right: 10px; display: inline-block;">
+                    {% trans "Post New Job" %}
+                </a>
+                <a href="{% url 'employers:job_postings_list' %}" class="btn btn-secondary" style="background: #6c757d; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                    {% trans "View All Jobs" %}
+                </a>
+            </div>
+        </div>
+
+        <div class="action-card" style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <h3 style="color: #333; margin-bottom: 15px;">{% trans "Applications" %}</h3>
+            <p style="color: #666; margin-bottom: 20px;">{% trans "Review and manage job applications" %}</p>
+            <div class="action-buttons">
+                <a href="{% url 'employers:applications_list' %}" class="btn btn-success" style="background: #28a745; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-right: 10px; display: inline-block;">
+                    {% trans "Review Applications" %}
+                </a>
+                <a href="{% url 'employers:applications_list' %}?status=INVITED" class="btn btn-info" style="background: #17a2b8; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                    {% trans "Shortlisted" %}
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="recent-activity" style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 20px;">
+            <h3 style="color: #333; margin: 0;">{% trans "Recent Job Postings" %}</h3>
+            {% if has_profile and total_job_postings > 0 %}
+            <a href="{% url 'employers:job_postings_list' %}" style="color: #007bff; text-decoration: none; font-size: 0.9rem;">
+                {% trans "View All" %} →
+            </a>
+            {% endif %}
+        </div>
+
+        {% if has_profile and total_job_postings > 0 %}
+            <div class="recent-jobs">
+                <!-- This will be populated by the view with recent job postings -->
+                {% if recent_job_postings %}
+                    {% for job in recent_job_postings %}
+                    <div class="job-item" style="border-bottom: 1px solid #eee; padding: 15px 0; display: flex; justify-content: between; align-items: center;">
+                        <div style="flex: 1;">
+                            <h5 style="margin: 0 0 5px 0; color: #333;">
+                                <a href="{% url 'employers:job_posting_detail' job.id %}" style="text-decoration: none; color: #333;">
+                                    {{ job.title }}
+                                </a>
+                            </h5>
+                            <p style="margin: 0; color: #666; font-size: 0.9rem;">
+                                {{ job.location }} • {{ job.get_job_type_display }} • {{ job.posted_date|date:"M d" }}
+                            </p>
+                        </div>
+                        <div style="text-align: right;">
+                            <span class="badge" style="background: {% if job.status == 'OPEN' %}#28a745{% else %}#6c757d{% endif %}; color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem;">
+                                {% if job.status == 'OPEN' %}{% trans "Active" %}{% else %}{% trans "Inactive" %}{% endif %}
+                            </span>
+                            {% if job.applications_count > 0 %}
+                            <div style="font-size: 0.8rem; color: #666; margin-top: 4px;">
+                                {{ job.applications_count }} {% trans "applications" %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+
+                <div style="text-align: center; margin-top: 20px;">
+                    <a href="{% url 'employers:create_job_posting' %}" class="btn btn-outline-primary" style="border: 1px solid #007bff; color: #007bff; padding: 8px 16px; text-decoration: none; border-radius: 4px; font-size: 0.9rem;">
+                        {% trans "Post New Job" %}
+                    </a>
+                </div>
+            </div>
+        {% else %}
+            <div class="activity-placeholder" style="text-align: center; padding: 40px; color: #999;">
+                <div style="font-size: 3rem; margin-bottom: 15px;">📊</div>
+                <p>{% trans "No job postings yet" %}</p>
+                <p style="font-size: 0.9rem;">{% trans "Start by posting your first job to attract talented candidates" %}</p>
+                {% if has_profile %}
+                <a href="{% url 'employers:create_job_posting' %}" class="btn btn-primary" style="background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 15px; display: inline-block;">
+                    {% trans "Post Your First Job" %}
+                </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .stat-card:hover, .action-card:hover, .clickable-card:hover {
+        transform: translateY(-2px);
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15) !important;
+    }
+
+    .clickable-card {
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .clickable-card:hover {
+        text-decoration: none !important;
+        color: inherit !important;
+    }
+
+    .btn:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+        transition: all 0.2s ease;
+    }
+
+    .job-item:hover {
+        background-color: #f8f9fa;
+        transition: background-color 0.2s ease;
+    }
+
+    .job-item:last-child {
+        border-bottom: none !important;
+    }
+
+    .badge {
+        display: inline-block;
+    }
+
+    /* Responsive improvements */
+    @media (max-width: 768px) {
+        .container {
+            padding: 10px !important;
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+            gap: 15px !important;
+        }
+
+        .quick-actions {
+            grid-template-columns: 1fr !important;
+            gap: 15px !important;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .action-buttons .btn {
+            margin: 0 !important;
+        }
+
+        .job-item {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 10px;
+        }
+
+        .job-item > div:last-child {
+            align-self: flex-start !important;
+        }
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends 'core/base1.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Logged Out" %} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: center; align-items: center; min-height: 70vh;">
+    <div style="background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #eee; padding: 40px; text-align: center; max-width: 500px;">
+        <div style="font-size: 4rem; color: #28a745; margin-bottom: 20px;">👋</div>
+        <h2 style="color: #333; margin-bottom: 15px;">{% trans "Successfully Logged Out" %}</h2>
+        <p style="color: #666; margin-bottom: 30px; font-size: 1.1rem;">
+            {% trans "You have been successfully logged out of your HR Portal account." %}
+        </p>
+
+        <div style="margin-bottom: 20px;">
+            <a href="{% url 'accounts:login' %}" class="btn btn-primary" style="background: #007bff; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; margin-right: 15px; display: inline-block;">
+                {% trans "Login Again" %}
+            </a>
+            <a href="{% url 'core:home' %}" class="btn btn-secondary" style="background: #6c757d; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                {% trans "Go Home" %}
+            </a>
+        </div>
+
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+            <p style="color: #999; font-size: 0.9rem; margin: 0;">
+                {% trans "Thank you for using HR Portal!" %}
+            </p>
+        </div>
+    </div>
+</div>
+
+<style>
+    .btn:hover {
+        transform: translateY(-1px);
+        transition: all 0.2s ease;
+        opacity: 0.9;
+    }
+</style>
+{% endblock %}

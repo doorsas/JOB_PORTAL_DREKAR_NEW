@@ -1,0 +1,133 @@
+{% extends 'core/base1.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Welcome to HR Portal" %}{% endblock %}
+
+{% block content %}
+<div class="hero-section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 80px 0; text-align: center;">
+    <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+        <h1 style="font-size: 3.5rem; margin-bottom: 20px; font-weight: 300;">{% trans "Welcome to HR Portal" %}</h1>
+        <p style="font-size: 1.5rem; margin-bottom: 40px; opacity: 0.9;">
+            {% trans "Your comprehensive solution for human resources management" %}
+        </p>
+
+        {% if not user.is_authenticated %}
+            <div class="cta-buttons">
+                <a href="{% url 'accounts:register' %}" class="btn btn-primary" style="background: #fff; color: #667eea; padding: 15px 30px; text-decoration: none; border-radius: 25px; font-weight: bold; margin-right: 20px; display: inline-block;">
+                    {% trans "Get Started" %}
+                </a>
+                <a href="{% url 'accounts:login' %}" class="btn btn-secondary" style="border: 2px solid #fff; color: #fff; background: transparent; padding: 13px 30px; text-decoration: none; border-radius: 25px; font-weight: bold; display: inline-block;">
+                    {% trans "Sign In" %}
+                </a>
+            </div>
+        {% else %}
+            <div class="welcome-back" style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 10px; margin-top: 20px; display: inline-block;">
+                <h3 style="margin-bottom: 10px;">{% trans "Welcome back" %}, {{ user.first_name|default:user.username }}!</h3>
+                <p style="margin-bottom: 20px;">{% trans "You are logged in as" %} <strong>{{ user_type_display }}</strong></p>
+                <a href="{% url 'accounts:dashboard' %}" class="btn btn-primary" style="background: #fff; color: #667eea; padding: 12px 25px; text-decoration: none; border-radius: 20px; font-weight: bold;">
+                    {% trans "Go to Dashboard" %}
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="features-section" style="padding: 80px 0; background: #f8f9fa;">
+    <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+        <h2 style="text-align: center; font-size: 2.5rem; margin-bottom: 60px; color: #333;">{% trans "Our Services" %}</h2>
+
+        <div class="features-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px;">
+            <!-- Employers Section -->
+            <div class="feature-card" style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: center;">
+                <div class="feature-icon" style="font-size: 3rem; color: #007bff; margin-bottom: 20px;">🏢</div>
+                <h3 style="color: #333; margin-bottom: 15px;">{% trans "For Employers" %}</h3>
+                <p style="color: #666; margin-bottom: 20px;">
+                    {% trans "Post jobs, manage applications, track employees, and handle payroll efficiently." %}
+                </p>
+                <ul style="text-align: left; color: #666; margin-bottom: 20px;">
+                    <li>{% trans "Job posting management" %}</li>
+                    <li>{% trans "Application tracking" %}</li>
+                    <li>{% trans "Employee management" %}</li>
+                    <li>{% trans "Invoicing system" %}</li>
+                </ul>
+            </div>
+
+            <!-- Employees Section -->
+            <div class="feature-card" style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: center;">
+                <div class="feature-icon" style="font-size: 3rem; color: #28a745; margin-bottom: 20px;">👥</div>
+                <h3 style="color: #333; margin-bottom: 15px;">{% trans "For Employees" %}</h3>
+                <p style="color: #666; margin-bottom: 20px;">
+                    {% trans "Find jobs, manage your schedule, track timesheets, and access payslips." %}
+                </p>
+                <ul style="text-align: left; color: #666; margin-bottom: 20px;">
+                    <li>{% trans "Job search & applications" %}</li>
+                    <li>{% trans "Schedule management" %}</li>
+                    <li>{% trans "Timesheet tracking" %}</li>
+                    <li>{% trans "Payslip access" %}</li>
+                </ul>
+            </div>
+
+            <!-- EOR Services Section -->
+            <div class="feature-card" style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: center;">
+                <div class="feature-icon" style="font-size: 3rem; color: #17a2b8; margin-bottom: 20px;">⚖️</div>
+                <h3 style="color: #333; margin-bottom: 15px;">{% trans "EOR Services" %}</h3>
+                <p style="color: #666; margin-bottom: 20px;">
+                    {% trans "Employer of Record services for international hiring and compliance." %}
+                </p>
+                <ul style="text-align: left; color: #666; margin-bottom: 20px;">
+                    <li>{% trans "International compliance" %}</li>
+                    <li>{% trans "Employee placement" %}</li>
+                    <li>{% trans "Payroll processing" %}</li>
+                    <li>{% trans "Contract management" %}</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="cta-section" style="padding: 80px 0; background: #333; color: white; text-align: center;">
+    <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+        <h2 style="font-size: 2.5rem; margin-bottom: 20px;">{% trans "Ready to get started?" %}</h2>
+        <p style="font-size: 1.2rem; margin-bottom: 40px; opacity: 0.8;">
+            {% trans "Join thousands of employers and employees using our platform" %}
+        </p>
+
+        {% if not user.is_authenticated %}
+            <a href="{% url 'accounts:register' %}" class="btn btn-primary" style="background: #007bff; color: white; padding: 15px 30px; text-decoration: none; border-radius: 25px; font-weight: bold; font-size: 1.1rem;">
+                {% trans "Create Account Today" %}
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .btn:hover {
+        transform: translateY(-2px);
+        transition: all 0.3s ease;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-5px);
+        transition: all 0.3s ease;
+    }
+
+    .feature-card ul {
+        list-style: none;
+        padding-left: 0;
+    }
+
+    .feature-card ul li {
+        padding: 5px 0;
+        position: relative;
+        padding-left: 20px;
+    }
+
+    .feature-card ul li:before {
+        content: "✓";
+        color: #28a745;
+        font-weight: bold;
+        position: absolute;
+        left: 0;
+    }
+</style>
+{% endblock %}

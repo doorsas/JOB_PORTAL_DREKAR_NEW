@@ -1,0 +1,334 @@
+{% extends 'core/base1.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "My Profile" %} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="card-title mb-0">{% trans "My Profile" %}</h3>
+                    <div>
+                        <a href="{% url 'employees:profile_setup' %}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-edit"></i> {% trans "Edit Profile" %}
+                        </a>
+                        <a href="{% url 'employees:dashboard' %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-arrow-left"></i> {% trans "Back to Dashboard" %}
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Personal Information -->
+                    <h5 class="text-primary mb-3">{% trans "Personal Information" %}</h5>
+
+                    <div class="row mb-3">
+                        <div class="col-sm-3">
+                            <strong>{% trans "Full Name:" %}</strong>
+                        </div>
+                        <div class="col-sm-9">
+                            {{ profile.full_name }}
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-sm-3">
+                            <strong>{% trans "Date of Birth:" %}</strong>
+                        </div>
+                        <div class="col-sm-9">
+                            {{ profile.date_of_birth }}
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-sm-3">
+                            <strong>{% trans "Nationality:" %}</strong>
+                        </div>
+                        <div class="col-sm-9">
+                            {{ profile.nationality }}
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-sm-3">
+                            <strong>{% trans "Address:" %}</strong>
+                        </div>
+                        <div class="col-sm-9">
+                            {{ profile.address }}
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-sm-3">
+                            <strong>{% trans "Phone:" %}</strong>
+                        </div>
+                        <div class="col-sm-9">
+                            <a href="tel:{{ profile.phone }}">{{ profile.phone }}</a>
+                        </div>
+                    </div>
+
+                    <!-- Professional Information -->
+                    <h5 class="text-primary mb-3 mt-4">{% trans "Professional Information" %}</h5>
+
+                    <div class="row mb-3">
+                        <div class="col-sm-3">
+                            <strong>{% trans "Current Status:" %}</strong>
+                        </div>
+                        <div class="col-sm-9">
+                            <span class="badge
+                                {% if profile.current_status == 'AVAILABLE' %}bg-success
+                                {% elif profile.current_status == 'EMPLOYED' %}bg-info
+                                {% elif profile.current_status == 'ON_HOLD' %}bg-warning
+                                {% endif %}">
+                                {{ profile.get_current_status_display }}
+                            </span>
+                        </div>
+                    </div>
+
+                    {% if profile.expected_salary %}
+                    <div class="row mb-3">
+                        <div class="col-sm-3">
+                            <strong>{% trans "Expected Salary:" %}</strong>
+                        </div>
+                        <div class="col-sm-9">
+                            €{{ profile.expected_salary|floatformat:0 }} {% trans "per month" %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if profile.preferred_professions.exists %}
+                    <div class="row mb-3">
+                        <div class="col-sm-3">
+                            <strong>{% trans "Preferred Jobs:" %}</strong>
+                        </div>
+                        <div class="col-sm-9">
+                            {% for profession in profile.preferred_professions.all %}
+                                <span class="badge bg-primary me-1 mb-1">{{ profession.name }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if profile.skills.exists %}
+                    <div class="row mb-3">
+                        <div class="col-sm-3">
+                            <strong>{% trans "Skills:" %}</strong>
+                        </div>
+                        <div class="col-sm-9">
+                            {% for skill in profile.skills.all %}
+                                <span class="badge bg-secondary me-1 mb-1">{{ skill.name }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if profile.experience_summary %}
+                    <div class="row mb-3">
+                        <div class="col-sm-3">
+                            <strong>{% trans "Experience:" %}</strong>
+                        </div>
+                        <div class="col-sm-9">
+                            <div class="border p-3 rounded bg-light">
+                                {{ profile.experience_summary|linebreaks }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Documents -->
+                    <h5 class="text-primary mb-3 mt-4">{% trans "Documents" %}</h5>
+
+                    <div class="row mb-3">
+                        <div class="col-sm-3">
+                            <strong>{% trans "CV/Resume:" %}</strong>
+                        </div>
+                        <div class="col-sm-9">
+                            {% if cv_document %}
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-file-pdf text-danger me-2"></i>
+                                    <a href="{{ cv_document.file.url }}" class="me-3" target="_blank">
+                                        {{ cv_document.file.name|cut:"employee_documents/" }}
+                                    </a>
+                                    <small class="text-muted">
+                                        {% trans "Uploaded" %} {{ cv_document.created_at|date:"M d, Y" }}
+                                    </small>
+                                </div>
+                            {% else %}
+                                <div class="text-muted">
+                                    <i class="fas fa-upload me-2"></i>
+                                    {% trans "No CV uploaded" %}
+                                    <a href="{% url 'employees:document_upload' %}" class="ms-2">{% trans "Upload now" %}</a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar with quick actions -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">{% trans "Quick Actions" %}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'employees:profile_setup' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-edit"></i> {% trans "Edit Profile" %}
+                        </a>
+                        <a href="#" class="btn btn-outline-success">
+                            <i class="fas fa-search"></i> {% trans "Search Jobs" %}
+                        </a>
+                        <a href="#" class="btn btn-outline-info">
+                            <i class="fas fa-file-alt"></i> {% trans "My Applications" %}
+                        </a>
+                        <a href="{% url 'employees:document_upload' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-file-upload"></i> {% trans "Manage Documents" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Status -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">{% trans "Profile Status" %}</h6>
+                </div>
+                <div class="card-body">
+                    <div class="profile-completeness">
+                        {% comment %} Calculate profile completeness {% endcomment %}
+                        {% with completeness=0 %}
+                            {% if profile.first_name and profile.last_name %}{% with completeness=completeness|add:15 %}{% endwith %}{% endif %}
+                            {% if profile.date_of_birth %}{% with completeness=completeness|add:10 %}{% endwith %}{% endif %}
+                            {% if profile.address %}{% with completeness=completeness|add:10 %}{% endwith %}{% endif %}
+                            {% if profile.phone %}{% with completeness=completeness|add:10 %}{% endwith %}{% endif %}
+                            {% if profile.nationality %}{% with completeness=completeness|add:5 %}{% endwith %}{% endif %}
+                            {% if profile.preferred_professions.exists %}{% with completeness=completeness|add:15 %}{% endwith %}{% endif %}
+                            {% if profile.skills.exists %}{% with completeness=completeness|add:15 %}{% endwith %}{% endif %}
+                            {% if profile.experience_summary %}{% with completeness=completeness|add:10 %}{% endwith %}{% endif %}
+                            {% if cv_document %}{% with completeness=completeness|add:10 %}{% endwith %}{% endif %}
+
+                            <div class="progress mb-2">
+                                <div class="progress-bar bg-success" role="progressbar"
+                                     style="width: {{ completeness }}%"
+                                     aria-valuenow="{{ completeness }}" aria-valuemin="0" aria-valuemax="100">
+                                </div>
+                            </div>
+                            <small class="text-muted">
+                                {% trans "Profile" %} {{ completeness }}% {% trans "complete" %}
+                            </small>
+                        {% endwith %}
+                    </div>
+
+                    <hr>
+
+                    <div class="availability-status">
+                        <div class="d-flex align-items-center">
+                            {% if profile.current_status == 'AVAILABLE' %}
+                                <i class="fas fa-circle text-success me-2"></i>
+                                <span class="text-success">{% trans "Available for work" %}</span>
+                            {% elif profile.current_status == 'EMPLOYED' %}
+                                <i class="fas fa-circle text-info me-2"></i>
+                                <span class="text-info">{% trans "Currently employed" %}</span>
+                            {% elif profile.current_status == 'ON_HOLD' %}
+                                <i class="fas fa-circle text-warning me-2"></i>
+                                <span class="text-warning">{% trans "On hold" %}</span>
+                            {% endif %}
+                        </div>
+                        <small class="text-muted mt-1 d-block">
+                            {% trans "Status affects job recommendations" %}
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Tips -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">{% trans "Profile Tips" %}</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        {% if not cv_document %}
+                        <li class="mb-2">
+                            <i class="fas fa-lightbulb text-warning me-2"></i>
+                            <small>{% trans "Upload your CV to get more job opportunities" %}</small>
+                        </li>
+                        {% endif %}
+                        {% if not profile.skills.exists %}
+                        <li class="mb-2">
+                            <i class="fas fa-lightbulb text-warning me-2"></i>
+                            <small>{% trans "Add skills to help employers find you" %}</small>
+                        </li>
+                        {% endif %}
+                        {% if not profile.experience_summary %}
+                        <li class="mb-2">
+                            <i class="fas fa-lightbulb text-warning me-2"></i>
+                            <small>{% trans "Add experience summary to stand out" %}</small>
+                        </li>
+                        {% endif %}
+                        {% if not profile.expected_salary %}
+                        <li class="mb-2">
+                            <i class="fas fa-lightbulb text-warning me-2"></i>
+                            <small>{% trans "Set expected salary for better job matches" %}</small>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom CSS -->
+<style>
+    .card {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border: 1px solid #e3e6f0;
+    }
+
+    .card-header {
+        background-color: #f8f9fc;
+        border-bottom: 1px solid #e3e6f0;
+    }
+
+    .text-primary {
+        color: #28a745 !important;
+    }
+
+    .row {
+        margin-bottom: 0.5rem;
+    }
+
+    .badge {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+    }
+
+    .progress {
+        height: 8px;
+    }
+
+    /* Responsive improvements */
+    @media (max-width: 768px) {
+        .d-flex.justify-content-between {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .d-flex.justify-content-between > div {
+            text-align: center;
+        }
+
+        .col-sm-3, .col-sm-9 {
+            margin-bottom: 0.5rem;
+        }
+
+        .col-sm-3 {
+            font-weight: bold;
+        }
+    }
+</style>
+{% endblock %}

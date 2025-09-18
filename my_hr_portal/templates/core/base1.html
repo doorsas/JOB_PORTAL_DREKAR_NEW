@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}HR Portal{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="nav-brand">
+                <h1>HR Portal</h1>
+            </div>
+            <div class="nav-links">
+                {% if user.is_authenticated %}
+                    <!-- Role-based navigation -->
+                    {% if user.user_type == 'EMPLOYER' %}
+                        <a href="{% url 'employers:dashboard' %}">Dashboard</a>
+                        <a href="{% url 'employers:job_postings_list' %}" title="Job Postings">Jobs</a>
+                        <a href="#" title="Applications">Applications</a>
+                        <a href="#" title="Employees">My Employees</a>
+                    {% elif user.user_type == 'EMPLOYEE' %}
+                        <a href="{% url 'employees:dashboard' %}">Dashboard</a>
+                        <a href="{% url 'employees:job_search' %}" title="Job Search">Find Jobs</a>
+                        <a href="{% url 'employees:my_applications' %}" title="Applications">My Applications</a>
+                        <a href="#" title="Schedule">Schedule</a>
+                        <a href="#" title="Timesheets">Timesheets</a>
+                        <a href="#" title="Payslips">Payslips</a>
+                    {% elif user.user_type == 'EOR_CLIENT' %}
+                        <a href="{% url 'eor_services:dashboard' %}">Dashboard</a>
+                        <a href="#" title="EOR Agreements">Agreements</a>
+                        <a href="#" title="Placements">Placements</a>
+                        <a href="#" title="Payroll">Payroll</a>
+                    {% elif user.user_type == 'ADMIN' %}
+                        <a href="{% url 'admin:index' %}">Admin Panel</a>
+                        <a href="{% url 'core:home' %}">Portal Home</a>
+                    {% endif %}
+
+                    <!-- Common authenticated user links -->
+                    <div class="user-menu">
+                        <a href="#" class="user-toggle" style="color: white; font-weight: bold;">
+                            {{ user.get_user_type_display }} ▼
+                        </a>
+                        <div id="userDropdown" class="user-dropdown" style="display: none;">
+                            <a href="{% url 'accounts:profile' %}">User Profile</a>
+                            {% if user.user_type == 'EMPLOYER' %}
+                                <a href="{% url 'employers:profile_view' %}">Company Profile</a>
+                            {% elif user.user_type == 'EMPLOYEE' %}
+                                <a href="{% url 'employees:profile_view' %}">Employee Profile</a>
+                                <a href="{% url 'employees:document_upload' %}" >My Documents</a>
+                    
+                            {% endif %}
+                            <a href="{% url 'accounts:dashboard' %}">Dashboard</a>
+                            <a href="{% url 'accounts:logout' %}">Logout</a>
+                        </div>
+                    </div>
+                {% else %}
+                    <!-- Public navigation -->
+                    <a href="{% url 'core:home' %}">Home</a>
+                    <a href="#" title="About">About</a>
+                    <a href="#" title="Services">Services</a>
+                    <a href="{% url 'accounts:login' %}">Login</a>
+                    <a href="{% url 'accounts:register' %}">Register</a>
+                {% endif %}
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Drekar HR Portal. All rights reserved.</p>
+    </footer>
+
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

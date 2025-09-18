@@ -1,0 +1,223 @@
+{% extends 'core/base1.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Document Management" %} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-file-upload me-2"></i>{% trans "Document Management" %}
+                    </h3>
+                    <p class="text-muted mb-0 mt-2">{% trans "Upload and manage your documents" %}</p>
+                </div>
+                <div class="card-body">
+                    <!-- Upload Form -->
+                    <form method="post" enctype="multipart/form-data" class="mb-4">
+                        {% csrf_token %}
+
+                        <h5 class="mb-3">{% trans "Upload New Document" %}</h5>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.document_type.id_for_label }}" class="form-label">
+                                        {{ form.document_type.label }}
+                                    </label>
+                                    {{ form.document_type }}
+                                    {% if form.document_type.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.document_type.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.description.id_for_label }}" class="form-label">
+                                        {{ form.description.label }}
+                                    </label>
+                                    {{ form.description }}
+                                    {% if form.description.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.description.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.file.id_for_label }}" class="form-label">
+                                {{ form.file.label }}
+                            </label>
+                            {{ form.file }}
+                            {% if form.file.help_text %}
+                                <div class="form-text">{{ form.file.help_text }}</div>
+                            {% endif %}
+                            {% if form.file.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.file.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'employees:profile_view' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> {% trans "Back to Profile" %}
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-upload"></i> {% trans "Upload Document" %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">{% trans "Upload Guidelines" %}</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            <strong>{% trans "Accepted formats:" %}</strong>
+                            <br><small class="text-muted">PDF, DOC, DOCX</small>
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            <strong>{% trans "Maximum size:" %}</strong>
+                            <br><small class="text-muted">5MB</small>
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-info text-info me-2"></i>
+                            <strong>{% trans "CV documents:" %}</strong>
+                            <br><small class="text-muted">{% trans "Keep your CV updated for better job matching" %}</small>
+                        </li>
+                        <li class="mb-0">
+                            <i class="fas fa-shield-alt text-warning me-2"></i>
+                            <strong>{% trans "Security:" %}</strong>
+                            <br><small class="text-muted">{% trans "Your documents are stored securely and only shared with your consent" %}</small>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Existing Documents -->
+    {% if documents %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">{% trans "Your Documents" %}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>{% trans "Type" %}</th>
+                                    <th>{% trans "Description" %}</th>
+                                    <th>{% trans "Uploaded" %}</th>
+                                    <th>{% trans "Actions" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for document in documents %}
+                                <tr>
+                                    <td>
+                                        <span class="badge
+                                            {% if document.document_type == 'CV' %}bg-primary
+                                            {% elif document.document_type == 'CERTIFICATE' %}bg-success
+                                            {% elif document.document_type == 'ID' %}bg-warning
+                                            {% else %}bg-secondary
+                                            {% endif %}">
+                                            {{ document.get_document_type_display }}
+                                        </span>
+                                    </td>
+                                    <td>{{ document.description|default:"-" }}</td>
+                                    <td>{{ document.created_at|date:"M d, Y H:i" }}</td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a href="{{ document.file.url }}" class="btn btn-outline-primary" target="_blank">
+                                                <i class="fas fa-download"></i> {% trans "Download" %}
+                                            </a>
+                                            <a href="{% url 'employees:document_delete' document.id %}" class="btn btn-outline-danger">
+                                                <i class="fas fa-trash"></i> {% trans "Delete" %}
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Custom CSS -->
+<style>
+    .card {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border: 1px solid #e3e6f0;
+    }
+
+    .card-header {
+        background-color: #f8f9fc;
+        border-bottom: 1px solid #e3e6f0;
+    }
+
+    .table th {
+        border-top: none;
+        font-weight: 600;
+        color: #5a5c69;
+    }
+
+    .badge {
+        font-size: 0.75rem;
+        padding: 0.4rem 0.8rem;
+    }
+
+    .btn-group-sm > .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+    }
+
+    /* Responsive improvements */
+    @media (max-width: 768px) {
+        .d-flex.justify-content-between {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .d-flex.justify-content-between > * {
+            width: 100%;
+            text-align: center;
+        }
+
+        .table-responsive {
+            font-size: 0.9rem;
+        }
+
+        .btn-group {
+            flex-direction: column;
+        }
+
+        .btn-group .btn {
+            margin-bottom: 0.25rem;
+        }
+    }
+</style>
+{% endblock %}

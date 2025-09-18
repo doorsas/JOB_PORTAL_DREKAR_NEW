@@ -1,0 +1,295 @@
+{% extends 'core/base1.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Applications" %} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-inbox me-2"></i>{% trans "Job Applications" %}
+                    </h3>
+                    <div>
+                        <a href="{% url 'employers:dashboard' %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-arrow-left"></i> {% trans "Back to Dashboard" %}
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Filter Tabs -->
+                    <ul class="nav nav-tabs mb-3" id="statusTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link {% if not status_filter %}active{% endif %}"
+                               href="?{% if job_filter %}job={{ job_filter }}&{% endif %}">
+                                {% trans "All" %} ({{ status_counts.all }})
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link {% if status_filter == 'SUBMITTED' %}active{% endif %}"
+                               href="?status=SUBMITTED{% if job_filter %}&job={{ job_filter }}{% endif %}">
+                                {% trans "New" %} ({{ status_counts.submitted }})
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link {% if status_filter == 'REVIEWED' %}active{% endif %}"
+                               href="?status=REVIEWED{% if job_filter %}&job={{ job_filter }}{% endif %}">
+                                {% trans "Reviewed" %} ({{ status_counts.reviewed }})
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link {% if status_filter == 'INVITED' %}active{% endif %}"
+                               href="?status=INVITED{% if job_filter %}&job={{ job_filter }}{% endif %}">
+                                {% trans "Invited" %} ({{ status_counts.invited }})
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link {% if status_filter == 'HIRED' %}active{% endif %}"
+                               href="?status=HIRED{% if job_filter %}&job={{ job_filter }}{% endif %}">
+                                {% trans "Hired" %} ({{ status_counts.hired }})
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link {% if status_filter == 'REJECTED' %}active{% endif %}"
+                               href="?status=REJECTED{% if job_filter %}&job={{ job_filter }}{% endif %}">
+                                {% trans "Rejected" %} ({{ status_counts.rejected }})
+                            </a>
+                        </li>
+                    </ul>
+
+                    <!-- Filters -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <form method="get" class="d-flex">
+                                {% if status_filter %}
+                                    <input type="hidden" name="status" value="{{ status_filter }}">
+                                {% endif %}
+                                <select name="job" class="form-select me-2" onchange="this.form.submit()">
+                                    <option value="">{% trans "All Job Postings" %}</option>
+                                    {% for job in job_postings %}
+                                        <option value="{{ job.id }}" {% if job_filter == job.id|stringformat:"s" %}selected{% endif %}>
+                                            {{ job.title }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Applications List -->
+                    {% if applications %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>{% trans "Applicant" %}</th>
+                                        <th>{% trans "Job Position" %}</th>
+                                        <th>{% trans "Applied Date" %}</th>
+                                        <th>{% trans "Status" %}</th>
+                                        <th>{% trans "Actions" %}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for application in applications %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar me-3">
+                                                    <i class="fas fa-user-circle fa-2x text-muted"></i>
+                                                </div>
+                                                <div>
+                                                    <strong>{{ application.applicant.full_name }}</strong>
+                                                    <br><small class="text-muted">{{ application.applicant.user.email }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'employers:job_posting_detail' application.job_posting.id %}" class="text-decoration-none">
+                                                {{ application.job_posting.title }}
+                                            </a>
+                                            <br><small class="text-muted">{{ application.job_posting.location }}</small>
+                                        </td>
+                                        <td>
+                                            {{ application.application_date|date:"M d, Y" }}
+                                            <br><small class="text-muted">{{ application.application_date|time:"H:i" }}</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge
+                                                {% if application.status == 'SUBMITTED' %}bg-primary
+                                                {% elif application.status == 'REVIEWED' %}bg-info
+                                                {% elif application.status == 'INVITED' %}bg-warning
+                                                {% elif application.status == 'HIRED' %}bg-success
+                                                {% elif application.status == 'REJECTED' %}bg-danger
+                                                {% endif %}">
+                                                {{ application.get_status_display }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                <a href="{% url 'employers:application_detail' application.id %}"
+                                                   class="btn btn-outline-primary">
+                                                    <i class="fas fa-eye"></i> {% trans "View" %}
+                                                </a>
+                                                {% if application.status == 'SUBMITTED' %}
+                                                <form method="post" action="{% url 'employers:update_application_status' application.id %}" class="d-inline">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="status" value="REVIEWED">
+                                                    <button type="submit" class="btn btn-outline-info">
+                                                        <i class="fas fa-check"></i> {% trans "Review" %}
+                                                    </button>
+                                                </form>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        {% if page_obj.has_other_pages %}
+                        <nav aria-label="Applications pagination">
+                            <ul class="pagination justify-content-center">
+                                {% if page_obj.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if job_filter %}&job={{ job_filter }}{% endif %}">
+                                            {% trans "Previous" %}
+                                        </a>
+                                    </li>
+                                {% endif %}
+
+                                {% for num in page_obj.paginator.page_range %}
+                                    {% if page_obj.number == num %}
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ num }}</span>
+                                        </li>
+                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ num }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if job_filter %}&job={{ job_filter }}{% endif %}">
+                                                {{ num }}
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% if page_obj.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if job_filter %}&job={{ job_filter }}{% endif %}">
+                                            {% trans "Next" %}
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                        {% endif %}
+
+                    {% else %}
+                        <!-- No Applications -->
+                        <div class="text-center py-5">
+                            <div class="mb-4">
+                                <i class="fas fa-inbox fa-4x text-muted"></i>
+                            </div>
+                            {% if status_filter or job_filter %}
+                                <h5 class="text-muted">{% trans "No applications found for the selected filters" %}</h5>
+                                <p class="text-muted">{% trans "Try adjusting your filters or check back later." %}</p>
+                                <a href="{% url 'employers:applications_list' %}" class="btn btn-outline-primary">
+                                    {% trans "View All Applications" %}
+                                </a>
+                            {% else %}
+                                <h5 class="text-muted">{% trans "No applications yet" %}</h5>
+                                <p class="text-muted">{% trans "Applications for your job postings will appear here." %}</p>
+                                <a href="{% url 'employers:create_job_posting' %}" class="btn btn-primary">
+                                    <i class="fas fa-plus"></i> {% trans "Post a Job" %}
+                                </a>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom CSS -->
+<style>
+    .card {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border: 1px solid #e3e6f0;
+    }
+
+    .card-header {
+        background-color: #f8f9fc;
+        border-bottom: 1px solid #e3e6f0;
+    }
+
+    .nav-tabs .nav-link {
+        color: #5a5c69;
+        border: none;
+        padding: 0.75rem 1rem;
+    }
+
+    .nav-tabs .nav-link.active {
+        color: #4e73df;
+        background-color: transparent;
+        border-bottom: 2px solid #4e73df;
+        font-weight: 600;
+    }
+
+    .nav-tabs .nav-link:hover {
+        border-color: transparent;
+        color: #4e73df;
+    }
+
+    .table th {
+        border-top: none;
+        font-weight: 600;
+        color: #5a5c69;
+        background-color: #f8f9fc;
+    }
+
+    .badge {
+        font-size: 0.75rem;
+        padding: 0.4rem 0.8rem;
+    }
+
+    .btn-group-sm > .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+    }
+
+    .avatar {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Responsive improvements */
+    @media (max-width: 768px) {
+        .table-responsive {
+            font-size: 0.9rem;
+        }
+
+        .btn-group {
+            flex-direction: column;
+        }
+
+        .btn-group .btn {
+            margin-bottom: 0.25rem;
+        }
+
+        .nav-tabs {
+            flex-wrap: wrap;
+        }
+
+        .nav-tabs .nav-link {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.9rem;
+        }
+    }
+</style>
+{% endblock %}

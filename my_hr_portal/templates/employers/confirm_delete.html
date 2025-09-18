@@ -1,0 +1,91 @@
+{% extends 'core/base1.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Delete Job Posting" %} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="card-title mb-0">
+                        <i class="fas fa-exclamation-triangle"></i> {% trans "Confirm Deletion" %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning" role="alert">
+                        <i class="fas fa-warning"></i>
+                        <strong>{% trans "Warning!" %}</strong> {% trans "This action cannot be undone." %}
+                    </div>
+
+                    <p>{% trans "Are you sure you want to delete the following job posting?" %}</p>
+
+                    <div class="card bg-light mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ job_posting.title }}</h5>
+                            <p class="card-text">
+                                <strong>{% trans "Location:" %}</strong> {{ job_posting.location }}<br>
+                                <strong>{% trans "Type:" %}</strong> {{ job_posting.get_job_type_display }}<br>
+                                <strong>{% trans "Posted:" %}</strong> {{ job_posting.posted_date|date:"M d, Y" }}<br>
+                                <strong>{% trans "Applications:" %}</strong> {{ job_posting.applications.count }}
+                            </p>
+                        </div>
+                    </div>
+
+                    {% if job_posting.applications.count > 0 %}
+                    <div class="alert alert-info" role="alert">
+                        <i class="fas fa-info-circle"></i>
+                        {% blocktrans count counter=job_posting.applications.count %}
+                            This job posting has {{ counter }} application. Deleting it will also remove all applications.
+                        {% plural %}
+                            This job posting has {{ counter }} applications. Deleting it will also remove all applications.
+                        {% endblocktrans %}
+                    </div>
+                    {% endif %}
+
+                    <form method="post" class="mt-4">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'employers:job_postings_list' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> {% trans "Cancel" %}
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> {% trans "Yes, Delete Job Posting" %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom CSS -->
+<style>
+    .card {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border: 1px solid #e3e6f0;
+    }
+
+    .btn-danger:hover {
+        background-color: #c82333;
+        border-color: #bd2130;
+    }
+
+    .alert {
+        border-radius: 0.375rem;
+    }
+
+    .card-body .card {
+        border: 1px solid #dee2e6;
+    }
+
+    @media (max-width: 768px) {
+        .d-flex.justify-content-between {
+            flex-direction: column;
+            gap: 1rem;
+        }
+    }
+</style>
+{% endblock %}

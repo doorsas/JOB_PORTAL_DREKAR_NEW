@@ -1,0 +1,273 @@
+{% extends 'core/base1.html' %}
+{% load i18n %}
+
+{% block title %}{{ job_posting.title }} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Job Posting Header -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="card-title mb-0">{{ job_posting.title }}</h3>
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'employers:edit_job_posting' job_posting.id %}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-edit"></i> {% trans "Edit" %}
+                        </a>
+                        <a href="{% url 'employers:job_postings_list' %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-arrow-left"></i> {% trans "Back to List" %}
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h5>{% trans "Job Details" %}</h5>
+                            <p class="mb-3">{{ job_posting.description|linebreaks }}</p>
+
+                            <div class="row mb-3">
+                                <div class="col-sm-6">
+                                    <strong>{% trans "Location:" %}</strong> {{ job_posting.location }}
+                                </div>
+                                <div class="col-sm-6">
+                                    <strong>{% trans "Job Type:" %}</strong> {{ job_posting.get_job_type_display }}
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-sm-6">
+                                    <strong>{% trans "Positions:" %}</strong> {{ job_posting.num_employees_requested }}
+                                </div>
+                                <div class="col-sm-6">
+                                    <strong>{% trans "Posted:" %}</strong> {{ job_posting.posted_date|date:"M d, Y" }}
+                                </div>
+                            </div>
+
+                            {% if job_posting.estimated_salary_min or job_posting.estimated_salary_max %}
+                            <div class="row mb-3">
+                                <div class="col-sm-12">
+                                    <strong>{% trans "Salary Range:" %}</strong>
+                                    {% if job_posting.estimated_salary_min and job_posting.estimated_salary_max %}
+                                        €{{ job_posting.estimated_salary_min }} - €{{ job_posting.estimated_salary_max }}
+                                    {% elif job_posting.estimated_salary_min %}
+                                        {% trans "From" %} €{{ job_posting.estimated_salary_min }}
+                                    {% elif job_posting.estimated_salary_max %}
+                                        {% trans "Up to" %} €{{ job_posting.estimated_salary_max }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            {% if job_posting.closing_date %}
+                            <div class="row mb-3">
+                                <div class="col-sm-12">
+                                    <strong>{% trans "Application Deadline:" %}</strong> {{ job_posting.closing_date|date:"M d, Y" }}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            {% if job_posting.required_qualifications.exists %}
+                            <div class="mb-3">
+                                <strong>{% trans "Required Qualifications:" %}</strong>
+                                <ul class="list-unstyled mt-2">
+                                    {% for qualification in job_posting.required_qualifications.all %}
+                                    <li><span class="badge bg-info me-1">{{ qualification.name }}</span></li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            {% endif %}
+
+                            {% if job_posting.required_skills.exists %}
+                            <div class="mb-3">
+                                <strong>{% trans "Required Skills:" %}</strong>
+                                <div class="mt-2">
+                                    {% for skill in job_posting.required_skills.all %}
+                                    <span class="badge bg-secondary me-1 mb-1">{{ skill.name }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6>{% trans "Quick Stats" %}</h6>
+                                    <div class="mb-2">
+                                        <strong>{% trans "Status:" %}</strong>
+                                        <span class="badge {% if job_posting.is_active %}bg-success{% else %}bg-secondary{% endif %}">
+                                            {% if job_posting.is_active %}{% trans "Active" %}{% else %}{% trans "Inactive" %}{% endif %}
+                                        </span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>{% trans "Total Applications:" %}</strong> {{ applications_count }}
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>{% trans "New Applications:" %}</strong> {{ new_applications_count }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Applications Section -->
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title mb-0">
+                        {% trans "Applications" %} ({{ applications_count }})
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if applications %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>{% trans "Applicant" %}</th>
+                                        <th>{% trans "Applied Date" %}</th>
+                                        <th>{% trans "Status" %}</th>
+                                        <th>{% trans "Actions" %}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for application in applications %}
+                                    <tr>
+                                        <td>
+                                            <div class="fw-bold">{{ application.applicant.user.get_full_name|default:application.applicant.user.username }}</div>
+                                            <small class="text-muted">{{ application.applicant.user.email }}</small>
+                                        </td>
+                                        <td>{{ application.application_date|date:"M d, Y H:i" }}</td>
+                                        <td>
+                                            <span class="badge
+                                                {% if application.status == 'SUBMITTED' %}bg-primary
+                                                {% elif application.status == 'REVIEWED' %}bg-info
+                                                {% elif application.status == 'INVITED' %}bg-warning
+                                                {% elif application.status == 'HIRED' %}bg-success
+                                                {% elif application.status == 'REJECTED' %}bg-danger
+                                                {% elif application.status == 'RESERVED' %}bg-secondary
+                                                {% endif %}">
+                                                {{ application.get_status_display }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <button type="button" class="btn btn-sm btn-outline-info"
+                                                        onclick="viewApplication({{ application.id }})"
+                                                        title="{% trans 'View Application' %}">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-outline-primary"
+                                                        onclick="updateApplicationStatus({{ application.id }})"
+                                                        title="{% trans 'Update Status' %}">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Applications Pagination -->
+                        {% if applications.has_other_pages %}
+                        <nav aria-label="Applications pagination" class="mt-3">
+                            <ul class="pagination justify-content-center">
+                                {% if applications.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ applications.previous_page_number }}">
+                                            {% trans "Previous" %}
+                                        </a>
+                                    </li>
+                                {% endif %}
+
+                                <li class="page-item active">
+                                    <span class="page-link">
+                                        {% trans "Page" %} {{ applications.number }} {% trans "of" %} {{ applications.paginator.num_pages }}
+                                    </span>
+                                </li>
+
+                                {% if applications.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ applications.next_page_number }}">
+                                            {% trans "Next" %}
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                        {% endif %}
+
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-inbox fa-2x text-muted mb-3"></i>
+                            <h5 class="text-muted">{% trans "No applications yet" %}</h5>
+                            <p class="text-muted">{% trans "Applications will appear here when candidates apply for this position." %}</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom CSS -->
+<style>
+    .card {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border: 1px solid #e3e6f0;
+    }
+
+    .card-header {
+        background-color: #f8f9fc;
+        border-bottom: 1px solid #e3e6f0;
+    }
+
+    .badge {
+        font-size: 0.75rem;
+    }
+
+    .btn-group .btn {
+        margin: 0 1px;
+    }
+
+    .table td {
+        vertical-align: middle;
+    }
+
+    .d-flex.gap-2 > * {
+        margin-right: 0.5rem;
+    }
+
+    .d-flex.gap-2 > *:last-child {
+        margin-right: 0;
+    }
+
+    @media (max-width: 768px) {
+        .d-flex.justify-content-between {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .d-flex.gap-2 {
+            justify-content: center;
+        }
+    }
+</style>
+
+<!-- JavaScript for application management -->
+<script>
+function viewApplication(applicationId) {
+    // TODO: Implement application detail modal or redirect
+    alert('{% trans "Application detail view - To be implemented" %}');
+}
+
+function updateApplicationStatus(applicationId) {
+    // TODO: Implement status update modal
+    alert('{% trans "Status update - To be implemented" %}');
+}
+</script>
+{% endblock %}

@@ -1,0 +1,152 @@
+{% extends 'core/base1.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Profile" %} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 800px; margin: 0 auto; padding: 20px;">
+    <div class="profile-header" style="background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #eee; padding: 24px; margin-bottom: 20px;">
+        <h2 style="margin-bottom: 20px; color: #333;">{% trans "User Profile" %}</h2>
+
+        <div class="user-info" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div>
+                <h4 style="color: #666; margin-bottom: 10px;">{% trans "Basic Information" %}</h4>
+                <p><strong>{% trans "Name:" %}</strong> {{ user.first_name }} {{ user.last_name }}</p>
+                <p><strong>{% trans "Email:" %}</strong> {{ user.email }}</p>
+                <p><strong>{% trans "Username:" %}</strong> {{ user.username }}</p>
+                <p><strong>{% trans "Account Type:" %}</strong>
+                    <span class="badge badge-{{ user.user_type|lower }}" style="background: #007bff; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
+                        {{ user.get_user_type_display }}
+                    </span>
+                </p>
+            </div>
+            <div>
+                <h4 style="color: #666; margin-bottom: 10px;">{% trans "Account Status" %}</h4>
+                <p><strong>{% trans "Verified:" %}</strong>
+                    {% if user.is_verified %}
+                        <span style="color: #28a745;">✓ {% trans "Verified" %}</span>
+                    {% else %}
+                        <span style="color: #dc3545;">✗ {% trans "Not verified" %}</span>
+                    {% endif %}
+                </p>
+                <p><strong>{% trans "Member since:" %}</strong> {{ user.registration_date|date:"F d, Y" }}</p>
+                <p><strong>{% trans "Last login:" %}</strong> {{ user.last_login|date:"F d, Y H:i"|default:"Never" }}</p>
+            </div>
+        </div>
+    </div>
+
+    {% if profile %}
+    <div class="profile-details" style="background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #eee; padding: 24px; margin-bottom: 20px;">
+        <h3 style="margin-bottom: 20px; color: #333;">
+            {% if profile_type == 'employer' %}
+                {% trans "Company Profile" %}
+            {% elif profile_type == 'employee' %}
+                {% trans "Employee Profile" %}
+            {% elif profile_type == 'eor_client' %}
+                {% trans "EOR Client Profile" %}
+            {% endif %}
+        </h3>
+
+        {% if profile_type == 'employer' %}
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <p><strong>{% trans "Company Name:" %}</strong> {{ profile.company_name }}</p>
+                    <p><strong>{% trans "Registration Code:" %}</strong> {{ profile.registration_code }}</p>
+                    <p><strong>{% trans "Phone:" %}</strong> {{ profile.phone }}</p>
+                    {% if profile.website %}
+                        <p><strong>{% trans "Website:" %}</strong> <a href="{{ profile.website }}" target="_blank">{{ profile.website }}</a></p>
+                    {% endif %}
+                </div>
+                <div>
+                    <p><strong>{% trans "Contact Person:" %}</strong> {{ profile.contact_person_name }}</p>
+                    <p><strong>{% trans "Contact Email:" %}</strong> {{ profile.contact_person_email }}</p>
+                    <p><strong>{% trans "Contact Phone:" %}</strong> {{ profile.contact_person_phone }}</p>
+                    <p><strong>{% trans "Status:" %}</strong>
+                        <span class="badge badge-{{ profile.internal_verification_status|lower }}">
+                            {{ profile.get_internal_verification_status_display }}
+                        </span>
+                    </p>
+                </div>
+            </div>
+            <div style="margin-top: 15px;">
+                <p><strong>{% trans "Address:" %}</strong> {{ profile.address }}</p>
+            </div>
+
+        {% elif profile_type == 'employee' %}
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <p><strong>{% trans "Full Name:" %}</strong> {{ profile.full_name }}</p>
+                    <p><strong>{% trans "Date of Birth:" %}</strong> {{ profile.date_of_birth }}</p>
+                    <p><strong>{% trans "Nationality:" %}</strong> {{ profile.nationality }}</p>
+                    <p><strong>{% trans "Phone:" %}</strong> {{ profile.phone }}</p>
+                </div>
+                <div>
+                    <p><strong>{% trans "Status:" %}</strong> {{ profile.get_current_status_display }}</p>
+                    {% if profile.expected_salary %}
+                        <p><strong>{% trans "Expected Salary:" %}</strong> €{{ profile.expected_salary }}</p>
+                    {% endif %}
+                    {% if profile.cv_file %}
+                        <p><strong>{% trans "CV:" %}</strong> <a href="{{ profile.cv_file.url }}" target="_blank">{% trans "Download CV" %}</a></p>
+                    {% endif %}
+                </div>
+            </div>
+            <div style="margin-top: 15px;">
+                <p><strong>{% trans "Address:" %}</strong> {{ profile.address }}</p>
+                {% if profile.experience_summary %}
+                    <p><strong>{% trans "Experience Summary:" %}</strong></p>
+                    <div style="background: #f8f9fa; padding: 12px; border-radius: 4px; margin-top: 8px;">
+                        {{ profile.experience_summary|linebreaksbr }}
+                    </div>
+                {% endif %}
+            </div>
+
+        {% elif profile_type == 'eor_client' %}
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <p><strong>{% trans "Company Name:" %}</strong> {{ profile.company_name }}</p>
+                    <p><strong>{% trans "Registration Code:" %}</strong> {{ profile.registration_code }}</p>
+                    <p><strong>{% trans "Address:" %}</strong> {{ profile.address }}</p>
+                </div>
+                <div>
+                    <p><strong>{% trans "Contact Person:" %}</strong> {{ profile.contact_person_name }}</p>
+                    <p><strong>{% trans "Contact Email:" %}</strong> {{ profile.contact_person_email }}</p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <div class="profile-actions" style="text-align: center;">
+        <a href="#" class="btn btn-primary" style="background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; margin-right: 10px;">
+            {% trans "Edit Profile" %}
+        </a>
+        {% if user.user_type == 'EMPLOYER' %}
+            <a href="{% url 'employers:dashboard' %}" class="btn btn-secondary" style="background: #6c757d; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">
+                {% trans "Go to Dashboard" %}
+            </a>
+        {% elif user.user_type == 'EMPLOYEE' %}
+            <a href="{% url 'employees:dashboard' %}" class="btn btn-secondary" style="background: #6c757d; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">
+                {% trans "Go to Dashboard" %}
+            </a>
+        {% elif user.user_type == 'EOR_CLIENT' %}
+            <a href="{% url 'eor_services:dashboard' %}" class="btn btn-secondary" style="background: #6c757d; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">
+                {% trans "Go to Dashboard" %}
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .badge-pending { background: #ffc107 !important; color: #212529 !important; }
+    .badge-verified { background: #28a745 !important; }
+    .badge-rejected { background: #dc3545 !important; }
+    .badge-employer { background: #007bff !important; }
+    .badge-employee { background: #28a745 !important; }
+    .badge-eor_client { background: #17a2b8 !important; }
+    .badge-admin { background: #6f42c1 !important; }
+
+    .btn:hover {
+        opacity: 0.8;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,348 @@
+{% extends 'core/base1.html' %}
+{% load i18n %}
+
+{% block title %}{{ title }} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">{{ title }}</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+
+                        <!-- Basic Information -->
+                        <h5 class="text-primary mb-3">{% trans "Basic Information" %}</h5>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="{{ form.title.id_for_label }}" class="form-label">
+                                    {{ form.title.label }} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.title }}
+                                {% if form.title.help_text %}
+                                    <div class="form-text">{{ form.title.help_text }}</div>
+                                {% endif %}
+                                {% if form.title.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.title.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.job_type.id_for_label }}" class="form-label">
+                                    {{ form.job_type.label }} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.job_type }}
+                                {% if form.job_type.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.job_type.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.location.id_for_label }}" class="form-label">
+                                    {{ form.location.label }} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.location }}
+                                {% if form.location.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.location.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.description.id_for_label }}" class="form-label">
+                                {{ form.description.label }} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.description }}
+                            {% if form.description.help_text %}
+                                <div class="form-text">{{ form.description.help_text }}</div>
+                            {% endif %}
+                            {% if form.description.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.description.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Requirements -->
+                        <h5 class="text-primary mb-3 mt-4">{% trans "Requirements" %}</h5>
+
+                        {% if form.required_qualifications.field.queryset %}
+                        <div class="mb-3">
+                            <label class="form-label">{{ form.required_qualifications.label }}</label>
+                            <div class="row">
+                                {% for choice in form.required_qualifications %}
+                                <div class="col-md-6 col-lg-4 mb-2">
+                                    <div class="form-check">
+                                        {{ choice.tag }}
+                                        <label class="form-check-label" for="{{ choice.id_for_label }}">
+                                            {{ choice.choice_label }}
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% if form.required_qualifications.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.required_qualifications.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        {% if form.required_skills.field.queryset %}
+                        <div class="mb-3">
+                            <label class="form-label">{{ form.required_skills.label }}</label>
+                            <div class="row">
+                                {% for choice in form.required_skills %}
+                                <div class="col-md-6 col-lg-4 mb-2">
+                                    <div class="form-check">
+                                        {{ choice.tag }}
+                                        <label class="form-check-label" for="{{ choice.id_for_label }}">
+                                            {{ choice.choice_label }}
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% if form.required_skills.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.required_skills.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        <!-- Employment Details -->
+                        <h5 class="text-primary mb-3 mt-4">{% trans "Employment Details" %}</h5>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.num_employees_requested.id_for_label }}" class="form-label">
+                                    {{ form.num_employees_requested.label }} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.num_employees_requested }}
+                                {% if form.num_employees_requested.help_text %}
+                                    <div class="form-text">{{ form.num_employees_requested.help_text }}</div>
+                                {% endif %}
+                                {% if form.num_employees_requested.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.num_employees_requested.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.estimated_salary_min.id_for_label }}" class="form-label">
+                                    {{ form.estimated_salary_min.label }}
+                                </label>
+                                {{ form.estimated_salary_min }}
+                                {% if form.estimated_salary_min.help_text %}
+                                    <div class="form-text">{{ form.estimated_salary_min.help_text }}</div>
+                                {% endif %}
+                                {% if form.estimated_salary_min.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.estimated_salary_min.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.estimated_salary_max.id_for_label }}" class="form-label">
+                                    {{ form.estimated_salary_max.label }}
+                                </label>
+                                {{ form.estimated_salary_max }}
+                                {% if form.estimated_salary_max.help_text %}
+                                    <div class="form-text">{{ form.estimated_salary_max.help_text }}</div>
+                                {% endif %}
+                                {% if form.estimated_salary_max.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.estimated_salary_max.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.closing_date.id_for_label }}" class="form-label">
+                                    {{ form.closing_date.label }}
+                                </label>
+                                {{ form.closing_date }}
+                                {% if form.closing_date.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.closing_date.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.status.id_for_label }}" class="form-label">
+                                    {{ form.status.label }}
+                                </label>
+                                {{ form.status }}
+                                {% if form.status.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.status.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Form Errors -->
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger" role="alert">
+                                {% for error in form.non_field_errors %}
+                                    <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex justify-content-between mt-4 pt-3 border-top">
+                            <a href="{% url 'employers:job_postings_list' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> {% trans "Back to Job Postings" %}
+                            </a>
+                            <div>
+                                {% if action == "Update" and job_posting %}
+                                    <a href="{% url 'employers:job_posting_detail' job_posting.id %}" class="btn btn-outline-info me-2">
+                                        <i class="fas fa-eye"></i> {% trans "View" %}
+                                    </a>
+                                {% endif %}
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> {{ action }}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom CSS -->
+<style>
+    .form-check-input {
+        margin-top: 0.1rem;
+    }
+
+    .form-check-label {
+        margin-left: 0.25rem;
+    }
+
+    .card {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border: 1px solid #e3e6f0;
+    }
+
+    .card-header {
+        background-color: #f8f9fc;
+        border-bottom: 1px solid #e3e6f0;
+    }
+
+    .text-primary {
+        color: #4e73df !important;
+    }
+
+    .btn-primary {
+        background-color: #4e73df;
+        border-color: #4e73df;
+    }
+
+    .btn-primary:hover {
+        background-color: #2e59d9;
+        border-color: #2e59d9;
+    }
+
+    .form-control:focus {
+        border-color: #4e73df;
+        box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+    }
+
+    .form-select:focus {
+        border-color: #4e73df;
+        box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+    }
+
+    .invalid-feedback {
+        display: block !important;
+    }
+
+    /* Responsive improvements */
+    @media (max-width: 768px) {
+        .container {
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+
+        .col-md-6, .col-md-4 {
+            margin-bottom: 1rem;
+        }
+
+        .d-flex.justify-content-between {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .d-flex.justify-content-between > div {
+            text-align: center;
+        }
+    }
+</style>
+
+<!-- JavaScript for form validation -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Bootstrap form validation
+    const forms = document.querySelectorAll('.needs-validation');
+
+    Array.prototype.slice.call(forms).forEach(function(form) {
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        }, false);
+    });
+
+    // Set minimum date for closing date
+    const closingDateField = document.querySelector('#{{ form.closing_date.id_for_label }}');
+    if (closingDateField) {
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        closingDateField.min = tomorrow.toISOString().split('T')[0];
+    }
+
+    // Salary validation
+    const salaryMinField = document.querySelector('#{{ form.estimated_salary_min.id_for_label }}');
+    const salaryMaxField = document.querySelector('#{{ form.estimated_salary_max.id_for_label }}');
+
+    function validateSalaryRange() {
+        const min = parseFloat(salaryMinField.value) || 0;
+        const max = parseFloat(salaryMaxField.value) || 0;
+
+        if (min > 0 && max > 0 && min > max) {
+            salaryMaxField.setCustomValidity('{% trans "Maximum salary must be greater than minimum salary" %}');
+        } else {
+            salaryMaxField.setCustomValidity('');
+        }
+    }
+
+    if (salaryMinField && salaryMaxField) {
+        salaryMinField.addEventListener('input', validateSalaryRange);
+        salaryMaxField.addEventListener('input', validateSalaryRange);
+    }
+});
+</script>
+{% endblock %}

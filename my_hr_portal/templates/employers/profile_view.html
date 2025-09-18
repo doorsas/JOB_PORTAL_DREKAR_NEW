@@ -1,0 +1,257 @@
+{% extends 'core/base1.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Company Profile" %} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="card-title mb-0">{% trans "Company Profile" %}</h3>
+                    <div>
+                        <a href="{% url 'employers:profile_setup' %}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-edit"></i> {% trans "Edit Profile" %}
+                        </a>
+                        <a href="{% url 'employers:dashboard' %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-arrow-left"></i> {% trans "Back to Dashboard" %}
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Company Information -->
+                    <h5 class="text-primary mb-3">{% trans "Company Information" %}</h5>
+
+                    <div class="row mb-3">
+                        <div class="col-sm-3">
+                            <strong>{% trans "Company Name:" %}</strong>
+                        </div>
+                        <div class="col-sm-9">
+                            {{ profile.company_name }}
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-sm-3">
+                            <strong>{% trans "Registration Code:" %}</strong>
+                        </div>
+                        <div class="col-sm-9">
+                            {{ profile.registration_code }}
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-sm-3">
+                            <strong>{% trans "Address:" %}</strong>
+                        </div>
+                        <div class="col-sm-9">
+                            {{ profile.address }}
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-sm-3">
+                            <strong>{% trans "Phone:" %}</strong>
+                        </div>
+                        <div class="col-sm-9">
+                            {{ profile.phone }}
+                        </div>
+                    </div>
+
+                    {% if profile.website %}
+                    <div class="row mb-3">
+                        <div class="col-sm-3">
+                            <strong>{% trans "Website:" %}</strong>
+                        </div>
+                        <div class="col-sm-9">
+                            <a href="{{ profile.website }}" target="_blank" rel="noopener noreferrer">
+                                {{ profile.website }} <i class="fas fa-external-link-alt"></i>
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Contact Person Information -->
+                    <h5 class="text-primary mb-3 mt-4">{% trans "Contact Person Information" %}</h5>
+
+                    <div class="row mb-3">
+                        <div class="col-sm-3">
+                            <strong>{% trans "Contact Person:" %}</strong>
+                        </div>
+                        <div class="col-sm-9">
+                            {{ profile.contact_person_name }}
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-sm-3">
+                            <strong>{% trans "Contact Email:" %}</strong>
+                        </div>
+                        <div class="col-sm-9">
+                            <a href="mailto:{{ profile.contact_person_email }}">
+                                {{ profile.contact_person_email }}
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-sm-3">
+                            <strong>{% trans "Contact Phone:" %}</strong>
+                        </div>
+                        <div class="col-sm-9">
+                            <a href="tel:{{ profile.contact_person_phone }}">
+                                {{ profile.contact_person_phone }}
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Verification Status -->
+                    <h5 class="text-primary mb-3 mt-4">{% trans "Verification Status" %}</h5>
+
+                    <div class="row mb-3">
+                        <div class="col-sm-3">
+                            <strong>{% trans "Status:" %}</strong>
+                        </div>
+                        <div class="col-sm-9">
+                            <span class="badge
+                                {% if profile.internal_verification_status == 'VERIFIED' %}bg-success
+                                {% elif profile.internal_verification_status == 'PENDING' %}bg-warning
+                                {% elif profile.internal_verification_status == 'REJECTED' %}bg-danger
+                                {% endif %}">
+                                {{ profile.get_internal_verification_status_display }}
+                            </span>
+                        </div>
+                    </div>
+
+                    {% if profile.verification_notes %}
+                    <div class="row mb-3">
+                        <div class="col-sm-3">
+                            <strong>{% trans "Notes:" %}</strong>
+                        </div>
+                        <div class="col-sm-9">
+                            <div class="alert alert-info">
+                                {{ profile.verification_notes|linebreaks }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if profile.internal_verification_status == 'PENDING' %}
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>{% trans "Verification Pending" %}</strong><br>
+                        {% trans "Your profile is currently under review. You will be notified once verification is complete." %}
+                    </div>
+                    {% elif profile.internal_verification_status == 'REJECTED' %}
+                    <div class="alert alert-warning mt-3">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>{% trans "Verification Required" %}</strong><br>
+                        {% trans "Please review the notes above and update your profile information." %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar with quick actions -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">{% trans "Quick Actions" %}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'employers:profile_setup' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-edit"></i> {% trans "Edit Profile" %}
+                        </a>
+                        <a href="{% url 'employers:job_postings_list' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-briefcase"></i> {% trans "Manage Jobs" %}
+                        </a>
+                        <a href="{% url 'employers:create_job_posting' %}" class="btn btn-outline-success">
+                            <i class="fas fa-plus"></i> {% trans "Post New Job" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Verification Status Info -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">{% trans "Verification Information" %}</h6>
+                </div>
+                <div class="card-body">
+                    {% if profile.internal_verification_status == 'VERIFIED' %}
+                        <div class="text-success">
+                            <i class="fas fa-check-circle"></i> {% trans "Verified Company" %}
+                        </div>
+                        <small class="text-muted">
+                            {% trans "Your company has been verified and you have full access to all features." %}
+                        </small>
+                    {% elif profile.internal_verification_status == 'PENDING' %}
+                        <div class="text-warning">
+                            <i class="fas fa-clock"></i> {% trans "Verification Pending" %}
+                        </div>
+                        <small class="text-muted">
+                            {% trans "We're reviewing your company information. This usually takes 1-2 business days." %}
+                        </small>
+                    {% else %}
+                        <div class="text-danger">
+                            <i class="fas fa-exclamation-circle"></i> {% trans "Action Required" %}
+                        </div>
+                        <small class="text-muted">
+                            {% trans "Please update your profile based on the verification notes." %}
+                        </small>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom CSS -->
+<style>
+    .card {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border: 1px solid #e3e6f0;
+    }
+
+    .card-header {
+        background-color: #f8f9fc;
+        border-bottom: 1px solid #e3e6f0;
+    }
+
+    .text-primary {
+        color: #4e73df !important;
+    }
+
+    .row {
+        margin-bottom: 0.5rem;
+    }
+
+    .badge {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+    }
+
+    /* Responsive improvements */
+    @media (max-width: 768px) {
+        .d-flex.justify-content-between {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .d-flex.justify-content-between > div {
+            text-align: center;
+        }
+
+        .col-sm-3, .col-sm-9 {
+            margin-bottom: 0.5rem;
+        }
+
+        .col-sm-3 {
+            font-weight: bold;
+        }
+    }
+</style>
+{% endblock %}

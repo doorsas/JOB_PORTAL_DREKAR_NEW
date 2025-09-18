@@ -1,0 +1,394 @@
+{% extends 'core/base1.html' %}
+{% load i18n %}
+
+{% block title %}{{ title }} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">{{ title }}</h3>
+                    {% if not is_editing %}
+                    <p class="text-muted mb-0 mt-2">{% trans "Please complete your profile to apply for jobs and access all features" %}</p>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        {% csrf_token %}
+
+                        <!-- Personal Information -->
+                        <h5 class="text-primary mb-3">{% trans "Personal Information" %}</h5>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.first_name.id_for_label }}" class="form-label">
+                                    {{ form.first_name.label }} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.first_name }}
+                                {% if form.first_name.help_text %}
+                                    <div class="form-text">{{ form.first_name.help_text }}</div>
+                                {% endif %}
+                                {% if form.first_name.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.first_name.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.last_name.id_for_label }}" class="form-label">
+                                    {{ form.last_name.label }} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.last_name }}
+                                {% if form.last_name.help_text %}
+                                    <div class="form-text">{{ form.last_name.help_text }}</div>
+                                {% endif %}
+                                {% if form.last_name.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.last_name.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.date_of_birth.id_for_label }}" class="form-label">
+                                    {{ form.date_of_birth.label }} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.date_of_birth }}
+                                {% if form.date_of_birth.help_text %}
+                                    <div class="form-text">{{ form.date_of_birth.help_text }}</div>
+                                {% endif %}
+                                {% if form.date_of_birth.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.date_of_birth.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.phone.id_for_label }}" class="form-label">
+                                    {{ form.phone.label }} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.phone }}
+                                {% if form.phone.help_text %}
+                                    <div class="form-text">{{ form.phone.help_text }}</div>
+                                {% endif %}
+                                {% if form.phone.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.phone.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.nationality.id_for_label }}" class="form-label">
+                                    {{ form.nationality.label }} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.nationality }}
+                                {% if form.nationality.help_text %}
+                                    <div class="form-text">{{ form.nationality.help_text }}</div>
+                                {% endif %}
+                                {% if form.nationality.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.nationality.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.address.id_for_label }}" class="form-label">
+                                {{ form.address.label }} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.address }}
+                            {% if form.address.help_text %}
+                                <div class="form-text">{{ form.address.help_text }}</div>
+                            {% endif %}
+                            {% if form.address.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.address.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Professional Information -->
+                        <h5 class="text-primary mb-3 mt-4">{% trans "Professional Information" %}</h5>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.expected_salary.id_for_label }}" class="form-label">
+                                    {{ form.expected_salary.label }}
+                                </label>
+                                {{ form.expected_salary }}
+                                {% if form.expected_salary.help_text %}
+                                    <div class="form-text">{{ form.expected_salary.help_text }}</div>
+                                {% endif %}
+                                {% if form.expected_salary.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.expected_salary.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.current_status.id_for_label }}" class="form-label">
+                                    {{ form.current_status.label }} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.current_status }}
+                                {% if form.current_status.help_text %}
+                                    <div class="form-text">{{ form.current_status.help_text }}</div>
+                                {% endif %}
+                                {% if form.current_status.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.current_status.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Preferred Professions -->
+                        {% if form.preferred_professions.field.queryset %}
+                        <div class="mb-3">
+                            <label class="form-label">{{ form.preferred_professions.label }}</label>
+                            <div class="row">
+                                {% for choice in form.preferred_professions %}
+                                <div class="col-md-6 col-lg-4 mb-2">
+                                    <div class="form-check">
+                                        {{ choice.tag }}
+                                        <label class="form-check-label" for="{{ choice.id_for_label }}">
+                                            {{ choice.choice_label }}
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% if form.preferred_professions.help_text %}
+                                <div class="form-text">{{ form.preferred_professions.help_text }}</div>
+                            {% endif %}
+                            {% if form.preferred_professions.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.preferred_professions.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        <!-- Skills -->
+                        {% if form.skills.field.queryset %}
+                        <div class="mb-3">
+                            <label class="form-label">{{ form.skills.label }}</label>
+                            <div class="row">
+                                {% for choice in form.skills %}
+                                <div class="col-md-6 col-lg-4 mb-2">
+                                    <div class="form-check">
+                                        {{ choice.tag }}
+                                        <label class="form-check-label" for="{{ choice.id_for_label }}">
+                                            {{ choice.choice_label }}
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% if form.skills.help_text %}
+                                <div class="form-text">{{ form.skills.help_text }}</div>
+                            {% endif %}
+                            {% if form.skills.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.skills.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        <!-- Experience & Documents -->
+                        <h5 class="text-primary mb-3 mt-4">{% trans "Experience & Documents" %}</h5>
+
+                        <div class="mb-3">
+                            <label for="{{ form.experience_summary.id_for_label }}" class="form-label">
+                                {{ form.experience_summary.label }}
+                            </label>
+                            {{ form.experience_summary }}
+                            {% if form.experience_summary.help_text %}
+                                <div class="form-text">{{ form.experience_summary.help_text }}</div>
+                            {% endif %}
+                            {% if form.experience_summary.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.experience_summary.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.cv_file.id_for_label }}" class="form-label">
+                                {{ form.cv_file.label }}
+                            </label>
+                            {{ form.cv_file }}
+                            {% if form.cv_file.help_text %}
+                                <div class="form-text">{{ form.cv_file.help_text }}</div>
+                            {% endif %}
+                            {% if form.cv_file.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.cv_file.errors.0 }}
+                                </div>
+                            {% endif %}
+                            {% if form.cv_file.value %}
+                                <div class="mt-2">
+                                    <small class="text-muted">
+                                        {% trans "Current file:" %} {{ form.cv_file.value|cut:"cvs/" }}
+                                    </small>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Form Errors -->
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger" role="alert">
+                                {% for error in form.non_field_errors %}
+                                    <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex justify-content-between mt-4 pt-3 border-top">
+                            <a href="{% url 'employees:dashboard' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> {% trans "Back to Dashboard" %}
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i>
+                                {% if is_editing %}
+                                    {% trans "Update Profile" %}
+                                {% else %}
+                                    {% trans "Complete Setup" %}
+                                {% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            {% if not is_editing %}
+            <!-- Information card -->
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h6 class="card-title">{% trans "Why complete your profile?" %}</h6>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success me-2"></i>{% trans "Apply for job opportunities" %}</li>
+                        <li><i class="fas fa-check text-success me-2"></i>{% trans "Get discovered by employers" %}</li>
+                        <li><i class="fas fa-check text-success me-2"></i>{% trans "Track your job applications" %}</li>
+                        <li><i class="fas fa-check text-success me-2"></i>{% trans "Access all HR Portal features" %}</li>
+                    </ul>
+                    <small class="text-muted">
+                        {% trans "Your information is secure and will only be shared with potential employers when you apply for jobs." %}
+                    </small>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Custom CSS -->
+<style>
+    .card {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border: 1px solid #e3e6f0;
+    }
+
+    .card-header {
+        background-color: #f8f9fc;
+        border-bottom: 1px solid #e3e6f0;
+    }
+
+    .text-primary {
+        color: #28a745 !important;
+    }
+
+    .btn-primary {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+
+    .btn-primary:hover {
+        background-color: #218838;
+        border-color: #1e7e34;
+    }
+
+    .form-control:focus {
+        border-color: #28a745;
+        box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+    }
+
+    .form-check-input:checked {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+
+    .invalid-feedback {
+        display: block !important;
+    }
+
+    /* Responsive improvements */
+    @media (max-width: 768px) {
+        .container {
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+
+        .col-md-6, .col-md-4, .col-lg-4 {
+            margin-bottom: 1rem;
+        }
+
+        .d-flex.justify-content-between {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .d-flex.justify-content-between > * {
+            text-align: center;
+        }
+    }
+</style>
+
+<!-- JavaScript for form validation -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Bootstrap form validation
+    const forms = document.querySelectorAll('.needs-validation');
+
+    Array.prototype.slice.call(forms).forEach(function(form) {
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        }, false);
+    });
+
+    // File upload preview
+    const fileInput = document.querySelector('#{{ form.cv_file.id_for_label }}');
+    if (fileInput) {
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Check file size
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('{% trans "File size must be less than 5MB" %}');
+                    e.target.value = '';
+                    return;
+                }
+
+                // Check file type
+                const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+                if (!allowedTypes.includes(file.type)) {
+                    alert('{% trans "Only PDF, DOC, and DOCX files are allowed" %}');
+                    e.target.value = '';
+                    return;
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
