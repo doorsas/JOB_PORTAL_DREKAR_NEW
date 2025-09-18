@@ -104,7 +104,7 @@
                                                 <div class="col-sm-6">
                                                     <p class="mb-1">
                                                         <i class="fas fa-calendar text-primary me-2"></i>
-                                                        <strong>{% trans "Applied:" %}</strong> {{ application.application_date|date:"M d, Y" }}
+                                                        <strong>{% trans "Applied:" %}</strong> {{ application.created_at|date:"M d, Y" }}
                                                     </p>
                                                     {% if application.job_posting.estimated_salary_min or application.job_posting.estimated_salary_max %}
                                                     <p class="mb-1">

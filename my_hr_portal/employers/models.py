@@ -49,7 +49,6 @@ class JobPosting(TimeStampedModel):
     num_employees_requested = models.IntegerField(default=1)
     estimated_salary_min = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     estimated_salary_max = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    posted_date = models.DateTimeField(auto_now_add=True)
     closing_date = models.DateField(blank=True, null=True)
     
     
@@ -78,7 +77,6 @@ class Application(TimeStampedModel):
 
     job_posting = models.ForeignKey(JobPosting, on_delete=models.CASCADE, related_name='applications')
     applicant = models.ForeignKey('employees.EmployeeProfile', on_delete=models.CASCADE, related_name='applications')
-    application_date = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='SUBMITTED')
     notes = models.TextField(blank=True, null=True)
 

@@ -40,7 +40,7 @@
                                     <strong>{% trans "Positions:" %}</strong> {{ job_posting.num_employees_requested }}
                                 </div>
                                 <div class="col-sm-6">
-                                    <strong>{% trans "Posted:" %}</strong> {{ job_posting.posted_date|date:"M d, Y" }}
+                                    <strong>{% trans "Posted:" %}</strong> {{ job_posting.created_at|date:"M d, Y" }}
                                 </div>
                             </div>
 
@@ -139,7 +139,7 @@
                                             <div class="fw-bold">{{ application.applicant.user.get_full_name|default:application.applicant.user.username }}</div>
                                             <small class="text-muted">{{ application.applicant.user.email }}</small>
                                         </td>
-                                        <td>{{ application.application_date|date:"M d, Y H:i" }}</td>
+                                        <td>{{ application.created_at|date:"M d, Y H:i" }}</td>
                                         <td>
                                             <span class="badge
                                                 {% if application.status == 'SUBMITTED' %}bg-primary

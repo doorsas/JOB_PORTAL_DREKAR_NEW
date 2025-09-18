@@ -34,7 +34,7 @@ def dashboard(request):
         })
 
         # Add recent job postings (last 5)
-        recent_jobs = employer_profile.job_postings.order_by('-posted_date')[:5]
+        recent_jobs = employer_profile.job_postings.order_by('-created_at')[:5]
         for job in recent_jobs:
             job.applications_count = job.applications.count()
         context['recent_job_postings'] = recent_jobs
@@ -53,7 +53,7 @@ def job_postings_list(request):
         return redirect('employers:profile_setup')
 
     # Get all job postings for this employer
-    job_postings = JobPosting.objects.filter(employer=employer_profile).order_by('-posted_date')
+    job_postings = JobPosting.objects.filter(employer=employer_profile).order_by('-created_at')
 
     # Filter by status if requested
     status_filter = request.GET.get('status')
@@ -208,7 +208,7 @@ def job_posting_detail(request, job_id):
         return redirect('employers:profile_setup')
 
     job_posting = get_object_or_404(JobPosting, id=job_id, employer=employer_profile)
-    applications = job_posting.applications.all().order_by('-application_date')
+    applications = job_posting.applications.all().order_by('-created_at')
 
     # Pagination for applications
     paginator = Paginator(applications, 10)
@@ -291,7 +291,7 @@ def applications_list(request):
     # Get all applications for this employer's job postings
     applications = Application.objects.filter(
         job_posting__employer=employer_profile
-    ).select_related('job_posting', 'applicant', 'applicant__user').order_by('-application_date')
+    ).select_related('job_posting', 'applicant', 'applicant__user').order_by('-created_at')
 
     # Filter by status if requested
     status_filter = request.GET.get('status')
@@ -319,7 +319,7 @@ def applications_list(request):
     }
 
     # Get job postings for filter dropdown
-    job_postings = JobPosting.objects.filter(employer=employer_profile).order_by('-posted_date')
+    job_postings = JobPosting.objects.filter(employer=employer_profile).order_by('-created_at')
 
     context = {
         'page_obj': page_obj,

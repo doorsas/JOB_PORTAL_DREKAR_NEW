@@ -112,8 +112,8 @@
                                             <br><small class="text-muted">{{ application.job_posting.location }}</small>
                                         </td>
                                         <td>
-                                            {{ application.application_date|date:"M d, Y" }}
-                                            <br><small class="text-muted">{{ application.application_date|time:"H:i" }}</small>
+                                            {{ application.created_at|date:"M d, Y" }}
+                                            <br><small class="text-muted">{{ application.created_at|time:"H:i" }}</small>
                                         </td>
                                         <td>
                                             <span class="badge

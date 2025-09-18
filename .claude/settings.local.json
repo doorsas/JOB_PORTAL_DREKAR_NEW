@@ -4,7 +4,9 @@
       "Bash(mkdir:*)",
       "Bash(django-admin startproject:*)",
       "Bash(touch:*)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(source:*)",
+      "Bash(python manage.py shell:*)"
     ],
     "deny": [],
     "ask": []

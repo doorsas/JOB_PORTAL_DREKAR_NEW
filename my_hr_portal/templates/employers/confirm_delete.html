@@ -27,7 +27,7 @@
                             <p class="card-text">
                                 <strong>{% trans "Location:" %}</strong> {{ job_posting.location }}<br>
                                 <strong>{% trans "Type:" %}</strong> {{ job_posting.get_job_type_display }}<br>
-                                <strong>{% trans "Posted:" %}</strong> {{ job_posting.posted_date|date:"M d, Y" }}<br>
+                                <strong>{% trans "Posted:" %}</strong> {{ job_posting.created_at|date:"M d, Y" }}<br>
                                 <strong>{% trans "Applications:" %}</strong> {{ job_posting.applications.count }}
                             </p>
                         </div>

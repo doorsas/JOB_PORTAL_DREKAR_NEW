@@ -177,8 +177,8 @@ def job_search(request):
         if skills:
             jobs = jobs.filter(required_skills__in=skills).distinct()
 
-    # Order by posting date (newest first)
-    jobs = jobs.order_by('-posted_date')
+    # Order by creation date (newest first)
+    jobs = jobs.order_by('-created_at')
 
     # Add application status for each job if user has profile
     try:
@@ -297,7 +297,7 @@ def my_applications(request):
 
     applications = Application.objects.filter(
         applicant=employee_profile
-    ).select_related('job_posting', 'job_posting__employer', 'job_posting__location').order_by('-application_date')
+    ).select_related('job_posting', 'job_posting__employer', 'job_posting__location').order_by('-created_at')
 
     # Filter by status if requested
     status_filter = request.GET.get('status')

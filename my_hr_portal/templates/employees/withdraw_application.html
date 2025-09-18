@@ -23,7 +23,7 @@
                                 <p class="mb-1"><strong>{% trans "Company:" %}</strong> {{ application.job_posting.employer.company_name }}</p>
                             </div>
                             <div class="col-md-6">
-                                <p class="mb-1"><strong>{% trans "Applied on:" %}</strong> {{ application.application_date|date:"M d, Y" }}</p>
+                                <p class="mb-1"><strong>{% trans "Applied on:" %}</strong> {{ application.created_at|date:"M d, Y" }}</p>
                                 <p class="mb-1"><strong>{% trans "Status:" %}</strong>
                                     <span class="badge
                                         {% if application.status == 'SUBMITTED' %}bg-primary
