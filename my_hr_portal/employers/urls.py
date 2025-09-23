@@ -16,4 +16,5 @@ urlpatterns = [
     path('applications/', views.applications_list, name='applications_list'),
     path('applications/<int:application_id>/', views.application_detail, name='application_detail'),
     path('applications/<int:application_id>/update-status/', views.update_application_status, name='update_application_status'),
+    path('applications/<int:application_id>/update-status-ajax/', views.update_application_status_ajax, name='update_application_status_ajax'),
 ]

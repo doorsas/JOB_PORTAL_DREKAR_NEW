@@ -176,28 +176,38 @@
                     <!-- Documents -->
                     <h5 class="text-primary mb-3 mt-4">{% trans "Documents" %}</h5>
 
-                    {% with cv_document=application.applicant.documents.filter:document_type='CV'|first %}
-                    <div class="row mb-3">
-                        <div class="col-sm-3">
-                            <strong>{% trans "CV/Resume:" %}</strong>
-                        </div>
-                        <div class="col-sm-9">
-                            {% if cv_document %}
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-file-pdf text-danger me-2"></i>
-                                    <a href="{{ cv_document.file.url }}" target="_blank" class="me-3">
-                                        {{ cv_document.file.name|cut:"employee_documents/" }}
-                                    </a>
-                                    <small class="text-muted">
-                                        {% trans "Uploaded" %} {{ cv_document.created_at|date:"M d, Y" }}
-                                    </small>
+                    {% regroup application.applicant.documents.all by document_type as documents_by_type %}
+                    {% for doc_type in documents_by_type %}
+                        {% if doc_type.grouper == 'CV' %}
+                            <div class="row mb-3">
+                                <div class="col-sm-3">
+                                    <strong>{% trans "CV/Resume:" %}</strong>
                                 </div>
-                            {% else %}
+                                <div class="col-sm-9">
+                                    {% for cv_document in doc_type.list %}
+                                        <div class="d-flex align-items-center mb-2">
+                                            <i class="fas fa-file-pdf text-danger me-2"></i>
+                                            <a href="{{ cv_document.file.url }}" target="_blank" class="me-3">
+                                                {{ cv_document.file.name|cut:"employee_documents/" }}
+                                            </a>
+                                            <small class="text-muted">
+                                                {% trans "Uploaded" %} {{ cv_document.created_at|date:"M d, Y" }}
+                                            </small>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% empty %}
+                        <div class="row mb-3">
+                            <div class="col-sm-3">
+                                <strong>{% trans "CV/Resume:" %}</strong>
+                            </div>
+                            <div class="col-sm-9">
                                 <span class="text-muted">{% trans "No CV uploaded" %}</span>
-                            {% endif %}
+                            </div>
                         </div>
-                    </div>
-                    {% endwith %}
+                    {% endfor %}
                 </div>
             </div>
         </div>

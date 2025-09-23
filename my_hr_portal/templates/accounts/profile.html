@@ -117,7 +117,7 @@
     {% endif %}
 
     <div class="profile-actions" style="text-align: center;">
-        <a href="#" class="btn btn-primary" style="background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; margin-right: 10px;">
+        <a href="{% url 'accounts:profile_edit' %}" class="btn btn-primary" style="background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; margin-right: 10px;">
             {% trans "Edit Profile" %}
         </a>
         {% if user.user_type == 'EMPLOYER' %}

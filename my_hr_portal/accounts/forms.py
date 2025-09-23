@@ -119,3 +119,40 @@ class CustomAuthenticationForm(AuthenticationForm):
                 )
 
         return self.cleaned_data
+
+
+class UserProfileForm(forms.ModelForm):
+    """Form for editing basic user profile information"""
+
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email']
+        widgets = {
+            'first_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': _('First name')
+            }),
+            'last_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': _('Last name')
+            }),
+            'email': forms.EmailInput(attrs={
+                'class': 'form-control',
+                'placeholder': _('Email address')
+            }),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Add help text
+        self.fields['first_name'].help_text = _('Your first name')
+        self.fields['last_name'].help_text = _('Your last name')
+        self.fields['email'].help_text = _('Your email address (used for login)')
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        # Check if email is already taken by another user
+        if email and User.objects.filter(email=email).exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError(_('This email address is already in use.'))
+        return email

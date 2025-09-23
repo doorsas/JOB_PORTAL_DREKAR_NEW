@@ -15,4 +15,9 @@ urlpatterns = [
     path('jobs/<int:job_id>/apply/', views.apply_for_job, name='apply_for_job'),
     path('applications/', views.my_applications, name='my_applications'),
     path('applications/<int:application_id>/withdraw/', views.withdraw_application, name='withdraw_application'),
+    path('payslips/', views.payslips_view, name='payslips'),
+    path('schedules/create/', views.WorkScheduleCreateView.as_view(), name='schedule_create'),
+    
+    
+    
 ]

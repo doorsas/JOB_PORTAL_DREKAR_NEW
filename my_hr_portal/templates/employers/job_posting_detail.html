@@ -214,6 +214,51 @@
     </div>
 </div>
 
+<!-- Status Update Modal -->
+<div class="modal fade" id="statusUpdateModal" tabindex="-1" aria-labelledby="statusUpdateModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="statusUpdateModalLabel">{% trans "Update Application Status" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="statusUpdateForm">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="applicantName" class="form-label">{% trans "Applicant" %}</label>
+                        <input type="text" class="form-control" id="applicantName" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="currentStatus" class="form-label">{% trans "Current Status" %}</label>
+                        <input type="text" class="form-control" id="currentStatus" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newStatus" class="form-label">{% trans "New Status" %}</label>
+                        <select class="form-select" id="newStatus" required>
+                            <option value="">{% trans "Select new status..." %}</option>
+                            <option value="SUBMITTED">{% trans "Submitted" %}</option>
+                            <option value="REVIEWED">{% trans "Reviewed" %}</option>
+                            <option value="INVITED">{% trans "Invited" %}</option>
+                            <option value="HIRED">{% trans "Hired" %}</option>
+                            <option value="REJECTED">{% trans "Rejected" %}</option>
+                            <option value="RESERVED">{% trans "Reserved" %}</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="statusNotes" class="form-label">{% trans "Notes (Optional)" %}</label>
+                        <textarea class="form-control" id="statusNotes" rows="3" placeholder="{% trans 'Add any notes about this status change...' %}"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                <button type="button" class="btn btn-primary" id="confirmStatusUpdate">{% trans "Update Status" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Custom CSS -->
 <style>
     .card {
@@ -260,14 +305,157 @@
 
 <!-- JavaScript for application management -->
 <script>
+let currentApplicationId = null;
+
 function viewApplication(applicationId) {
     // TODO: Implement application detail modal or redirect
     alert('{% trans "Application detail view - To be implemented" %}');
 }
 
 function updateApplicationStatus(applicationId) {
-    // TODO: Implement status update modal
-    alert('{% trans "Status update - To be implemented" %}');
+    currentApplicationId = applicationId;
+
+    // Find the application row to get current data
+    const row = document.querySelector(`tr[data-application-id="${applicationId}"]`);
+    if (!row) {
+        // Fallback: find by button click context
+        const button = event.target.closest('button');
+        const tableRow = button.closest('tr');
+        const applicantName = tableRow.querySelector('td:first-child .fw-bold').textContent;
+        const currentStatusBadge = tableRow.querySelector('td:nth-child(3) .badge');
+        const currentStatus = currentStatusBadge.textContent.trim();
+
+        // Populate modal
+        document.getElementById('applicantName').value = applicantName;
+        document.getElementById('currentStatus').value = currentStatus;
+        document.getElementById('newStatus').value = '';
+        document.getElementById('statusNotes').value = '';
+
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('statusUpdateModal'));
+        modal.show();
+        return;
+    }
+
+    // Get application data from the row
+    const applicantName = row.querySelector('td:first-child .fw-bold').textContent;
+    const currentStatusBadge = row.querySelector('td:nth-child(3) .badge');
+    const currentStatus = currentStatusBadge.textContent.trim();
+
+    // Populate modal
+    document.getElementById('applicantName').value = applicantName;
+    document.getElementById('currentStatus').value = currentStatus;
+    document.getElementById('newStatus').value = '';
+    document.getElementById('statusNotes').value = '';
+
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('statusUpdateModal'));
+    modal.show();
+}
+
+// Handle status update confirmation
+document.getElementById('confirmStatusUpdate').addEventListener('click', function() {
+    const newStatus = document.getElementById('newStatus').value;
+    const notes = document.getElementById('statusNotes').value;
+
+    if (!newStatus) {
+        alert('{% trans "Please select a new status" %}');
+        return;
+    }
+
+    if (!currentApplicationId) {
+        alert('{% trans "Error: No application selected" %}');
+        return;
+    }
+
+    // Show loading state
+    this.disabled = true;
+    this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>{% trans "Updating..." %}';
+
+    // Make AJAX request
+    fetch(`/employers/applications/${currentApplicationId}/update-status-ajax/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify({
+            status: newStatus,
+            notes: notes
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update the status badge in the table
+            updateStatusBadgeInTable(currentApplicationId, newStatus, data.status_display);
+
+            // Hide modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('statusUpdateModal'));
+            modal.hide();
+
+            // Show success message
+            showAlert('success', '{% trans "Application status updated successfully!" %}');
+        } else {
+            showAlert('danger', data.error || '{% trans "Failed to update status" %}');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('danger', '{% trans "An error occurred while updating the status" %}');
+    })
+    .finally(() => {
+        // Reset button state
+        this.disabled = false;
+        this.innerHTML = '{% trans "Update Status" %}';
+    });
+});
+
+function updateStatusBadgeInTable(applicationId, status, statusDisplay) {
+    // Find the table row and update the status badge
+    const rows = document.querySelectorAll('tbody tr');
+    rows.forEach(row => {
+        const button = row.querySelector(`button[onclick="updateApplicationStatus(${applicationId})"]`);
+        if (button) {
+            const statusBadge = row.querySelector('td:nth-child(3) .badge');
+            if (statusBadge) {
+                // Update badge class
+                statusBadge.className = 'badge';
+                if (status === 'SUBMITTED') statusBadge.classList.add('bg-primary');
+                else if (status === 'REVIEWED') statusBadge.classList.add('bg-info');
+                else if (status === 'INVITED') statusBadge.classList.add('bg-warning');
+                else if (status === 'HIRED') statusBadge.classList.add('bg-success');
+                else if (status === 'REJECTED') statusBadge.classList.add('bg-danger');
+                else if (status === 'RESERVED') statusBadge.classList.add('bg-secondary');
+
+                // Update badge text
+                statusBadge.textContent = statusDisplay;
+            }
+        }
+    });
+}
+
+function showAlert(type, message) {
+    // Create and show a Bootstrap alert
+    const alertHtml = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+
+    // Insert alert at the top of the container
+    const container = document.querySelector('.container');
+    container.insertAdjacentHTML('afterbegin', alertHtml);
+
+    // Auto-hide after 5 seconds
+    setTimeout(() => {
+        const alert = container.querySelector('.alert');
+        if (alert) {
+            const bsAlert = new bootstrap.Alert(alert);
+            bsAlert.close();
+        }
+    }, 5000);
 }
 </script>
 {% endblock %}

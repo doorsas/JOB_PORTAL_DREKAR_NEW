@@ -12,6 +12,7 @@ urlpatterns = [
 
     # Profile URLs
     path('profile/', views.profile_view, name='profile'),
+    path('profile/edit/', views.profile_edit_view, name='profile_edit'),
     path('dashboard/', views.dashboard_redirect, name='dashboard'),
 
     # Password Reset URLs

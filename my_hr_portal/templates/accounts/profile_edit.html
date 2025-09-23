@@ -1,0 +1,113 @@
+{% extends 'core/base1.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Edit Profile" %} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 600px; margin: 0 auto; padding: 20px;">
+    <div class="profile-edit-header" style="background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #eee; padding: 24px; margin-bottom: 20px;">
+        <h2 style="margin-bottom: 20px; color: #333;">{% trans "Edit Profile" %}</h2>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label for="{{ form.first_name.id_for_label }}" style="display: block; margin-bottom: 5px; font-weight: bold; color: #555;">
+                    {{ form.first_name.label }}
+                </label>
+                {{ form.first_name }}
+                {% if form.first_name.help_text %}
+                    <small style="color: #666; font-size: 0.875rem;">{{ form.first_name.help_text }}</small>
+                {% endif %}
+                {% if form.first_name.errors %}
+                    <div style="color: #dc3545; font-size: 0.875rem; margin-top: 5px;">
+                        {{ form.first_name.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label for="{{ form.last_name.id_for_label }}" style="display: block; margin-bottom: 5px; font-weight: bold; color: #555;">
+                    {{ form.last_name.label }}
+                </label>
+                {{ form.last_name }}
+                {% if form.last_name.help_text %}
+                    <small style="color: #666; font-size: 0.875rem;">{{ form.last_name.help_text }}</small>
+                {% endif %}
+                {% if form.last_name.errors %}
+                    <div style="color: #dc3545; font-size: 0.875rem; margin-top: 5px;">
+                        {{ form.last_name.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label for="{{ form.email.id_for_label }}" style="display: block; margin-bottom: 5px; font-weight: bold; color: #555;">
+                    {{ form.email.label }}
+                </label>
+                {{ form.email }}
+                {% if form.email.help_text %}
+                    <small style="color: #666; font-size: 0.875rem;">{{ form.email.help_text }}</small>
+                {% endif %}
+                {% if form.email.errors %}
+                    <div style="color: #dc3545; font-size: 0.875rem; margin-top: 5px;">
+                        {{ form.email.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-actions" style="margin-top: 30px; text-align: center;">
+                <button type="submit" class="btn btn-primary" style="background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; margin-right: 10px; cursor: pointer;">
+                    {% trans "Save Changes" %}
+                </button>
+                <a href="{% url 'accounts:profile' %}" class="btn btn-secondary" style="background: #6c757d; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">
+                    {% trans "Cancel" %}
+                </a>
+            </div>
+        </form>
+    </div>
+
+    {% if profile %}
+    <div class="profile-notice" style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+        <h5 style="margin-bottom: 15px; color: #495057;">{% trans "Additional Profile Information" %}</h5>
+        <p style="margin-bottom: 10px; color: #6c757d;">
+            {% if profile_type == 'employer' %}
+                {% trans "To edit your company information, go to" %}
+                <a href="{% url 'employers:profile_setup' %}" style="color: #007bff;">{% trans "Company Profile" %}</a>
+            {% elif profile_type == 'employee' %}
+                {% trans "To edit your employee details, go to" %}
+                <a href="{% url 'employees:profile_setup' %}" style="color: #007bff;">{% trans "Employee Profile" %}</a>
+            {% elif profile_type == 'eor_client' %}
+                {% trans "To edit your client information, go to" %}
+                <a href="{% url 'eor_services:profile_setup' %}" style="color: #007bff;">{% trans "Client Profile" %}</a>
+            {% endif %}
+        </p>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    .form-control:focus {
+        outline: 0;
+        border-color: #80bdff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+
+    .btn:hover {
+        opacity: 0.8;
+    }
+
+    .btn:focus {
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+</style>
+{% endblock %}

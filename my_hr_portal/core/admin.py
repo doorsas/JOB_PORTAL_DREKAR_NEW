@@ -1,12 +1,12 @@
 from django.contrib import admin
-from .models import Location, Qualification, Skill, Contract, Invoice, Payment, Notification, Profession
+from .models import Address, Qualification, Skill, Contract, Invoice, Payment, Notification, Profession
 
 
-@admin.register(Location)
-class LocationAdmin(admin.ModelAdmin):
-    list_display = ['city', 'country', 'address_line1']
-    list_filter = ['country']
-    search_fields = ['city', 'country']
+@admin.register(Address)
+class AddressAdmin(admin.ModelAdmin):
+    list_display = ['city', 'country', 'street_address', 'postal_code']
+    list_filter = ['country', 'city']
+    search_fields = ['city', 'country', 'street_address']
 
 
 @admin.register(Qualification)

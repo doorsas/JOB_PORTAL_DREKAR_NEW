@@ -1,0 +1,48 @@
+{% extends 'core/base1.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Payslips" %} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 1200px; margin: 0 auto; padding: 30px 0;">
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2 style="margin:0;">{% trans "Your Payslips" %}</h2>
+        </div>
+        <div class="card-body">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>{% trans "Period" %}</th>
+                        <th>{% trans "Gross Salary" %}</th>
+                        <th>{% trans "Net Salary" %}</th>
+                        <th>{% trans "Tax" %}</th>
+                        <th>{% trans "Issued" %}</th>
+                        <th>{% trans "PDF" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payslip in payslips %}
+                    <tr>
+                        <td>{{ payslip.period_start_date }} - {{ payslip.period_end_date }}</td>
+                        <td>{{ payslip.gross_salary }}</td>
+                        <td>{{ payslip.net_salary }}</td>
+                        <td>{{ payslip.tax_amount }}</td>
+                        <td>{{ payslip.issue_date }}</td>
+                        <td>
+                            {% if payslip.file %}
+                                <a href="{{ payslip.file.url }}" target="_blank" class="btn btn-sm btn-outline-primary">{% trans "Download" %}</a>
+                            {% else %}
+                                <span class="text-muted">{% trans "Not available" %}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="6" class="text-center">{% trans "No payslips available." %}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

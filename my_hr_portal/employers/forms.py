@@ -1,7 +1,7 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
 from .models import JobPosting, EmployerProfile
-from core.models import Location, Qualification, Skill, Address
+from core.models import Address, Qualification, Skill
 
 
 class JobPostingForm(forms.ModelForm):
@@ -62,11 +62,11 @@ class JobPostingForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Ensure we have locations, qualifications, and skills
-        if not Location.objects.exists():
+        if not Address.objects.exists():
             # Add some default locations if none exist
-            Location.objects.get_or_create(city='Vilnius', country='Lithuania')
-            Location.objects.get_or_create(city='Kaunas', country='Lithuania')
-            Location.objects.get_or_create(city='Klaipeda', country='Lithuania')
+            Address.objects.get_or_create(city='Vilnius', country='Lithuania')
+            Address.objects.get_or_create(city='Kaunas', country='Lithuania')
+            Address.objects.get_or_create(city='Klaipeda', country='Lithuania')
 
         # Ensure we have some basic qualifications
         if not Qualification.objects.exists():
@@ -113,7 +113,7 @@ class EmployerProfileForm(forms.ModelForm):
         model = EmployerProfile
         fields = [
             'company_name', 'registration_code', 'phone', 'website',
-            'contact_person_name', 'contact_person_email', 'contact_person_phone'
+            'contact_person_name', 'contact_person_email', 'contact_person_phone', 'logo'
         ]
         widgets = {
             'company_name': forms.TextInput(attrs={
@@ -148,6 +148,10 @@ class EmployerProfileForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': _('Contact person phone'),
                 'maxlength': 20
+            }),
+            'logo': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': 'image/*'
             })
         }
 
@@ -187,9 +191,11 @@ class EmployerProfileForm(forms.ModelForm):
         self.fields['contact_person_name'].help_text = _('Main contact person for HR matters')
         self.fields['contact_person_email'].help_text = _('Email for HR and recruitment communications')
         self.fields['contact_person_phone'].help_text = _('Phone number for urgent HR matters')
+        self.fields['logo'].help_text = _('Company logo (will be automatically resized to 200x200px)')
 
         # Set required fields
         self.fields['website'].required = False
+        self.fields['logo'].required = False
 
     def clean_contact_person_email(self):
         email = self.cleaned_data.get('contact_person_email')

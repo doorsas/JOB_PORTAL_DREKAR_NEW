@@ -1,3 +1,4 @@
+
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.decorators import user_passes_test
@@ -5,14 +6,96 @@ from django.contrib import messages
 from django.http import JsonResponse, HttpResponse
 from django.core.paginator import Paginator
 from django.db.models import Q
-from .models import EmployeeProfile, Document
-from .forms import EmployeeProfileForm, JobSearchForm, JobApplicationForm, DocumentUploadForm
+from .models import EmployeeProfile, Document,Payslip,WorkSchedule,Timesheet
+from .forms import EmployeeProfileForm, JobSearchForm, JobApplicationForm, DocumentUploadForm,WorkScheduleForm, TimesheetForm
 from employers.models import JobPosting, Application
-
+from django.views.generic import CreateView
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.views.generic import ListView
+from django.utils import timezone
 
 def is_employee(user):
     return user.is_authenticated and user.user_type == 'EMPLOYEE'
 
+# Payslips page for employees
+@login_required
+@user_passes_test(is_employee)
+def payslips_view(request):
+    profile = getattr(request.user, 'employeeprofile', None)
+    payslips = profile.payslips.order_by('-issue_date') if profile else []
+    return render(request, 'employees/payslips.html', {'payslips': payslips})
+
+class WorkScheduleCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
+    model = WorkSchedule
+    form_class = WorkScheduleForm
+    template_name = 'employees/schedule_form.html'
+    success_url = '/schedules/' # Redirect to a schedule list page
+
+    def test_func(self):
+        # Only allow managers to access this view
+        return self.request.user.is_staff # Or a more specific 'is_manager' check
+
+
+
+
+@login_required
+def process_timesheet(request, timesheet_id, action):
+    if not request.user.is_staff:
+        return redirect('dashboard') # Or show an error
+
+    timesheet = get_object_or_404(Timesheet, id=timesheet_id)
+    if request.method == 'POST':
+        if action == 'approve':
+            timesheet.status = 'APPROVED'
+            timesheet.approved_by = request.user
+            timesheet.approval_date = timezone.now()
+        elif action == 'reject':
+            timesheet.status = 'REJECTED'
+
+        timesheet.save()
+    return redirect('pending_timesheets')
+
+
+
+class PendingTimesheetsView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    model = Timesheet
+    template_name = 'employees/pending_timesheets.html'
+    context_object_name = 'timesheets'
+
+    def get_queryset(self):
+        # Managers should only see timesheets for their employees
+        return Timesheet.objects.filter(status='PENDING').order_by('date')
+
+    def test_func(self):
+        return self.request.user.is_staff
+
+@login_required
+def submit_timesheet(request, schedule_id=None):
+    initial_data = {}
+    schedule = None
+    if schedule_id:
+        schedule = get_object_or_404(WorkSchedule, id=schedule_id, employee__user=request.user)
+        initial_data = {
+            'date': schedule.date,
+            'hours_worked': round(schedule.total_hours, 2)
+        }
+
+    if request.method == 'POST':
+        form = TimesheetForm(request.POST)
+        if form.is_valid():
+            timesheet = form.save(commit=False)
+            timesheet.employee = request.user.employeeprofile
+            timesheet.work_schedule = schedule
+            timesheet.save()
+            # Optional: Update the WorkSchedule status
+            if schedule:
+                schedule.status = 'COMPLETED'
+                schedule.save()
+            return redirect('my_timesheets_list')
+    else:
+        form = TimesheetForm(initial=initial_data)
+
+    return render(request, 'employees/timesheet_form.html', {'form': form, 'schedule': schedule})
 
 @login_required
 @user_passes_test(is_employee)
@@ -40,6 +123,7 @@ def dashboard(request):
             'pending_applications': profile.applications.filter(status='SUBMITTED').count(),
             'total_assignments': profile.assignments.count(),
             'active_assignments': profile.assignments.filter(status='ACTIVE').count(),
+            'payslips': profile.payslips.order_by('-issue_date') if hasattr(profile, 'payslips') else [],
         })
 
     return render(request, 'employees/dashboard.html', context)

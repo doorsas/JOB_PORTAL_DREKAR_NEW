@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from .models import EmployeeProfile, Document
 from core.models import Skill, Profession, Address
 from employers.models import JobPosting, Application
+from employees.models import Timesheet,WorkSchedule
 import datetime
 
 
@@ -192,6 +193,27 @@ class EmployeeProfileForm(forms.ModelForm):
         return cleaned_data
 
 
+
+
+
+class WorkScheduleForm(forms.ModelForm):
+    class Meta:
+        model = WorkSchedule
+        fields = ['employee', 'assignment', 'date', 'start_time', 'end_time', 'break_duration_minutes']
+        widgets = {
+            'date': forms.DateInput(attrs={'type': 'date'}),
+            'start_time': forms.TimeInput(attrs={'type': 'time'}),
+            'end_time': forms.TimeInput(attrs={'type': 'time'}),
+        }
+        
+class TimesheetForm(forms.ModelForm):
+    class Meta:
+        model = Timesheet
+        fields = ['date', 'hours_worked', 'overtime_hours']
+        widgets = {
+            'date': forms.DateInput(attrs={'type': 'date'}),
+        }
+
 class JobSearchForm(forms.Form):
     search_query = forms.CharField(
         max_length=200,
@@ -215,7 +237,7 @@ class JobSearchForm(forms.Form):
     )
 
     job_type = forms.ChoiceField(
-        choices=[('', _('All Types'))] + JobPosting.JOB_TYPE_CHOICES,
+        choices=[('', _('All Types'))] + JobPosting.JobType.choices,
         required=False,
         widget=forms.Select(attrs={
             'class': 'form-control'
@@ -248,10 +270,10 @@ class JobSearchForm(forms.Form):
         super().__init__(*args, **kwargs)
 
         # Import here to avoid circular imports
-        from core.models import Location
+        from core.models import Address
 
         # Set querysets
-        self.fields['location'].queryset = Location.objects.all().order_by('city')
+        self.fields['location'].queryset = Address.objects.all().order_by('city')
         self.fields['skills'].queryset = Skill.objects.all().order_by('name')
 
 

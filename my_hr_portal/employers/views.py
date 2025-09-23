@@ -3,8 +3,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib import messages
 from django.http import JsonResponse
+import json
 from django.core.paginator import Paginator
-from .models import JobPosting, EmployerProfile, Application
+from .models import JobPosting, EmployerProfile, Application, Assignment
 from .forms import JobPostingForm, EmployerProfileForm
 
 
@@ -28,9 +29,9 @@ def dashboard(request):
         # Add some basic stats
         context.update({
             'total_job_postings': employer_profile.job_postings.count(),
-            'active_job_postings': employer_profile.job_postings.filter(status='OPEN').count(),
+            'active_job_postings': employer_profile.job_postings.filter(status=JobPosting.JobStatus.OPEN).count(),
             'total_assignments': employer_profile.assignments.count(),
-            'active_assignments': employer_profile.assignments.filter(status='ACTIVE').count(),
+            'active_assignments': employer_profile.assignments.filter(status=Assignment.AssignmentStatus.ACTIVE).count(),
         })
 
         # Add recent job postings (last 5)
@@ -58,9 +59,9 @@ def job_postings_list(request):
     # Filter by status if requested
     status_filter = request.GET.get('status')
     if status_filter == 'active':
-        job_postings = job_postings.filter(status='OPEN')
+        job_postings = job_postings.filter(status=JobPosting.JobStatus.OPEN)
     elif status_filter == 'inactive':
-        job_postings = job_postings.filter(status__in=['DRAFT', 'CLOSED', 'FILLED'])
+        job_postings = job_postings.filter(status__in=[JobPosting.JobStatus.DRAFT, JobPosting.JobStatus.CLOSED, JobPosting.JobStatus.FILLED])
 
     # Pagination
     paginator = Paginator(job_postings, 10)
@@ -70,7 +71,7 @@ def job_postings_list(request):
     # Add application counts for each job posting
     for job in page_obj:
         job.applications_count = job.applications.count()
-        job.new_applications_count = job.applications.filter(status='SUBMITTED').count()
+        job.new_applications_count = job.applications.filter(status=Application.ApplicationStatus.SUBMITTED).count()
 
     context = {
         'page_obj': page_obj,
@@ -177,10 +178,10 @@ def toggle_job_status(request, job_id):
             employer_profile = request.user.employerprofile
             job_posting = get_object_or_404(JobPosting, id=job_id, employer=employer_profile)
 
-            if job_posting.status == 'OPEN':
-                job_posting.status = 'CLOSED'
+            if job_posting.status == JobPosting.JobStatus.OPEN:
+                job_posting.status = JobPosting.JobStatus.CLOSED
             else:
-                job_posting.status = 'OPEN'
+                job_posting.status = JobPosting.JobStatus.OPEN
             job_posting.save()
 
             return JsonResponse({
@@ -219,7 +220,7 @@ def job_posting_detail(request, job_id):
         'job_posting': job_posting,
         'applications': applications_page,
         'applications_count': applications.count(),
-        'new_applications_count': applications.filter(status='SUBMITTED').count(),
+        'new_applications_count': applications.filter(status=Application.ApplicationStatus.SUBMITTED).count(),
     }
 
     return render(request, 'employers/job_posting_detail.html', context)
@@ -311,11 +312,11 @@ def applications_list(request):
     # Get status counts for filter tabs
     status_counts = {
         'all': Application.objects.filter(job_posting__employer=employer_profile).count(),
-        'submitted': Application.objects.filter(job_posting__employer=employer_profile, status='SUBMITTED').count(),
-        'reviewed': Application.objects.filter(job_posting__employer=employer_profile, status='REVIEWED').count(),
-        'invited': Application.objects.filter(job_posting__employer=employer_profile, status='INVITED').count(),
-        'hired': Application.objects.filter(job_posting__employer=employer_profile, status='HIRED').count(),
-        'rejected': Application.objects.filter(job_posting__employer=employer_profile, status='REJECTED').count(),
+        'submitted': Application.objects.filter(job_posting__employer=employer_profile, status=Application.ApplicationStatus.SUBMITTED).count(),
+        'reviewed': Application.objects.filter(job_posting__employer=employer_profile, status=Application.ApplicationStatus.REVIEWED).count(),
+        'invited': Application.objects.filter(job_posting__employer=employer_profile, status=Application.ApplicationStatus.INVITED).count(),
+        'hired': Application.objects.filter(job_posting__employer=employer_profile, status=Application.ApplicationStatus.HIRED).count(),
+        'rejected': Application.objects.filter(job_posting__employer=employer_profile, status=Application.ApplicationStatus.REJECTED).count(),
     }
 
     # Get job postings for filter dropdown
@@ -375,7 +376,7 @@ def update_application_status(request, application_id):
 
     if request.method == 'POST':
         new_status = request.POST.get('status')
-        if new_status in ['SUBMITTED', 'REVIEWED', 'INVITED', 'HIRED', 'REJECTED']:
+        if new_status in [Application.ApplicationStatus.SUBMITTED, Application.ApplicationStatus.REVIEWED, Application.ApplicationStatus.INVITED, Application.ApplicationStatus.HIRED, Application.ApplicationStatus.REJECTED]:
             application.status = new_status
             application.save()
 
@@ -385,3 +386,61 @@ def update_application_status(request, application_id):
             messages.error(request, 'Invalid status.')
 
     return redirect('employers:application_detail', application_id=application.id)
+
+
+@login_required
+@user_passes_test(is_employer)
+def update_application_status_ajax(request, application_id):
+    """Update application status via AJAX"""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Invalid request method'})
+
+    try:
+        employer_profile = request.user.employerprofile
+    except EmployerProfile.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Employer profile not found'})
+
+    try:
+        application = get_object_or_404(
+            Application,
+            id=application_id,
+            job_posting__employer=employer_profile
+        )
+    except Application.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Application not found'})
+
+    try:
+        data = json.loads(request.body)
+        new_status = data.get('status')
+        notes = data.get('notes', '')
+
+        # Validate status
+        valid_statuses = [choice[0] for choice in Application.ApplicationStatus.choices]
+        if new_status not in valid_statuses:
+            return JsonResponse({'success': False, 'error': 'Invalid status'})
+
+        # Update application
+        old_status = application.status
+        application.status = new_status
+
+        # Update notes if provided
+        if notes:
+            if application.notes:
+                application.notes += f"\n\n[{request.user.get_full_name() or request.user.username}]: {notes}"
+            else:
+                application.notes = f"[{request.user.get_full_name() or request.user.username}]: {notes}"
+
+        application.save()
+
+        return JsonResponse({
+            'success': True,
+            'status': new_status,
+            'status_display': application.get_status_display(),
+            'old_status': old_status,
+            'message': f'Application status updated from {dict(Application.ApplicationStatus.choices)[old_status]} to {application.get_status_display()}'
+        })
+
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Invalid JSON data'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': f'An error occurred: {str(e)}'})

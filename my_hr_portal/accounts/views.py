@@ -6,7 +6,7 @@ from django.urls import reverse_lazy
 from django.utils.translation import gettext as _
 from django.contrib.auth.views import LoginView, LogoutView
 from django.views.generic import CreateView
-from .forms import CustomUserCreationForm, CustomAuthenticationForm
+from .forms import CustomUserCreationForm, CustomAuthenticationForm, UserProfileForm
 from .models import User
 
 
@@ -87,6 +87,37 @@ def profile_view(request):
         context['profile_type'] = 'eor_client'
 
     return render(request, 'accounts/profile.html', context)
+
+
+@login_required
+def profile_edit_view(request):
+    """Edit user profile"""
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, _('Your profile has been updated successfully.'))
+            return redirect('accounts:profile')
+    else:
+        form = UserProfileForm(instance=request.user)
+
+    context = {
+        'form': form,
+        'user': request.user,
+    }
+
+    # Add user type specific information for context
+    if hasattr(request.user, 'employerprofile'):
+        context['profile'] = request.user.employerprofile
+        context['profile_type'] = 'employer'
+    elif hasattr(request.user, 'employeeprofile'):
+        context['profile'] = request.user.employeeprofile
+        context['profile_type'] = 'employee'
+    elif hasattr(request.user, 'eorclientprofile'):
+        context['profile'] = request.user.eorclientprofile
+        context['profile_type'] = 'eor_client'
+
+    return render(request, 'accounts/profile_edit.html', context)
 
 
 def dashboard_redirect(request):

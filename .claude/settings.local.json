@@ -6,7 +6,10 @@
       "Bash(touch:*)",
       "Bash(tree:*)",
       "Bash(source:*)",
-      "Bash(python manage.py shell:*)"
+      "Bash(python manage.py shell:*)",
+      "Bash(python manage.py:*)",
+      "Bash(find:*)",
+      "Bash(python:*)"
     ],
     "deny": [],
     "ask": []

@@ -18,17 +18,17 @@
                 {% if user.is_authenticated %}
                     <!-- Role-based navigation -->
                     {% if user.user_type == 'EMPLOYER' %}
-                        <a href="{% url 'employers:dashboard' %}">Dashboard</a>
-                        <a href="{% url 'employers:job_postings_list' %}" title="Job Postings">Jobs</a>
-                        <a href="#" title="Applications">Applications</a>
+                        <a href="{% url 'employers:dashboard' %}" {% if request.resolver_match.url_name == 'dashboard' and request.resolver_match.namespace == 'employers' %}class="active"{% endif %}>Dashboard</a>
+                        <a href="{% url 'employers:job_postings_list' %}" title="Job Postings" {% if request.resolver_match.url_name in 'job_postings_list,create_job_posting,edit_job_posting,job_posting_detail' and request.resolver_match.namespace == 'employers' %}class="active"{% endif %}>Jobs</a>
+                        <a href="{% url 'employers:applications_list' %}" title="Applications" {% if request.resolver_match.url_name in 'applications_list,application_detail' and request.resolver_match.namespace == 'employers' %}class="active"{% endif %}>Applications</a>
                         <a href="#" title="Employees">My Employees</a>
                     {% elif user.user_type == 'EMPLOYEE' %}
-                        <a href="{% url 'employees:dashboard' %}">Dashboard</a>
-                        <a href="{% url 'employees:job_search' %}" title="Job Search">Find Jobs</a>
-                        <a href="{% url 'employees:my_applications' %}" title="Applications">My Applications</a>
+                        <a href="{% url 'employees:dashboard' %}" {% if request.resolver_match.url_name == 'dashboard' and request.resolver_match.namespace == 'employees' %}class="active"{% endif %}>Dashboard</a>
+                        <a href="{% url 'employees:job_search' %}" title="Job Search" {% if request.resolver_match.url_name in 'job_search,job_detail' and request.resolver_match.namespace == 'employees' %}class="active"{% endif %}>Find Jobs</a>
+                        <a href="{% url 'employees:my_applications' %}" title="Applications" {% if request.resolver_match.url_name in 'my_applications,withdraw_application' and request.resolver_match.namespace == 'employees' %}class="active"{% endif %}>My Applications</a>
                         <a href="#" title="Schedule">Schedule</a>
                         <a href="#" title="Timesheets">Timesheets</a>
-                        <a href="#" title="Payslips">Payslips</a>
+                        <a href="{% url 'employees:payslips' %}" title="Payslips">Payslips</a>
                     {% elif user.user_type == 'EOR_CLIENT' %}
                         <a href="{% url 'eor_services:dashboard' %}">Dashboard</a>
                         <a href="#" title="EOR Agreements">Agreements</a>

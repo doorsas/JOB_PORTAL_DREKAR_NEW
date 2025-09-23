@@ -1,0 +1,13 @@
+{% for timesheet in timesheets %}
+  <div>
+    <p>{{ timesheet }}</p>
+    <form method="post" action="{% url 'process_timesheet' timesheet.id 'approve' %}" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit">Approve</button>
+    </form>
+    <form method="post" action="{% url 'process_timesheet' timesheet.id 'reject' %}" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit">Reject</button>
+    </form>
+  </div>
+{% endfor %}
