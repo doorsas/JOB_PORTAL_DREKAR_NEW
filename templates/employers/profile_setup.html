@@ -1,0 +1,310 @@
+{% extends 'core/base1.html' %}
+{% load i18n %}
+
+{% block title %}{{ title }} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">{{ title }}</h3>
+                    {% if not is_editing %}
+                    <p class="text-muted mb-0 mt-2">{% trans "Please provide your company information to continue using the HR Portal" %}</p>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        {% csrf_token %}
+
+                        <!-- Company Information -->
+                        <h5 class="text-primary mb-3">{% trans "Company Information" %}</h5>
+
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                <label for="{{ form.company_name.id_for_label }}" class="form-label">
+                                    {{ form.company_name.label }} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.company_name }}
+                                {% if form.company_name.help_text %}
+                                    <div class="form-text">{{ form.company_name.help_text }}</div>
+                                {% endif %}
+                                {% if form.company_name.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.company_name.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.registration_code.id_for_label }}" class="form-label">
+                                    {{ form.registration_code.label }} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.registration_code }}
+                                {% if form.registration_code.help_text %}
+                                    <div class="form-text">{{ form.registration_code.help_text }}</div>
+                                {% endif %}
+                                {% if form.registration_code.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.registration_code.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.address.id_for_label }}" class="form-label">
+                                {{ form.address.label }}
+                            </label>
+                            {{ form.address }}
+                            {% if form.address.help_text %}
+                                <div class="form-text">{{ form.address.help_text }}</div>
+                            {% endif %}
+                            {% if form.address.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.address.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.phone.id_for_label }}" class="form-label">
+                                    {{ form.phone.label }} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.phone }}
+                                {% if form.phone.help_text %}
+                                    <div class="form-text">{{ form.phone.help_text }}</div>
+                                {% endif %}
+                                {% if form.phone.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.phone.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.website.id_for_label }}" class="form-label">
+                                    {{ form.website.label }}
+                                </label>
+                                {{ form.website }}
+                                {% if form.website.help_text %}
+                                    <div class="form-text">{{ form.website.help_text }}</div>
+                                {% endif %}
+                                {% if form.website.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.website.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Contact Person Information -->
+                        <h5 class="text-primary mb-3 mt-4">{% trans "Contact Person Information" %}</h5>
+                        <p class="text-muted mb-3">{% trans "Primary contact for HR and recruitment activities" %}</p>
+
+                        <div class="mb-3">
+                            <label for="{{ form.contact_person_name.id_for_label }}" class="form-label">
+                                {{ form.contact_person_name.label }} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.contact_person_name }}
+                            {% if form.contact_person_name.help_text %}
+                                <div class="form-text">{{ form.contact_person_name.help_text }}</div>
+                            {% endif %}
+                            {% if form.contact_person_name.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.contact_person_name.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.contact_person_email.id_for_label }}" class="form-label">
+                                    {{ form.contact_person_email.label }} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.contact_person_email }}
+                                {% if form.contact_person_email.help_text %}
+                                    <div class="form-text">{{ form.contact_person_email.help_text }}</div>
+                                {% endif %}
+                                {% if form.contact_person_email.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.contact_person_email.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.contact_person_phone.id_for_label }}" class="form-label">
+                                    {{ form.contact_person_phone.label }} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.contact_person_phone }}
+                                {% if form.contact_person_phone.help_text %}
+                                    <div class="form-text">{{ form.contact_person_phone.help_text }}</div>
+                                {% endif %}
+                                {% if form.contact_person_phone.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.contact_person_phone.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Form Errors -->
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger" role="alert">
+                                {% for error in form.non_field_errors %}
+                                    <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex justify-content-between mt-4 pt-3 border-top">
+                            <a href="{% url 'employers:dashboard' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> {% trans "Back to Dashboard" %}
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i>
+                                {% if is_editing %}
+                                    {% trans "Update Profile" %}
+                                {% else %}
+                                    {% trans "Complete Setup" %}
+                                {% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            {% if not is_editing %}
+            <!-- Information card -->
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h6 class="card-title">{% trans "Why do we need this information?" %}</h6>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success me-2"></i>{% trans "Verify your company legitimacy" %}</li>
+                        <li><i class="fas fa-check text-success me-2"></i>{% trans "Enable job posting and candidate management" %}</li>
+                        <li><i class="fas fa-check text-success me-2"></i>{% trans "Facilitate communication with candidates" %}</li>
+                        <li><i class="fas fa-check text-success me-2"></i>{% trans "Comply with employment regulations" %}</li>
+                    </ul>
+                    <small class="text-muted">
+                        {% trans "Your information is secure and will only be used for HR Portal services." %}
+                    </small>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Custom CSS -->
+<style>
+    .card {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border: 1px solid #e3e6f0;
+    }
+
+    .card-header {
+        background-color: #f8f9fc;
+        border-bottom: 1px solid #e3e6f0;
+    }
+
+    .text-primary {
+        color: #4e73df !important;
+    }
+
+    .btn-primary {
+        background-color: #4e73df;
+        border-color: #4e73df;
+    }
+
+    .btn-primary:hover {
+        background-color: #2e59d9;
+        border-color: #2e59d9;
+    }
+
+    .form-control:focus {
+        border-color: #4e73df;
+        box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+    }
+
+    .invalid-feedback {
+        display: block !important;
+    }
+
+    /* Responsive improvements */
+    @media (max-width: 768px) {
+        .container {
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+
+        .col-md-6, .col-md-4, .col-md-8 {
+            margin-bottom: 1rem;
+        }
+
+        .d-flex.justify-content-between {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .d-flex.justify-content-between > * {
+            text-align: center;
+        }
+    }
+</style>
+
+<!-- JavaScript for form validation -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Bootstrap form validation
+    const forms = document.querySelectorAll('.needs-validation');
+    const submitBtn = document.querySelector('button[type="submit"]');
+    const originalBtnText = submitBtn.innerHTML;
+
+    Array.prototype.slice.call(forms).forEach(function(form) {
+        form.addEventListener('submit', function(event) {
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> {% trans "Processing..." %}';
+
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+
+                // Reset button state if validation fails
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+
+                // Show first error
+                const firstInvalid = form.querySelector(':invalid');
+                if (firstInvalid) {
+                    firstInvalid.focus();
+                    firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+            form.classList.add('was-validated');
+        }, false);
+    });
+
+    // Auto-fill contact person email with user email if empty
+    const userEmail = '{{ user.email }}';
+    const contactEmailField = document.querySelector('#{{ form.contact_person_email.id_for_label }}');
+    if (contactEmailField && !contactEmailField.value && userEmail) {
+        contactEmailField.value = userEmail;
+    }
+
+    // Auto-fill contact person name with user name if empty
+    const userName = '{{ user.get_full_name|default:user.username }}';
+    const contactNameField = document.querySelector('#{{ form.contact_person_name.id_for_label }}');
+    if (contactNameField && !contactNameField.value && userName) {
+        contactNameField.value = userName;
+    }
+
+    // Reset button state if there are server-side errors
+    {% if form.errors %}
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = originalBtnText;
+    {% endif %}
+});
+</script>
+{% endblock %}

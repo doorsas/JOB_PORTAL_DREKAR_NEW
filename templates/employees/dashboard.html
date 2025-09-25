@@ -1,0 +1,230 @@
+{% extends 'core/base1.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Employee Dashboard" %} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Header Row -->
+    <div class="row mb-3">
+        <div class="col-lg-8 col-md-7 mb-2">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body py-3">
+                    <h4 class="mb-0">
+                        <i class="fas fa-user me-2 text-primary"></i>{% trans "Employee Dashboard" %}
+                    </h4>
+                    <p class="text-muted mb-0 mt-1">{% trans "Welcome back" %}, {{ user.first_name|default:user.username }}!</p>
+                </div>
+            </div>
+        </div>
+
+        {% if not has_profile %}
+        <div class="col-lg-4 col-md-5 mb-2">
+            <div class="card border-0 shadow-sm bg-warning bg-opacity-10">
+                <div class="card-body py-3 d-flex align-items-center">
+                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                    <div class="flex-grow-1">
+                        <small class="fw-bold text-warning">{% trans "Profile Setup Required" %}</small>
+                        <a href="{% url 'employees:profile_setup' %}" class="btn btn-warning btn-sm ms-2">
+                            <i class="fas fa-user-plus me-1"></i>{% trans "Setup" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Stats and Actions Row -->
+    {% if has_profile %}
+    <div class="row mb-3 g-2">
+        <!-- Stats Cards -->
+        <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+            <a href="{% url 'employees:my_applications' %}" class="text-decoration-none">
+                <div class="card border-0 shadow-sm stat-card h-100">
+                    <div class="card-body text-center py-2">
+                        <i class="fas fa-file-alt fa-lg text-primary mb-1"></i>
+                        <h5 class="mb-0">{{ total_applications|default:0 }}</h5>
+                        <small class="text-muted">{% trans "Applications" %}</small>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+            <a href="{% url 'employees:my_applications' %}?status=SUBMITTED" class="text-decoration-none">
+                <div class="card border-0 shadow-sm stat-card h-100">
+                    <div class="card-body text-center py-2">
+                        <i class="fas fa-clock fa-lg text-warning mb-1"></i>
+                        <h5 class="mb-0">{{ pending_applications|default:0 }}</h5>
+                        <small class="text-muted">{% trans "Pending" %}</small>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center py-2">
+                    <i class="fas fa-briefcase fa-lg text-success mb-1"></i>
+                    <h5 class="mb-0">{{ total_assignments|default:0 }}</h5>
+                    <small class="text-muted">{% trans "Total Jobs" %}</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center py-2">
+                    <i class="fas fa-user-tie fa-lg text-info mb-1"></i>
+                    <h5 class="mb-0">{{ active_assignments|default:0 }}</h5>
+                    <small class="text-muted">{% trans "Active" %}</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Cards -->
+        <div class="col-xl-2 col-lg-6 col-md-4 col-sm-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center py-2">
+                    <a href="{% url 'employees:job_search' %}" class="btn btn-success btn-sm w-100">
+                        <i class="fas fa-search me-1"></i>{% trans "Search Jobs" %}
+                    </a>
+                    <small class="text-muted d-block mt-1">{% trans "Find Work" %}</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-2 col-lg-6 col-md-4 col-sm-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center py-2">
+                    <a href="{% url 'employees:schedules' %}" class="btn btn-info btn-sm w-100">
+                        <i class="fas fa-calendar me-1"></i>{% trans "Schedule" %}
+                    </a>
+                    <small class="text-muted d-block mt-1">{% trans "View Times" %}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions Row -->
+    <div class="row mb-3 g-2">
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body py-2">
+                    <h6 class="mb-2">
+                        <i class="fas fa-folder-open text-warning me-2"></i>{% trans "Documents" %}
+                    </h6>
+                    <div class="d-flex gap-1">
+                        <a href="{% url 'employees:payslips' %}" class="btn btn-primary btn-sm flex-grow-1">
+                            <i class="fas fa-file-invoice-dollar me-1"></i>{% trans "Payslips" %}
+                        </a>
+                        <a href="{% url 'employees:document_upload' %}" class="btn btn-outline-secondary btn-sm flex-grow-1">
+                            <i class="fas fa-upload me-1"></i>{% trans "Upload" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body py-2">
+                    <h6 class="mb-2">
+                        <i class="fas fa-user-circle text-primary me-2"></i>{% trans "Profile Status" %}
+                    </h6>
+                    <div class="d-flex justify-content-between align-items-center">
+                        {% if profile.current_status == 'AVAILABLE' %}
+                            <span class="badge bg-success">{% trans "Available" %}</span>
+                        {% elif profile.current_status == 'EMPLOYED' %}
+                            <span class="badge bg-info">{% trans "Employed" %}</span>
+                        {% elif profile.current_status == 'ON_HOLD' %}
+                            <span class="badge bg-warning text-dark">{% trans "On Hold" %}</span>
+                        {% endif %}
+                        <a href="{% url 'employees:profile_view' %}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-eye me-1"></i>{% trans "View" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body py-2">
+                    <h6 class="mb-2">
+                        <i class="fas fa-file-pdf text-danger me-2"></i>{% trans "CV Status" %}
+                    </h6>
+                    <div class="d-flex justify-content-between align-items-center">
+                        {% if has_cv %}
+                            <span class="badge bg-success">{% trans "Uploaded" %}</span>
+                            <a href="{% url 'employees:cv_download' %}" class="btn btn-outline-success btn-sm">
+                                <i class="fas fa-download me-1"></i>{% trans "Download" %}
+                            </a>
+                        {% else %}
+                            <span class="badge bg-warning text-dark">{% trans "Missing" %}</span>
+                            <a href="{% url 'employees:document_upload' %}" class="btn btn-outline-warning btn-sm">
+                                <i class="fas fa-upload me-1"></i>{% trans "Upload" %}
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body py-2">
+                    <h6 class="mb-2">
+                        <i class="fas fa-cog text-secondary me-2"></i>{% trans "Quick Actions" %}
+                    </h6>
+                    <div class="d-flex gap-1">
+                        <a href="{% url 'employees:profile_setup' %}" class="btn btn-outline-primary btn-sm flex-grow-1">
+                            <i class="fas fa-edit me-1"></i>{% trans "Edit" %}
+                        </a>
+                        <a href="{% url 'employees:my_applications' %}" class="btn btn-outline-secondary btn-sm flex-grow-1">
+                            <i class="fas fa-file-alt me-1"></i>{% trans "Apps" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- No Profile Setup Message -->
+    {% if not has_profile %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center py-4">
+                    <i class="fas fa-user-plus fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">{% trans "Complete your profile to get started" %}</h5>
+                    <p class="text-muted">{% trans "Create your profile to apply for jobs and showcase your skills" %}</p>
+                    <a href="{% url 'employees:profile_setup' %}" class="btn btn-success">
+                        <i class="fas fa-user-plus me-1"></i>{% trans "Create Profile Now" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.stat-card:hover {
+    transform: translateY(-2px);
+    transition: all 0.3s ease;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.stat-card {
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover .text-decoration-none {
+    text-decoration: none !important;
+    color: inherit !important;
+}
+</style>
+{% endblock %}

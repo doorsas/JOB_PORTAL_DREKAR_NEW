@@ -1,0 +1,19 @@
+[Unit]
+Description=HR Portal Django Application
+After=network.target
+
+[Service]
+Type=notify
+User=www-data
+Group=www-data
+RuntimeDirectory=hr-portal
+WorkingDirectory=/var/www/hr-portal
+ExecStart=/var/www/hr-portal/venv/bin/gunicorn --config /var/www/hr-portal/gunicorn.conf.py my_hr_portal.wsgi:application
+ExecReload=/bin/kill -s HUP $MAINPID
+KillMode=mixed
+TimeoutStopSec=5
+PrivateTmp=true
+Environment=DJANGO_SETTINGS_MODULE=my_hr_portal.settings.production
+
+[Install]
+WantedBy=multi-user.target

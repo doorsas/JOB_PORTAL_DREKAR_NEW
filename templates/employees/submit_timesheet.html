@@ -1,0 +1,235 @@
+{% extends 'core/base1.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Submit Timesheet" %} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-clock me-2"></i>{% trans "Submit Timesheet" %}
+                    </h3>
+                    <a href="{% url 'employees:schedules' %}" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-arrow-left"></i> {% trans "Back to Schedules" %}
+                    </a>
+                </div>
+
+                <div class="card-body">
+                    <!-- Schedule Information -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="fas fa-calendar-day me-2"></i>{% trans "Schedule Details" %}
+                                    </h6>
+                                    <p class="mb-1"><strong>{% trans "Date" %}:</strong> {{ schedule.date|date:"M d, Y" }}</p>
+                                    <p class="mb-1"><strong>{% trans "Start Time" %}:</strong> {{ schedule.start_time|time:"H:i" }}</p>
+                                    <p class="mb-1"><strong>{% trans "End Time" %}:</strong> {{ schedule.end_time|time:"H:i" }}</p>
+                                    <p class="mb-0"><strong>{% trans "Location" %}:</strong> {{ schedule.location|default:"-" }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="fas fa-briefcase me-2"></i>{% trans "Job Information" %}
+                                    </h6>
+                                    <p class="mb-1"><strong>{% trans "Position" %}:</strong> {{ schedule.job_position|default:"-" }}</p>
+                                    <p class="mb-1"><strong>{% trans "Description" %}:</strong> {{ schedule.description|default:"-" }}</p>
+                                    <p class="mb-0">
+                                        <strong>{% trans "Status" %}:</strong>
+                                        <span class="badge {% if schedule.status == 'PLANNED' %}bg-primary{% elif schedule.status == 'COMPLETED' %}bg-success{% elif schedule.status == 'CANCELED' %}bg-danger{% endif %}">
+                                            {{ schedule.get_status_display }}
+                                        </span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Timesheet Form -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-edit me-2"></i>
+                                {% if existing_timesheet %}
+                                    {% trans "Update Timesheet" %}
+                                {% else %}
+                                    {% trans "Submit Timesheet" %}
+                                {% endif %}
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="post" class="row g-3">
+                                {% csrf_token %}
+
+                                {% if form.non_field_errors %}
+                                    <div class="col-12">
+                                        <div class="alert alert-danger">
+                                            {% for error in form.non_field_errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+
+                                <div class="col-md-6">
+                                    <label for="{{ form.actual_start_time.id_for_label }}" class="form-label">
+                                        <i class="fas fa-play me-2"></i>{{ form.actual_start_time.label }}
+                                    </label>
+                                    {{ form.actual_start_time }}
+                                    {% if form.actual_start_time.errors %}
+                                        <div class="text-danger small">
+                                            {% for error in form.actual_start_time.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="{{ form.actual_end_time.id_for_label }}" class="form-label">
+                                        <i class="fas fa-stop me-2"></i>{{ form.actual_end_time.label }}
+                                    </label>
+                                    {{ form.actual_end_time }}
+                                    {% if form.actual_end_time.errors %}
+                                        <div class="text-danger small">
+                                            {% for error in form.actual_end_time.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="{{ form.break_duration.id_for_label }}" class="form-label">
+                                        <i class="fas fa-coffee me-2"></i>{{ form.break_duration.label }}
+                                    </label>
+                                    {{ form.break_duration }}
+                                    {% if form.break_duration.errors %}
+                                        <div class="text-danger small">
+                                            {% for error in form.break_duration.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">{% trans "Enter break duration in minutes" %}</div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="{{ form.overtime_hours.id_for_label }}" class="form-label">
+                                        <i class="fas fa-clock me-2"></i>{{ form.overtime_hours.label }}
+                                    </label>
+                                    {{ form.overtime_hours }}
+                                    {% if form.overtime_hours.errors %}
+                                        <div class="text-danger small">
+                                            {% for error in form.overtime_hours.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">{% trans "Enter overtime hours as decimal (e.g., 1.5)" %}</div>
+                                </div>
+
+                                <div class="col-12">
+                                    <label for="{{ form.notes.id_for_label }}" class="form-label">
+                                        <i class="fas fa-sticky-note me-2"></i>{{ form.notes.label }}
+                                    </label>
+                                    {{ form.notes }}
+                                    {% if form.notes.errors %}
+                                        <div class="text-danger small">
+                                            {% for error in form.notes.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">{% trans "Any additional notes about this work shift" %}</div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="d-flex gap-2">
+                                        <button type="submit" class="btn btn-success">
+                                            <i class="fas fa-save me-2"></i>
+                                            {% if existing_timesheet %}
+                                                {% trans "Update Timesheet" %}
+                                            {% else %}
+                                                {% trans "Submit Timesheet" %}
+                                            {% endif %}
+                                        </button>
+                                        <a href="{% url 'employees:schedules' %}" class="btn btn-secondary">
+                                            <i class="fas fa-times me-2"></i>{% trans "Cancel" %}
+                                        </a>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    {% if existing_timesheet %}
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>{% trans "Note:" %}</strong>
+                        {% trans "This timesheet was previously submitted. You can update it if needed." %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border: 1px solid #e3e6f0;
+}
+
+.card-header {
+    background-color: #f8f9fc;
+    border-bottom: 1px solid #e3e6f0;
+}
+
+.form-control, .form-select {
+    border: 2px solid #e3e6f0;
+    border-radius: 8px;
+    transition: border-color 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #4e73df;
+    box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+}
+
+.btn {
+    border-radius: 8px;
+    padding: 0.5rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.badge {
+    font-size: 0.75rem;
+    padding: 0.4rem 0.8rem;
+}
+
+@media (max-width: 768px) {
+    .d-flex.gap-2 {
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+}
+</style>
+{% endblock %}

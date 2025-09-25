@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice {{ invoice.invoice_number }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            line-height: 1.4;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .company-info {
+            float: left;
+            width: 50%;
+        }
+
+        .invoice-info {
+            float: right;
+            width: 45%;
+            text-align: right;
+        }
+
+        .company-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 10px;
+        }
+
+        .invoice-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 10px;
+        }
+
+        .invoice-number {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .clearfix::after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+
+        .client-info {
+            margin-bottom: 30px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-left: 4px solid #007bff;
+        }
+
+        .client-info h3 {
+            margin: 0 0 10px 0;
+            color: #007bff;
+            font-size: 16px;
+        }
+
+        .invoice-details {
+            margin-bottom: 30px;
+        }
+
+        .details-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .details-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .details-table td:first-child {
+            font-weight: bold;
+            width: 150px;
+        }
+
+        .line-items {
+            margin-bottom: 30px;
+        }
+
+        .line-items h3 {
+            color: #007bff;
+            font-size: 16px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 5px;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .items-table th,
+        .items-table td {
+            padding: 12px 8px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .items-table th {
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+        }
+
+        .items-table td:nth-child(2),
+        .items-table td:nth-child(3),
+        .items-table td:nth-child(4),
+        .items-table th:nth-child(2),
+        .items-table th:nth-child(3),
+        .items-table th:nth-child(4) {
+            text-align: right;
+        }
+
+        .items-table td:nth-child(1) {
+            width: 50%;
+        }
+
+        .items-table td:nth-child(2),
+        .items-table td:nth-child(3),
+        .items-table td:nth-child(4) {
+            width: 16.66%;
+        }
+
+        .total-section {
+            float: right;
+            width: 300px;
+            margin-top: 20px;
+        }
+
+        .total-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .total-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .total-table td:first-child {
+            font-weight: bold;
+        }
+
+        .total-table td:last-child {
+            text-align: right;
+        }
+
+        .grand-total {
+            font-size: 16px;
+            font-weight: bold;
+            background-color: #007bff;
+            color: white;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .status-paid {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-overdue {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status-canceled {
+            background-color: #e2e3e5;
+            color: #383d41;
+            border: 1px solid #d6d8db;
+        }
+
+        .footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #dee2e6;
+            font-size: 11px;
+            color: #6c757d;
+            text-align: center;
+        }
+
+        .payment-info {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #e7f3ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 4px;
+        }
+
+        .payment-info h4 {
+            margin: 0 0 10px 0;
+            color: #007bff;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header clearfix">
+        <div class="company-info">
+            <div class="company-name">Drekar HR Portal</div>
+            <div>Professional HR Services</div>
+            <div>Lithuania</div>
+            <div>Email: info@drekar-hr.com</div>
+            <div>Phone: +370 5 123 4567</div>
+        </div>
+        <div class="invoice-info">
+            <div class="invoice-title">INVOICE</div>
+            <div class="invoice-number">{{ invoice.invoice_number }}</div>
+            <div>
+                <span class="status-badge status-{{ invoice.status|lower }}">
+                    {{ invoice.get_status_display }}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="client-info">
+        <h3>Bill To:</h3>
+        <div>
+            {% if invoice.client %}
+                <strong>{{ invoice.client.company_name }}</strong><br>
+                {% if invoice.client.contact_person_name %}
+                    Attn: {{ invoice.client.contact_person_name }}<br>
+                {% endif %}
+                {% if invoice.client.address %}
+                    {{ invoice.client.address }}<br>
+                {% endif %}
+                {% if invoice.client.contact_person_email %}
+                    Email: {{ invoice.client.contact_person_email }}<br>
+                {% endif %}
+                {% if invoice.client.phone %}
+                    Phone: {{ invoice.client.phone }}
+                {% endif %}
+            {% else %}
+                Client information not available
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="invoice-details">
+        <table class="details-table">
+            <tr>
+                <td>Invoice Date:</td>
+                <td>{{ invoice.issue_date|date:"F d, Y" }}</td>
+            </tr>
+            <tr>
+                <td>Due Date:</td>
+                <td>{{ invoice.due_date|date:"F d, Y" }}</td>
+            </tr>
+            <tr>
+                <td>Created:</td>
+                <td>{{ invoice.created_at|date:"F d, Y H:i" }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="line-items">
+        <h3>Services & Items</h3>
+        {% if invoice.line_items.all %}
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>Quantity</th>
+                        <th>Unit Price</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in invoice.line_items.all %}
+                    <tr>
+                        <td>{{ item.description }}</td>
+                        <td>{{ item.quantity|floatformat:2 }}</td>
+                        <td>€{{ item.unit_price|floatformat:2 }}</td>
+                        <td>€{{ item.total|floatformat:2 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No line items found for this invoice.</p>
+        {% endif %}
+    </div>
+
+    <div class="clearfix">
+        <div class="total-section">
+            <table class="total-table">
+                <tr>
+                    <td>Subtotal:</td>
+                    <td>€{{ invoice.total_amount|floatformat:2 }}</td>
+                </tr>
+                <tr>
+                    <td>Tax (VAT 21%):</td>
+                    <td>€{{ invoice.total_amount|floatformat:2 }}</td>
+                </tr>
+                <tr class="grand-total">
+                    <td>Total Amount:</td>
+                    <td>€{{ invoice.total_amount|floatformat:2 }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div style="clear: both;"></div>
+
+    {% if invoice.status == 'PENDING' or invoice.status == 'OVERDUE' %}
+    <div class="payment-info">
+        <h4>Payment Information</h4>
+        <p><strong>Bank:</strong> SEB Bank Lithuania</p>
+        <p><strong>Account Number:</strong> LT12 7044 0600 0123 4567</p>
+        <p><strong>SWIFT/BIC:</strong> CBVILT2X</p>
+        <p><strong>Reference:</strong> {{ invoice.invoice_number }}</p>
+        <p style="margin-bottom: 0;"><strong>Due Date:</strong> {{ invoice.due_date|date:"F d, Y" }}</p>
+    </div>
+    {% endif %}
+
+    <div class="footer">
+        <p>Thank you for your business!</p>
+        <p>This is a computer-generated invoice. For any questions, please contact us at info@drekar-hr.com</p>
+        <p>© {{ "now"|date:"Y" }} Drekar HR Portal. All rights reserved.</p>
+    </div>
+</body>
+</html>

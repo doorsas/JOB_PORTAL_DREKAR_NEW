@@ -1,0 +1,262 @@
+{% extends 'core/base1.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Assignment Details" %} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Navigation -->
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'employers:dashboard' %}">{% trans "Dashboard" %}</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'employers:assignments_list' %}">{% trans "Assignments" %}</a></li>
+                    <li class="breadcrumb-item active">{% trans "Assignment Details" %}</li>
+                </ol>
+            </nav>
+
+            <!-- Assignment Details Card -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-user-tie me-2"></i>{% trans "Assignment Details" %}
+                    </h3>
+                    <div>
+                        <a href="{% url 'employers:assignments_list' %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-arrow-left"></i> {% trans "Back to Assignments" %}
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Employee Information -->
+                        <div class="col-md-6 mb-4">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-user me-2"></i>{% trans "Employee Information" %}
+                            </h5>
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="avatar-circle me-3">
+                                    {{ assignment.employee.first_name|first|upper }}{{ assignment.employee.last_name|first|upper }}
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">{{ assignment.employee.first_name }} {{ assignment.employee.last_name }}</h6>
+                                    {% if assignment.employee.phone %}
+                                        <small class="text-muted">
+                                            <i class="fas fa-phone me-1"></i>{{ assignment.employee.phone }}
+                                        </small>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            {% if assignment.employee.nationality %}
+                                <p class="mb-2">
+                                    <strong>{% trans "Nationality:" %}</strong> {{ assignment.employee.nationality }}
+                                </p>
+                            {% endif %}
+
+                            {% if assignment.employee.expected_salary %}
+                                <p class="mb-2">
+                                    <strong>{% trans "Expected Salary:" %}</strong> €{{ assignment.employee.expected_salary }}
+                                </p>
+                            {% endif %}
+
+                            {% if assignment.employee.current_status %}
+                                <p class="mb-2">
+                                    <strong>{% trans "Status:" %}</strong> {{ assignment.employee.get_current_status_display }}
+                                </p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Assignment Information -->
+                        <div class="col-md-6 mb-4">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-briefcase me-2"></i>{% trans "Assignment Information" %}
+                            </h5>
+
+                            <p class="mb-2">
+                                <strong>{% trans "Start Date:" %}</strong> {{ assignment.start_date }}
+                            </p>
+
+                            <p class="mb-2">
+                                <strong>{% trans "End Date:" %}</strong>
+                                {% if assignment.end_date %}
+                                    {{ assignment.end_date }}
+                                {% else %}
+                                    <span class="text-muted">{% trans "Ongoing" %}</span>
+                                {% endif %}
+                            </p>
+
+                            <p class="mb-2">
+                                <strong>{% trans "Status:" %}</strong>
+                                {% if assignment.status == 'ACTIVE' %}
+                                    <span class="badge bg-success">{% trans "Active" %}</span>
+                                {% elif assignment.status == 'PENDING_START' %}
+                                    <span class="badge bg-warning text-dark">{% trans "Pending Start" %}</span>
+                                {% elif assignment.status == 'COMPLETED' %}
+                                    <span class="badge bg-info">{% trans "Completed" %}</span>
+                                {% elif assignment.status == 'TERMINATED' %}
+                                    <span class="badge bg-danger">{% trans "Terminated" %}</span>
+                                {% endif %}
+                            </p>
+
+                            <p class="mb-2">
+                                <strong>{% trans "Employment Contract:" %}</strong>
+                                {% if assignment.employment_contract %}
+                                    <i class="fas fa-file-contract text-success"></i> {% trans "Available" %}
+                                {% else %}
+                                    <i class="fas fa-file-contract text-muted"></i> {% trans "Not available" %}
+                                {% endif %}
+                            </p>
+
+                            <p class="mb-2">
+                                <strong>{% trans "Created:" %}</strong> {{ assignment.created_at|date:"M d, Y" }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Job Posting Information -->
+                    {% if assignment.job_posting %}
+                    <div class="row">
+                        <div class="col-12">
+                            <h5 class="text-primary mb-3 mt-3">
+                                <i class="fas fa-file-alt me-2"></i>{% trans "Related Job Posting" %}
+                            </h5>
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <h6 class="card-title">
+                                                <a href="{% url 'employers:job_posting_detail' assignment.job_posting.id %}"
+                                                   class="text-decoration-none">
+                                                    {{ assignment.job_posting.title }}
+                                                </a>
+                                            </h6>
+                                            <p class="card-text">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-map-marker-alt me-1"></i>{{ assignment.job_posting.location }}
+                                                    <span class="mx-2">•</span>
+                                                    <i class="fas fa-briefcase me-1"></i>{{ assignment.job_posting.get_job_type_display }}
+                                                </small>
+                                            </p>
+                                            {% if assignment.job_posting.description %}
+                                                <p class="card-text">{{ assignment.job_posting.description|truncatewords:30 }}</p>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-4 text-end">
+                                            {% if assignment.job_posting.estimated_salary_min or assignment.job_posting.estimated_salary_max %}
+                                                <p class="mb-2">
+                                                    <strong>{% trans "Salary:" %}</strong><br>
+                                                    {% if assignment.job_posting.estimated_salary_min and assignment.job_posting.estimated_salary_max %}
+                                                        €{{ assignment.job_posting.estimated_salary_min }} - €{{ assignment.job_posting.estimated_salary_max }}
+                                                    {% elif assignment.job_posting.estimated_salary_min %}
+                                                        {% trans "From" %} €{{ assignment.job_posting.estimated_salary_min }}
+                                                    {% elif assignment.job_posting.estimated_salary_max %}
+                                                        {% trans "Up to" %} €{{ assignment.job_posting.estimated_salary_max }}
+                                                    {% endif %}
+                                                </p>
+                                            {% endif %}
+                                            <small class="text-muted">
+                                                {% trans "Posted:" %} {{ assignment.job_posting.created_at|date:"M d, Y" }}
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Employee Skills and Experience -->
+                    {% if assignment.employee.skills.all or assignment.employee.experience_summary %}
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-cogs me-2"></i>{% trans "Employee Skills & Experience" %}
+                            </h5>
+
+                            {% if assignment.employee.skills.all %}
+                            <div class="mb-3">
+                                <strong>{% trans "Skills:" %}</strong><br>
+                                {% for skill in assignment.employee.skills.all %}
+                                    <span class="badge bg-secondary me-1 mb-1">{{ skill.name }}</span>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+
+                            {% if assignment.employee.experience_summary %}
+                            <div class="mb-3">
+                                <strong>{% trans "Experience Summary:" %}</strong>
+                                <div class="mt-2 p-3 bg-light rounded">
+                                    {{ assignment.employee.experience_summary|linebreaks }}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom CSS -->
+<style>
+.avatar-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: #007bff;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.badge {
+    font-size: 0.75em;
+    padding: 0.5em 0.75em;
+}
+
+.breadcrumb {
+    background-color: transparent;
+    padding: 0;
+    margin-bottom: 1rem;
+}
+
+.card {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border: 1px solid #e3e6f0;
+}
+
+.text-primary {
+    color: #4e73df !important;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+
+    .card-header {
+        flex-direction: column;
+        gap: 10px;
+        align-items: stretch !important;
+    }
+
+    .avatar-circle {
+        width: 50px;
+        height: 50px;
+        font-size: 16px;
+    }
+
+    .col-md-4.text-end {
+        text-align: start !important;
+        margin-top: 1rem;
+    }
+}
+</style>
+{% endblock %}

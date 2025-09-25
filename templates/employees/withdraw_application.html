@@ -1,0 +1,206 @@
+{% extends 'core/base1.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Withdraw Application" %} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="card-title mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>{% trans "Withdraw Application" %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- Application Summary -->
+                    <div class="alert alert-info">
+                        <h6 class="alert-heading">{% trans "Application Details" %}</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>{% trans "Position:" %}</strong> {{ application.job_posting.title }}</p>
+                                <p class="mb-1"><strong>{% trans "Company:" %}</strong> {{ application.job_posting.employer.company_name }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>{% trans "Applied on:" %}</strong> {{ application.created_at|date:"M d, Y" }}</p>
+                                <p class="mb-1"><strong>{% trans "Status:" %}</strong>
+                                    <span class="badge
+                                        {% if application.status == 'SUBMITTED' %}bg-primary
+                                        {% elif application.status == 'REVIEWED' %}bg-info
+                                        {% endif %}">
+                                        {{ application.get_status_display }}
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Warning Message -->
+                    <div class="alert alert-warning">
+                        <h6 class="alert-heading">
+                            <i class="fas fa-exclamation-triangle me-2"></i>{% trans "Are you sure you want to withdraw this application?" %}
+                        </h6>
+                        <ul class="mb-0">
+                            <li>{% trans "This action cannot be undone" %}</li>
+                            <li>{% trans "Your application will be permanently removed from the employer's review process" %}</li>
+                            <li>{% trans "You will need to reapply if you change your mind" %}</li>
+                            <li>{% trans "The employer may be notified of the withdrawal" %}</li>
+                        </ul>
+                    </div>
+
+                    <!-- Cover Letter Preview (if exists) -->
+                    {% if application.cover_letter %}
+                    <div class="card bg-light mb-4">
+                        <div class="card-body">
+                            <h6 class="card-title">{% trans "Your Cover Letter" %}</h6>
+                            <p class="card-text">{{ application.cover_letter|linebreaks }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Additional Notes Preview (if exists) -->
+                    {% if application.notes %}
+                    <div class="card bg-light mb-4">
+                        <div class="card-body">
+                            <h6 class="card-title">{% trans "Additional Notes" %}</h6>
+                            <p class="card-text">{{ application.notes|linebreaks }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Withdrawal Form -->
+                    <form method="post" class="mt-4">
+                        {% csrf_token %}
+
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" type="checkbox" id="confirmWithdraw" required>
+                            <label class="form-check-label text-muted" for="confirmWithdraw">
+                                {% trans "I understand that withdrawing this application is permanent and cannot be undone" %}
+                            </label>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex justify-content-between pt-3 border-top">
+                            <a href="{% url 'employees:my_applications' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> {% trans "Cancel" %}
+                            </a>
+                            <button type="submit" class="btn btn-danger" id="withdrawBtn" disabled>
+                                <i class="fas fa-times"></i> {% trans "Withdraw Application" %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Alternative Actions Card -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">{% trans "Before you withdraw..." %}</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="d-flex mb-3">
+                                <div class="me-3">
+                                    <i class="fas fa-eye text-info fa-2x"></i>
+                                </div>
+                                <div>
+                                    <h6>{% trans "Review the job posting" %}</h6>
+                                    <p class="text-muted small mb-2">{% trans "Make sure this position isn't the right fit for you" %}</p>
+                                    <a href="{% url 'employees:job_detail' application.job_posting.id %}" class="btn btn-outline-info btn-sm">
+                                        {% trans "View Job Details" %}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex mb-3">
+                                <div class="me-3">
+                                    <i class="fas fa-search text-primary fa-2x"></i>
+                                </div>
+                                <div>
+                                    <h6>{% trans "Find similar opportunities" %}</h6>
+                                    <p class="text-muted small mb-2">{% trans "Explore other positions that might interest you" %}</p>
+                                    <a href="{% url 'employees:job_search' %}" class="btn btn-outline-primary btn-sm">
+                                        {% trans "Search Jobs" %}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom CSS -->
+<style>
+    .card {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border: 1px solid #e3e6f0;
+    }
+
+    .card-header {
+        border-bottom: 1px solid #e3e6f0;
+    }
+
+    .alert-info {
+        border-color: #b8daff;
+        background-color: #d1ecf1;
+    }
+
+    .alert-warning {
+        border-color: #ffeaa7;
+        background-color: #fff3cd;
+    }
+
+    .form-check-input:checked {
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+
+    .btn-danger:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    /* Responsive improvements */
+    @media (max-width: 768px) {
+        .d-flex.justify-content-between {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .d-flex.justify-content-between > * {
+            width: 100%;
+            text-align: center;
+        }
+
+        .row .col-md-6 {
+            margin-bottom: 1rem;
+        }
+    }
+</style>
+
+<!-- JavaScript for form interaction -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const checkbox = document.getElementById('confirmWithdraw');
+    const withdrawBtn = document.getElementById('withdrawBtn');
+
+    checkbox.addEventListener('change', function() {
+        withdrawBtn.disabled = !this.checked;
+    });
+
+    // Add confirmation dialog
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        if (!confirm('{% trans "Are you absolutely sure you want to withdraw this application? This action cannot be undone." %}')) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
+{% endblock %}

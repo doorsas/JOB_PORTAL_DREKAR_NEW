@@ -1,0 +1,314 @@
+{% extends 'core/base1.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "My Applications" %} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>{% trans "My Applications" %}</h2>
+                <a href="{% url 'employees:job_search' %}" class="btn btn-primary">
+                    <i class="fas fa-search"></i> {% trans "Search Jobs" %}
+                </a>
+            </div>
+
+            <!-- Filter Tabs -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <ul class="nav nav-pills nav-fill" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link {% if not status_filter %}active{% endif %}"
+                               href="{% url 'employees:my_applications' %}">
+                                {% trans "All" %} <span class="badge bg-secondary ms-1">{{ status_counts.all }}</span>
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link {% if status_filter == 'SUBMITTED' %}active{% endif %}"
+                               href="{% url 'employees:my_applications' %}?status=SUBMITTED">
+                                {% trans "Submitted" %} <span class="badge bg-primary ms-1">{{ status_counts.submitted }}</span>
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link {% if status_filter == 'REVIEWED' %}active{% endif %}"
+                               href="{% url 'employees:my_applications' %}?status=REVIEWED">
+                                {% trans "Reviewed" %} <span class="badge bg-info ms-1">{{ status_counts.reviewed }}</span>
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link {% if status_filter == 'INVITED' %}active{% endif %}"
+                               href="{% url 'employees:my_applications' %}?status=INVITED">
+                                {% trans "Invited" %} <span class="badge bg-warning ms-1">{{ status_counts.invited }}</span>
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link {% if status_filter == 'HIRED' %}active{% endif %}"
+                               href="{% url 'employees:my_applications' %}?status=HIRED">
+                                {% trans "Hired" %} <span class="badge bg-success ms-1">{{ status_counts.hired }}</span>
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link {% if status_filter == 'REJECTED' %}active{% endif %}"
+                               href="{% url 'employees:my_applications' %}?status=REJECTED">
+                                {% trans "Rejected" %} <span class="badge bg-danger ms-1">{{ status_counts.rejected }}</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Applications List -->
+            {% if applications %}
+                <div class="row">
+                    {% for application in applications %}
+                    <div class="col-12 mb-4">
+                        <div class="card application-card">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <h5 class="card-title mb-0">
+                                                <a href="{% url 'employees:job_detail' application.job_posting.id %}" class="text-decoration-none">
+                                                    {{ application.job_posting.title }}
+                                                </a>
+                                            </h5>
+                                            <span class="badge
+                                                {% if application.status == 'SUBMITTED' %}bg-primary
+                                                {% elif application.status == 'REVIEWED' %}bg-info
+                                                {% elif application.status == 'INVITED' %}bg-warning
+                                                {% elif application.status == 'HIRED' %}bg-success
+                                                {% elif application.status == 'REJECTED' %}bg-danger
+                                                {% elif application.status == 'RESERVED' %}bg-secondary
+                                                {% endif %}">
+                                                {{ application.get_status_display }}
+                                            </span>
+                                        </div>
+
+                                        <h6 class="card-subtitle mb-2 text-muted">
+                                            <i class="fas fa-building me-1"></i>{{ application.job_posting.employer.company_name }}
+                                        </h6>
+
+                                        <div class="application-details mb-3">
+                                            <div class="row">
+                                                <div class="col-sm-6">
+                                                    <p class="mb-1">
+                                                        <i class="fas fa-map-marker-alt text-primary me-2"></i>
+                                                        <strong>{% trans "Location:" %}</strong> {{ application.job_posting.location }}
+                                                    </p>
+                                                    <p class="mb-1">
+                                                        <i class="fas fa-briefcase text-primary me-2"></i>
+                                                        <strong>{% trans "Type:" %}</strong> {{ application.job_posting.get_job_type_display }}
+                                                    </p>
+                                                </div>
+                                                <div class="col-sm-6">
+                                                    <p class="mb-1">
+                                                        <i class="fas fa-calendar text-primary me-2"></i>
+                                                        <strong>{% trans "Applied:" %}</strong> {{ application.created_at|date:"M d, Y" }}
+                                                    </p>
+                                                    {% if application.job_posting.estimated_salary_min or application.job_posting.estimated_salary_max %}
+                                                    <p class="mb-1">
+                                                        <i class="fas fa-euro-sign text-primary me-2"></i>
+                                                        <strong>{% trans "Salary:" %}</strong>
+                                                        {% if application.job_posting.estimated_salary_min and application.job_posting.estimated_salary_max %}
+                                                            €{{ application.job_posting.estimated_salary_min|floatformat:0 }} - €{{ application.job_posting.estimated_salary_max|floatformat:0 }}
+                                                        {% elif application.job_posting.estimated_salary_min %}
+                                                            {% trans "From" %} €{{ application.job_posting.estimated_salary_min|floatformat:0 }}
+                                                        {% elif application.job_posting.estimated_salary_max %}
+                                                            {% trans "Up to" %} €{{ application.job_posting.estimated_salary_max|floatformat:0 }}
+                                                        {% endif %}
+                                                    </p>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {% if application.cover_letter %}
+                                        <div class="cover-letter-preview mb-2">
+                                            <strong>{% trans "Cover Letter:" %}</strong>
+                                            <p class="text-muted small mb-0">{{ application.cover_letter|truncatechars:150 }}</p>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="application-actions d-flex flex-column gap-2">
+                                            <a href="{% url 'employees:job_detail' application.job_posting.id %}" class="btn btn-outline-primary btn-sm">
+                                                <i class="fas fa-eye"></i> {% trans "View Job" %}
+                                            </a>
+
+                                            {% if application.status in 'SUBMITTED,REVIEWED' %}
+                                                <a href="{% url 'employees:withdraw_application' application.id %}" class="btn btn-outline-danger btn-sm">
+                                                    <i class="fas fa-times"></i> {% trans "Withdraw" %}
+                                                </a>
+                                            {% endif %}
+
+                                            {% if application.status == 'INVITED' %}
+                                                <div class="alert alert-warning py-2 mb-0">
+                                                    <small>
+                                                        <i class="fas fa-exclamation-triangle me-1"></i>
+                                                        {% trans "Interview invitation - check your email!" %}
+                                                    </small>
+                                                </div>
+                                            {% elif application.status == 'HIRED' %}
+                                                <div class="alert alert-success py-2 mb-0">
+                                                    <small>
+                                                        <i class="fas fa-check-circle me-1"></i>
+                                                        {% trans "Congratulations! You got the job!" %}
+                                                    </small>
+                                                </div>
+                                            {% elif application.status == 'REJECTED' %}
+                                                <div class="alert alert-secondary py-2 mb-0">
+                                                    <small>
+                                                        <i class="fas fa-info-circle me-1"></i>
+                                                        {% trans "Application not selected this time" %}
+                                                    </small>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Pagination -->
+                {% if page_obj.has_other_pages %}
+                <nav aria-label="Applications pagination" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                                    {% trans "First" %}
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                                    {% trans "Previous" %}
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        <li class="page-item active">
+                            <span class="page-link">
+                                {% trans "Page" %} {{ page_obj.number }} {% trans "of" %} {{ page_obj.paginator.num_pages }}
+                            </span>
+                        </li>
+
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                                    {% trans "Next" %}
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                                    {% trans "Last" %}
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+
+            {% else %}
+                <!-- No applications found -->
+                <div class="card">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
+                        <h4 class="text-muted">
+                            {% if status_filter %}
+                                {% trans "No applications found with this status" %}
+                            {% else %}
+                                {% trans "You haven't applied for any jobs yet" %}
+                            {% endif %}
+                        </h4>
+                        <p class="text-muted">
+                            {% trans "Start exploring job opportunities and submit your applications." %}
+                        </p>
+                        <a href="{% url 'employees:job_search' %}" class="btn btn-primary">
+                            <i class="fas fa-search"></i> {% trans "Search Jobs" %}
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Custom CSS -->
+<style>
+    .application-card {
+        transition: all 0.3s ease;
+        border: 1px solid #e3e6f0;
+    }
+
+    .application-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .card-title a {
+        color: #2c3e50;
+    }
+
+    .card-title a:hover {
+        color: #3498db;
+    }
+
+    .application-details i {
+        width: 16px;
+    }
+
+    .nav-pills .nav-link {
+        color: #6c757d;
+        border-radius: 0.5rem;
+    }
+
+    .nav-pills .nav-link.active {
+        background-color: #007bff;
+    }
+
+    .nav-pills .nav-link:hover {
+        background-color: #e9ecef;
+        color: #495057;
+    }
+
+    .nav-pills .nav-link.active:hover {
+        background-color: #0056b3;
+        color: white;
+    }
+
+    .cover-letter-preview {
+        background-color: #f8f9fa;
+        padding: 0.75rem;
+        border-radius: 0.375rem;
+        border-left: 3px solid #007bff;
+    }
+
+    /* Responsive improvements */
+    @media (max-width: 768px) {
+        .d-flex.justify-content-between {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .application-actions {
+            margin-top: 1rem;
+        }
+
+        .application-actions .btn {
+            width: 100%;
+        }
+
+        .nav-pills {
+            flex-direction: column;
+        }
+
+        .nav-pills .nav-item {
+            margin-bottom: 0.25rem;
+        }
+    }
+</style>
+{% endblock %}

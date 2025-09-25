@@ -1,0 +1,302 @@
+{% extends 'core/base1.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Create Contract" %} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="card-title mb-0">
+                            <i class="fas fa-plus-circle me-2"></i>{% trans "Create New Contract" %}
+                        </h3>
+                        <p class="text-muted mb-0 mt-1">{% trans "Set up a new service agreement or employment contract" %}</p>
+                    </div>
+                    <a href="{% url 'employers:contracts_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>{% trans "Back to Contracts" %}
+                    </a>
+                </div>
+
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger d-flex align-items-center">
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                                <div>
+                                    {% for error in form.non_field_errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <div class="row">
+                            <!-- Contract Type -->
+                            <div class="col-md-6 mb-3">
+                                <label for="contract_type" class="form-label">
+                                    <i class="fas fa-file-alt me-2"></i>{% trans "Contract Type" %}
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <select name="contract_type" id="contract_type" class="form-select" required>
+                                    <option value="">{% trans "Select contract type" %}</option>
+                                    {% for choice in contract_types %}
+                                        <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+                                    {% endfor %}
+                                </select>
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    {% trans "Choose the type of contract you want to create" %}
+                                </div>
+                            </div>
+
+                            <!-- Template Selection -->
+                            <div class="col-md-6 mb-3">
+                                <label for="template_id" class="form-label">
+                                    <i class="fas fa-template me-2"></i>{% trans "Contract Template" %}
+                                </label>
+                                <select name="template_id" id="template_id" class="form-select">
+                                    <option value="">{% trans "Select a template (optional)" %}</option>
+                                    {% for template in templates %}
+                                        <option value="{{ template.id }}" data-type="{{ template.contract_type }}">
+                                            {{ template.name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    {% trans "Pre-defined templates will auto-populate contract content" %}
+                                </div>
+                            </div>
+
+                            <!-- Effective Date -->
+                            <div class="col-md-6 mb-3">
+                                <label for="effective_date" class="form-label">
+                                    <i class="fas fa-calendar me-2"></i>{% trans "Effective Date" %}
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <input type="date" name="effective_date" id="effective_date"
+                                       class="form-control"
+                                       value="{{ today|date:'Y-m-d' }}" required>
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    {% trans "When this contract becomes legally binding" %}
+                                </div>
+                            </div>
+
+                            <!-- Expiry Date -->
+                            <div class="col-md-6 mb-3">
+                                <label for="expiry_date" class="form-label">
+                                    <i class="fas fa-calendar-times me-2"></i>{% trans "Expiry Date" %}
+                                </label>
+                                <input type="date" name="expiry_date" id="expiry_date"
+                                       class="form-control">
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    {% trans "Leave blank for indefinite contracts" %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contract Preview Section -->
+                        <div class="card mt-4" id="contractPreview" style="display: none;">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-eye me-2"></i>{% trans "Contract Preview" %}
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="bg-light p-3 rounded" id="previewContent">
+                                    <!-- Template content will be loaded here -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Document Upload Section -->
+                        <div class="card mt-4">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-upload me-2"></i>{% trans "Contract Document" %}
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <input type="file" name="document_file" id="document_file"
+                                           class="form-control"
+                                           accept=".pdf,.doc,.docx">
+                                    <div class="form-text">
+                                        <i class="fas fa-file-pdf me-1"></i>
+                                        {% trans "Upload the signed contract document (PDF, DOC, or DOCX)" %}
+                                        <br><small class="text-muted">{% trans "Maximum file size: 10MB" %}</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Company Information Display -->
+                        <div class="card mt-4">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-building me-2"></i>{% trans "Your Company Information" %}
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p class="mb-2"><strong>{% trans "Company:" %}</strong> {{ employer_profile.company_name }}</p>
+                                        <p class="mb-2"><strong>{% trans "Registration:" %}</strong> {{ employer_profile.registration_code }}</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p class="mb-2"><strong>{% trans "Contact:" %}</strong> {{ employer_profile.contact_person_name }}</p>
+                                        <p class="mb-2"><strong>{% trans "Email:" %}</strong> {{ employer_profile.contact_person_email }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'employers:contracts_list' %}" class="btn btn-secondary">
+                                <i class="fas fa-times me-2"></i>{% trans "Cancel" %}
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>{% trans "Create Contract" %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+#previewContent {
+    min-height: 200px;
+    white-space: pre-line;
+    font-family: 'Times New Roman', serif;
+    line-height: 1.6;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const contractTypeSelect = document.getElementById('contract_type');
+    const templateSelect = document.getElementById('template_id');
+    const previewSection = document.getElementById('contractPreview');
+    const previewContent = document.getElementById('previewContent');
+
+    // Filter templates based on contract type
+    contractTypeSelect.addEventListener('change', function() {
+        const selectedType = this.value;
+        const options = templateSelect.querySelectorAll('option');
+
+        options.forEach(option => {
+            if (option.value === '') {
+                option.style.display = 'block';
+                return;
+            }
+
+            const templateType = option.dataset.type;
+            if (!selectedType || templateType === selectedType) {
+                option.style.display = 'block';
+            } else {
+                option.style.display = 'none';
+            }
+        });
+
+        // Reset template selection
+        templateSelect.value = '';
+        previewSection.style.display = 'none';
+    });
+
+    // Show template preview
+    templateSelect.addEventListener('change', function() {
+        const templateId = this.value;
+
+        if (templateId) {
+            // In a real implementation, you would fetch the template content via AJAX
+            previewContent.innerHTML = `
+                <h4>Contract Template Preview</h4>
+                <p><strong>Template:</strong> ${this.options[this.selectedIndex].text}</p>
+                <p><strong>Company:</strong> {{ employer_profile.company_name }}</p>
+                <p><strong>Effective Date:</strong> <span id="previewEffectiveDate">{{ today|date:'M d, Y' }}</span></p>
+                <hr>
+                <p>This is a preview of the selected contract template. The actual content would be loaded from the database.</p>
+                <p>Template placeholders will be replaced with actual company and contract information when the contract is generated.</p>
+            `;
+            previewSection.style.display = 'block';
+        } else {
+            previewSection.style.display = 'none';
+        }
+    });
+
+    // Update preview when dates change
+    document.getElementById('effective_date').addEventListener('change', function() {
+        const previewDate = document.getElementById('previewEffectiveDate');
+        if (previewDate) {
+            const date = new Date(this.value);
+            previewDate.textContent = date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+    });
+
+    // Form validation
+    document.querySelector('.form-professional').addEventListener('submit', function(e) {
+        const contractType = document.getElementById('contract_type').value;
+        const effectiveDate = document.getElementById('effective_date').value;
+
+        if (!contractType) {
+            e.preventDefault();
+            alert('{% trans "Please select a contract type." %}');
+            return;
+        }
+
+        if (!effectiveDate) {
+            e.preventDefault();
+            alert('{% trans "Please select an effective date." %}');
+            return;
+        }
+
+        // Validate expiry date
+        const expiryDate = document.getElementById('expiry_date').value;
+        if (expiryDate && new Date(expiryDate) <= new Date(effectiveDate)) {
+            e.preventDefault();
+            alert('{% trans "Expiry date must be after the effective date." %}');
+            return;
+        }
+    });
+
+    // File upload validation
+    document.getElementById('document_file').addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+            // Check file size (10MB limit)
+            if (file.size > 10 * 1024 * 1024) {
+                alert('{% trans "File size cannot exceed 10MB." %}');
+                this.value = '';
+                return;
+            }
+
+            // Check file type
+            const allowedTypes = ['.pdf', '.doc', '.docx'];
+            const fileName = file.name.toLowerCase();
+            const isAllowed = allowedTypes.some(type => fileName.endsWith(type));
+
+            if (!isAllowed) {
+                alert('{% trans "Only PDF, DOC, and DOCX files are allowed." %}');
+                this.value = '';
+                return;
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

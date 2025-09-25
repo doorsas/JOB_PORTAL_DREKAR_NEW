@@ -1,0 +1,296 @@
+{% extends 'core/base1.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Contracts" %} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-file-contract me-2"></i>{% trans "Contracts" %}
+                    </h3>
+                    <div>
+                        <a href="{% url 'employers:create_contract' %}" class="btn btn-primary btn-sm me-2">
+                            <i class="fas fa-plus"></i> {% trans "Create Contract" %}
+                        </a>
+                        <a href="{% url 'employers:dashboard' %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-arrow-left"></i> {% trans "Back to Dashboard" %}
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Filter Tabs -->
+                    <ul class="nav nav-tabs mb-3" id="statusTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link {% if not status_filter %}active{% endif %}" href="?">
+                                {% trans "All" %} ({{ status_counts.all }})
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link {% if status_filter == 'DRAFT' %}active{% endif %}" href="?status=DRAFT">
+                                {% trans "Draft" %} ({{ status_counts.draft }})
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link {% if status_filter == 'PENDING_SIGNATURE' %}active{% endif %}" href="?status=PENDING_SIGNATURE">
+                                {% trans "Pending" %} ({{ status_counts.pending }})
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link {% if status_filter == 'ACTIVE' %}active{% endif %}" href="?status=ACTIVE">
+                                {% trans "Active" %} ({{ status_counts.active }})
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link {% if status_filter == 'EXPIRED' %}active{% endif %}" href="?status=EXPIRED">
+                                {% trans "Expired" %} ({{ status_counts.expired }})
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link {% if status_filter == 'CANCELLED' %}active{% endif %}" href="?status=CANCELLED">
+                                {% trans "Cancelled" %} ({{ status_counts.cancelled }})
+                            </a>
+                        </li>
+                    </ul>
+
+                    <!-- Contracts Table -->
+                    {% if contracts %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th><i class="fas fa-file-contract me-2"></i>{% trans "Contract" %}</th>
+                                        <th><i class="fas fa-template me-2"></i>{% trans "Template" %}</th>
+                                        <th><i class="fas fa-calendar me-2"></i>{% trans "Effective Date" %}</th>
+                                        <th><i class="fas fa-calendar-times me-2"></i>{% trans "Expiry Date" %}</th>
+                                        <th><i class="fas fa-info-circle me-2"></i>{% trans "Status" %}</th>
+                                        <th><i class="fas fa-file-pdf me-2"></i>{% trans "Document" %}</th>
+                                        <th><i class="fas fa-cogs me-2"></i>{% trans "Actions" %}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for contract in contracts %}
+                                    <tr>
+                                        <td>
+                                            <div class="contract-info">
+                                                <strong>{{ contract.get_contract_type_display }}</strong>
+                                                <br><small class="text-muted">ID: {{ contract.id }}</small>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            {% if contract.template_used %}
+                                                <span class="badge bg-info">{{ contract.template_used.name }}</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{% trans "Custom" %}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ contract.effective_date|date:"M d, Y" }}</td>
+                                        <td>
+                                            {% if contract.expiry_date %}
+                                                {{ contract.expiry_date|date:"M d, Y" }}
+                                            {% else %}
+                                                <span class="text-muted">{% trans "Indefinite" %}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if contract.status == 'DRAFT' %}
+                                                <span class="badge bg-secondary">{% trans "Draft" %}</span>
+                                            {% elif contract.status == 'PENDING_SIGNATURE' %}
+                                                <span class="badge bg-warning text-dark">{% trans "Pending" %}</span>
+                                            {% elif contract.status == 'ACTIVE' %}
+                                                <span class="badge bg-success">{% trans "Active" %}</span>
+                                            {% elif contract.status == 'EXPIRED' %}
+                                                <span class="badge bg-danger">{% trans "Expired" %}</span>
+                                            {% elif contract.status == 'CANCELLED' %}
+                                                <span class="badge bg-dark">{% trans "Cancelled" %}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if contract.document_file %}
+                                                <a href="{{ contract.document_file.url }}" target="_blank"
+                                                   class="btn btn-sm btn-outline-primary" title="{% trans 'Download PDF' %}">
+                                                    <i class="fas fa-file-pdf"></i>
+                                                </a>
+                                            {% else %}
+                                                <span class="text-muted">
+                                                    <i class="fas fa-file-pdf"></i> {% trans "N/A" %}
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a href="{% url 'employers:contract_detail' contract.id %}"
+                                                   class="btn btn-sm btn-outline-primary" title="{% trans 'View Details' %}">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                {% if contract.status == 'DRAFT' %}
+                                                    <button class="btn btn-sm btn-outline-warning"
+                                                            onclick="updateContractStatus({{ contract.id }}, 'PENDING_SIGNATURE')"
+                                                            title="{% trans 'Send for Signature' %}">
+                                                        <i class="fas fa-paper-plane"></i>
+                                                    </button>
+                                                {% elif contract.status == 'PENDING_SIGNATURE' %}
+                                                    <button class="btn btn-sm btn-outline-success"
+                                                            onclick="updateContractStatus({{ contract.id }}, 'ACTIVE')"
+                                                            title="{% trans 'Mark as Active' %}">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        {% if page_obj.has_other_pages %}
+                        <nav aria-label="{% trans 'Contracts pagination' %}" class="mt-4">
+                            <ul class="pagination justify-content-center">
+                                {% if page_obj.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                                            {% trans "Previous" %}
+                                        </a>
+                                    </li>
+                                {% endif %}
+
+                                {% for num in page_obj.paginator.page_range %}
+                                    {% if page_obj.number == num %}
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ num }}</span>
+                                        </li>
+                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ num }}{% if status_filter %}&status={{ status_filter }}{% endif %}">{{ num }}</a>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% if page_obj.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                                            {% trans "Next" %}
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                        {% endif %}
+
+                    {% else %}
+                        <!-- Empty State -->
+                        <div class="text-center py-5">
+                            <i class="fas fa-file-contract fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">{% trans "No contracts found" %}</h5>
+                            <p class="text-muted">
+                                {% if status_filter %}
+                                    {% trans "No contracts match the selected filter." %}
+                                    <a href="{% url 'employers:contracts_list' %}" class="text-decoration-none">{% trans "View all contracts" %}</a>
+                                {% else %}
+                                    {% trans "You don't have any contracts yet." %}
+                                    <br>
+                                    <a href="{% url 'employers:create_contract' %}" class="btn btn-primary mt-2">
+                                        <i class="fas fa-plus"></i> {% trans "Create Your First Contract" %}
+                                    </a>
+                                {% endif %}
+                            </p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom CSS -->
+<style>
+.nav-tabs .nav-link {
+    color: #495057;
+    border: 1px solid transparent;
+}
+
+.nav-tabs .nav-link.active {
+    color: #007bff;
+    background-color: #fff;
+    border-color: #dee2e6 #dee2e6 #fff;
+}
+
+.badge {
+    font-size: 0.75em;
+    padding: 0.5em 0.75em;
+}
+
+.btn-group .btn {
+    margin-right: 2px;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.contract-info {
+    line-height: 1.3;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+
+    .card-header {
+        flex-direction: column;
+        gap: 10px;
+        align-items: stretch !important;
+    }
+
+    .nav-tabs {
+        flex-wrap: wrap;
+        border-bottom: none;
+    }
+
+    .nav-tabs .nav-item {
+        margin-bottom: 5px;
+    }
+
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+}
+</style>
+
+<script>
+function updateContractStatus(contractId, newStatus) {
+    if (!confirm('Are you sure you want to update this contract status?')) {
+        return;
+    }
+
+    fetch(`/employers/contracts/${contractId}/update-status/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        },
+        body: JSON.stringify({
+            status: newStatus
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error updating contract status: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while updating the contract status.');
+    });
+}
+</script>
+{% endblock %}

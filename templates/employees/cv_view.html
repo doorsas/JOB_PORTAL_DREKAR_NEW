@@ -1,0 +1,374 @@
+{% extends 'core/base1.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{{ employee_profile.full_name }} - CV{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar">
+            <div class="position-sticky pt-3">
+                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                    <span>Employee Portal</span>
+                </h6>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'employees:dashboard' %}">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'employees:my_assignments' %}">
+                            <i class="fas fa-briefcase"></i> My Assignments
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'employees:schedules' %}">
+                            <i class="fas fa-calendar-alt"></i> Work Schedule
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'employees:payslips' %}">
+                            <i class="fas fa-file-invoice-dollar"></i> Payslips
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'employees:profile_view' %}">
+                            <i class="fas fa-user"></i> Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'employees:cv_view' %}">
+                            <i class="fas fa-file-alt"></i> My CV
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">
+                    <i class="fas fa-file-alt me-2"></i>My Curriculum Vitae
+                </h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        <a href="{% url 'employees:cv_form' %}" class="btn btn-primary">
+                            <i class="fas fa-edit me-1"></i>{% trans "Edit CV" %}
+                        </a>
+                        {% if cv.attachment %}
+                        <a href="{% url 'employees:cv_download' %}" class="btn btn-outline-success">
+                            <i class="fas fa-download me-1"></i>{% trans "Download" %}
+                        </a>
+                        {% endif %}
+                        <button onclick="window.print()" class="btn btn-outline-secondary">
+                            <i class="fas fa-print me-1"></i>{% trans "Print" %}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cv-container">
+                <!-- CV Header -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body bg-primary text-white text-center p-4">
+                                <h2 class="mb-2">{{ employee_profile.full_name }}</h2>
+                                <p class="mb-0 fs-5">{% trans "Professional Curriculum Vitae" %}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Personal Information -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-header bg-info text-white">
+                                <h5 class="mb-0"><i class="fas fa-user me-2"></i>{% trans "Personal Information" %}</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    {% if employee_profile.phone %}
+                                    <div class="col-12">
+                                        <strong>{% trans "Phone:" %}</strong><br>
+                                        <span class="text-muted">{{ employee_profile.phone }}</span>
+                                    </div>
+                                    {% endif %}
+                                    {% if cv.date_of_birth %}
+                                    <div class="col-12">
+                                        <strong>{% trans "Date of Birth:" %}</strong><br>
+                                        <span class="text-muted">{{ cv.date_of_birth|date:"F j, Y" }}</span>
+                                    </div>
+                                    {% endif %}
+                                    {% if cv.place_of_birth %}
+                                    <div class="col-12">
+                                        <strong>{% trans "Place of Birth:" %}</strong><br>
+                                        <span class="text-muted">{{ cv.place_of_birth }}</span>
+                                    </div>
+                                    {% endif %}
+                                    {% if cv.place_of_residence %}
+                                    <div class="col-12">
+                                        <strong>{% trans "Place of Residence:" %}</strong><br>
+                                        <span class="text-muted">{{ cv.place_of_residence }}</span>
+                                    </div>
+                                    {% endif %}
+                                    {% if cv.civil_status %}
+                                    <div class="col-12">
+                                        <strong>{% trans "Civil Status:" %}</strong><br>
+                                        <span class="text-muted">{{ cv.civil_status }}</span>
+                                    </div>
+                                    {% endif %}
+                                    {% if employee_profile.nationality %}
+                                    <div class="col-12">
+                                        <strong>{% trans "Nationality:" %}</strong><br>
+                                        <span class="text-muted">{{ employee_profile.nationality }}</span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-header bg-warning text-dark">
+                                <h5 class="mb-0"><i class="fas fa-address-card me-2"></i>{% trans "Contact Information" %}</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    {% if cv.contacts %}
+                                    <div class="col-12">
+                                        <strong>{% trans "Emergency Contacts:" %}</strong><br>
+                                        <span class="text-muted">{{ cv.contacts }}</span>
+                                    </div>
+                                    {% endif %}
+                                    {% if employee_profile.address %}
+                                    <div class="col-12">
+                                        <strong>{% trans "Address:" %}</strong><br>
+                                        <span class="text-muted">
+                                            {% if employee_profile.address.street_address %}{{ employee_profile.address.street_address }}<br>{% endif %}
+                                            {{ employee_profile.address.city }}
+                                            {% if employee_profile.address.postal_code %}, {{ employee_profile.address.postal_code }}{% endif %}<br>
+                                            {{ employee_profile.address.country }}
+                                        </span>
+                                    </div>
+                                    {% endif %}
+                                    {% if cv.languages %}
+                                    <div class="col-12">
+                                        <strong>{% trans "Languages:" %}</strong><br>
+                                        <span class="text-muted">{{ cv.languages|linebreaks }}</span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Core Professional Information -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0"><i class="fas fa-graduation-cap me-2"></i>{% trans "Education" %}</h5>
+                            </div>
+                            <div class="card-body">
+                                <p class="mb-0">{{ cv.education|linebreaks }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0"><i class="fas fa-briefcase me-2"></i>{% trans "Work Experience" %}</h5>
+                            </div>
+                            <div class="card-body">
+                                <p class="mb-0">{{ cv.experience|linebreaks }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {% if cv.professional_experience %}
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header bg-secondary text-white">
+                                <h5 class="mb-0"><i class="fas fa-star me-2"></i>{% trans "Professional Experience" %}</h5>
+                            </div>
+                            <div class="card-body">
+                                <p class="mb-0">{{ cv.professional_experience|linebreaks }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header bg-info text-white">
+                                <h5 class="mb-0"><i class="fas fa-tools me-2"></i>{% trans "Skills" %}</h5>
+                            </div>
+                            <div class="card-body">
+                                <p class="mb-0">{{ cv.skills|linebreaks }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Information -->
+                {% if cv.characteristics or cv.other_relevant_information or cv.hobby %}
+                <div class="row mb-4">
+                    {% if cv.characteristics %}
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100">
+                            <div class="card-header bg-dark text-white">
+                                <h6 class="mb-0"><i class="fas fa-heart me-1"></i>{% trans "Personal Characteristics" %}</h6>
+                            </div>
+                            <div class="card-body">
+                                <p class="mb-0 small">{{ cv.characteristics|linebreaks }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if cv.other_relevant_information %}
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100">
+                            <div class="card-header bg-warning text-dark">
+                                <h6 class="mb-0"><i class="fas fa-plus me-1"></i>{% trans "Other Relevant Information" %}</h6>
+                            </div>
+                            <div class="card-body">
+                                <p class="mb-0 small">{{ cv.other_relevant_information|linebreaks }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if cv.hobby %}
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100">
+                            <div class="card-header bg-danger text-white">
+                                <h6 class="mb-0"><i class="fas fa-gamepad me-1"></i>{% trans "Hobbies & Interests" %}</h6>
+                            </div>
+                            <div class="card-body">
+                                <p class="mb-0 small">{{ cv.hobby|linebreaks }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <!-- CV Attachment Info -->
+                {% if cv.attachment %}
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="alert alert-info">
+                            <h6 class="alert-heading">
+                                <i class="fas fa-paperclip me-2"></i>{% trans "CV Document Available" %}
+                            </h6>
+                            <p class="mb-2">{% trans "A complete CV document is attached to this profile." %}</p>
+                            <hr>
+                            <a href="{% url 'employees:cv_download' %}" class="btn btn-sm btn-info">
+                                <i class="fas fa-download me-1"></i>{% trans "Download Full CV Document" %}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Footer -->
+                <div class="row">
+                    <div class="col-12">
+                        <hr>
+                        <div class="text-center text-muted small">
+                            <p class="mb-1">{% trans "CV last updated:" %} {{ cv.updated_at|date:"F j, Y \a\t H:i" }}</p>
+                            <p class="mb-0">{% trans "Generated through Employee Portal" %}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<style>
+.sidebar {
+    background-color: #f8f9fa;
+    border-right: 1px solid #dee2e6;
+    min-height: calc(100vh - 56px);
+}
+
+.sidebar .nav-link {
+    color: #495057;
+    padding: 0.75rem 1rem;
+    border-radius: 0.375rem;
+    margin: 0.125rem 0.5rem;
+}
+
+.sidebar .nav-link:hover {
+    background-color: #e9ecef;
+    color: #495057;
+}
+
+.sidebar .nav-link.active {
+    background-color: #0d6efd;
+    color: white;
+}
+
+.sidebar .nav-link i {
+    width: 16px;
+    margin-right: 8px;
+}
+
+.cv-container {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.card {
+    transition: box-shadow 0.2s ease-in-out;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.card:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+@media print {
+    .sidebar, .btn-toolbar, .border-bottom {
+        display: none !important;
+    }
+
+    .col-md-9.ms-sm-auto.col-lg-10 {
+        margin: 0 !important;
+        max-width: 100% !important;
+        padding: 0 !important;
+    }
+
+    .card {
+        border: 1px solid #ddd !important;
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    .cv-container {
+        font-size: 12pt;
+    }
+
+    .btn {
+        display: none !important;
+    }
+}
+</style>
+{% endblock %}

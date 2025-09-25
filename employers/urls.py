@@ -1,0 +1,29 @@
+from django.urls import path
+from . import views
+
+app_name = 'employers'
+
+urlpatterns = [
+    path('dashboard/', views.dashboard, name='dashboard'),
+    path('profile/', views.profile_view, name='profile_view'),
+    path('profile/setup/', views.profile_setup, name='profile_setup'),
+    path('jobs/', views.job_postings_list, name='job_postings_list'),
+    path('jobs/create/', views.create_job_posting, name='create_job_posting'),
+    path('jobs/<int:job_id>/', views.job_posting_detail, name='job_posting_detail'),
+    path('jobs/<int:job_id>/edit/', views.edit_job_posting, name='edit_job_posting'),
+    path('jobs/<int:job_id>/delete/', views.delete_job_posting, name='delete_job_posting'),
+    path('jobs/<int:job_id>/toggle-status/', views.toggle_job_status, name='toggle_job_status'),
+    path('applications/', views.applications_list, name='applications_list'),
+    path('applications/<int:application_id>/', views.application_detail, name='application_detail'),
+    path('applications/<int:application_id>/update-status/', views.update_application_status, name='update_application_status'),
+    path('applications/<int:application_id>/update-status-ajax/', views.update_application_status_ajax, name='update_application_status_ajax'),
+    path('assignments/', views.assignments_list, name='assignments_list'),
+    path('assignments/<int:assignment_id>/', views.assignment_detail, name='assignment_detail'),
+    path('invoices/', views.invoices_list, name='invoices_list'),
+    path('invoices/create/', views.create_invoice, name='create_invoice'),
+    path('invoices/<int:invoice_id>/', views.invoice_detail, name='invoice_detail'),
+    path('contracts/', views.contracts_list, name='contracts_list'),
+    path('contracts/create/', views.create_contract, name='create_contract'),
+    path('contracts/<int:contract_id>/', views.contract_detail, name='contract_detail'),
+    path('contracts/<int:contract_id>/update-status/', views.update_contract_status, name='update_contract_status'),
+]

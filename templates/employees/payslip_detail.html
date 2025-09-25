@@ -1,0 +1,344 @@
+{% extends 'core/base1.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}Payslip Details - {{ payslip.period_start_date|date:"M Y" }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar">
+            <div class="position-sticky pt-3">
+                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                    <span>Employee Portal</span>
+                </h6>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'employees:dashboard' %}">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'employees:my_assignments' %}">
+                            <i class="fas fa-briefcase"></i> My Assignments
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'employees:schedules' %}">
+                            <i class="fas fa-calendar-alt"></i> Work Schedule
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'employees:payslips' %}">
+                            <i class="fas fa-file-invoice-dollar"></i> Payslips
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'employees:profile_view' %}">
+                            <i class="fas fa-user"></i> Profile
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">
+                    <i class="fas fa-file-invoice-dollar me-2"></i>Payslip Details
+                </h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        {% if payslip.file %}
+                        <a href="{{ payslip.file.url }}" target="_blank" class="btn btn-primary">
+                            <i class="fas fa-download me-1"></i>Download PDF
+                        </a>
+                        {% endif %}
+                        <a href="{% url 'employees:payslips' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>Back to Payslips
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payslip Content -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card shadow-sm">
+                        <div class="card-body p-4">
+                            <!-- Header -->
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <h3 class="text-primary mb-3">{{ payslip.assignment.employer.company_name }}</h3>
+                                    <div class="mb-2">
+                                        <strong>Company Address:</strong><br>
+                                        {% if payslip.assignment.employer.address %}
+                                            {{ payslip.assignment.employer.address.street_address }}<br>
+                                            {{ payslip.assignment.employer.address.city }}, {{ payslip.assignment.employer.address.postal_code }}<br>
+                                            {{ payslip.assignment.employer.address.country }}
+                                        {% else %}
+                                            <span class="text-muted">Address not specified</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6 text-md-end">
+                                    <h4 class="text-success mb-3">PAYSLIP</h4>
+                                    <p class="mb-1"><strong>Pay Period:</strong> {{ payslip.period_start_date|date:"F j, Y" }} - {{ payslip.period_end_date|date:"F j, Y" }}</p>
+                                    <p class="mb-1"><strong>Issue Date:</strong> {{ payslip.issue_date|date:"F j, Y" }}</p>
+                                    {% if payslip.pay_date %}
+                                    <p class="mb-1"><strong>Pay Date:</strong> {{ payslip.pay_date|date:"F j, Y" }}</p>
+                                    {% endif %}
+                                    {% if payslip.status == 'VIEWED' %}
+                                    <span class="badge bg-success fs-6 mt-2">
+                                    {% elif payslip.status == 'SENT' %}
+                                    <span class="badge bg-primary fs-6 mt-2">
+                                    {% else %}
+                                    <span class="badge bg-secondary fs-6 mt-2">
+                                    {% endif %}
+                                        {{ payslip.get_status_display }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Employee Information -->
+                            <div class="row mb-4 bg-light p-3 rounded">
+                                <div class="col-md-6">
+                                    <h6 class="text-dark mb-3">Employee Information</h6>
+                                    <p class="mb-1"><strong>Name:</strong> {{ payslip.employee.full_name }}</p>
+                                    <p class="mb-1"><strong>Position:</strong> {{ payslip.assignment.position_title|default:"General Position" }}</p>
+                                    {% if payslip.assignment.department %}
+                                    <p class="mb-1"><strong>Department:</strong> {{ payslip.assignment.department }}</p>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="text-dark mb-3">Assignment Details</h6>
+                                    <p class="mb-1"><strong>Assignment Type:</strong> {{ payslip.assignment.get_assignment_type_display }}</p>
+                                    {% if payslip.hourly_rate %}
+                                    <p class="mb-1"><strong>Hourly Rate:</strong> ${{ payslip.hourly_rate }}</p>
+                                    {% endif %}
+                                    {% if payslip.overtime_rate %}
+                                    <p class="mb-1"><strong>Overtime Rate:</strong> ${{ payslip.overtime_rate }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Hours and Earnings -->
+                            <div class="row mb-4">
+                                <div class="col-lg-8">
+                                    <h6 class="text-dark mb-3">Hours Worked</h6>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-bordered">
+                                            <thead class="table-primary">
+                                                <tr>
+                                                    <th>Description</th>
+                                                    <th class="text-end">Hours</th>
+                                                    <th class="text-end">Rate</th>
+                                                    <th class="text-end">Amount</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>Regular Hours</td>
+                                                    <td class="text-end">{{ payslip.base_hours|floatformat:1 }}</td>
+                                                    <td class="text-end">${{ payslip.hourly_rate|default:"0.00" }}</td>
+                                                    <td class="text-end">${{ payslip.base_hours|default:0|floatformat:2 }}</td>
+                                                </tr>
+                                                {% if payslip.overtime_hours and payslip.overtime_hours > 0 %}
+                                                <tr>
+                                                    <td>Overtime Hours</td>
+                                                    <td class="text-end">{{ payslip.overtime_hours|floatformat:1 }}</td>
+                                                    <td class="text-end">${{ payslip.overtime_rate|default:"0.00" }}</td>
+                                                    <td class="text-end">${{ payslip.overtime_hours|default:0|floatformat:2 }}</td>
+                                                </tr>
+                                                {% endif %}
+                                            </tbody>
+                                            <tfoot class="table-secondary">
+                                                <tr>
+                                                    <th colspan="3">Gross Earnings</th>
+                                                    <th class="text-end">${{ payslip.gross_salary|floatformat:2 }}</th>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- Summary Box -->
+                                <div class="col-lg-4">
+                                    <div class="card bg-success text-white">
+                                        <div class="card-header">
+                                            <h6 class="mb-0 text-center">
+                                                <i class="fas fa-dollar-sign me-1"></i>Net Pay
+                                            </h6>
+                                        </div>
+                                        <div class="card-body text-center">
+                                            <h2 class="mb-0">${{ payslip.net_salary|floatformat:2 }}</h2>
+                                            <small>Take Home Pay</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Deductions and Bonuses -->
+                            <div class="row mb-4">
+                                <!-- Deductions -->
+                                <div class="col-md-6">
+                                    <h6 class="text-dark mb-3">Deductions</h6>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-bordered">
+                                            <thead class="table-danger">
+                                                <tr>
+                                                    <th>Description</th>
+                                                    <th class="text-end">Amount</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>Income Tax</td>
+                                                    <td class="text-end">${{ payslip.tax_amount|floatformat:2 }}</td>
+                                                </tr>
+                                                {% for key, value in payslip.deductions_json.items %}
+                                                <tr>
+                                                    <td>{{ key|title }}</td>
+                                                    <td class="text-end">${{ value|floatformat:2 }}</td>
+                                                </tr>
+                                                {% empty %}
+                                                {% if not payslip.tax_amount %}
+                                                <tr>
+                                                    <td colspan="2" class="text-center text-muted">No deductions</td>
+                                                </tr>
+                                                {% endif %}
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- Bonuses -->
+                                <div class="col-md-6">
+                                    <h6 class="text-dark mb-3">Bonuses & Benefits</h6>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-bordered">
+                                            <thead class="table-success">
+                                                <tr>
+                                                    <th>Description</th>
+                                                    <th class="text-end">Amount</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for key, value in payslip.bonuses_json.items %}
+                                                <tr>
+                                                    <td>{{ key|title }}</td>
+                                                    <td class="text-end">${{ value|floatformat:2 }}</td>
+                                                </tr>
+                                                {% empty %}
+                                                <tr>
+                                                    <td colspan="2" class="text-center text-muted">No bonuses</td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Summary Calculation -->
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered">
+                                            <tbody>
+                                                <tr class="table-light">
+                                                    <td><strong>Gross Salary</strong></td>
+                                                    <td class="text-end"><strong>${{ payslip.gross_salary|floatformat:2 }}</strong></td>
+                                                </tr>
+                                                <tr class="table-danger">
+                                                    <td><strong>Total Deductions</strong></td>
+                                                    <td class="text-end"><strong>-${{ payslip.tax_amount|floatformat:2 }}</strong></td>
+                                                </tr>
+                                                <tr class="table-success">
+                                                    <td><strong>NET PAY</strong></td>
+                                                    <td class="text-end"><strong>${{ payslip.net_salary|floatformat:2 }}</strong></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Footer -->
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <hr>
+                                    <div class="text-center text-muted small">
+                                        <p class="mb-1">This payslip was generated on {{ payslip.created_at|date:"F j, Y" }}</p>
+                                        {% if payslip.viewed_at %}
+                                        <p class="mb-0">First viewed on {{ payslip.viewed_at|date:"F j, Y \a\t H:i" }}</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<style>
+.sidebar {
+    background-color: #f8f9fa;
+    border-right: 1px solid #dee2e6;
+    min-height: calc(100vh - 56px);
+}
+
+.sidebar .nav-link {
+    color: #495057;
+    padding: 0.75rem 1rem;
+    border-radius: 0.375rem;
+    margin: 0.125rem 0.5rem;
+}
+
+.sidebar .nav-link:hover {
+    background-color: #e9ecef;
+    color: #495057;
+}
+
+.sidebar .nav-link.active {
+    background-color: #0d6efd;
+    color: white;
+}
+
+.sidebar .nav-link i {
+    width: 16px;
+    margin-right: 8px;
+}
+
+@media print {
+    .sidebar, .btn-toolbar, .border-bottom {
+        display: none !important;
+    }
+
+    .col-md-9.ms-sm-auto.col-lg-10 {
+        margin: 0 !important;
+        max-width: 100% !important;
+        padding: 0 !important;
+    }
+
+    .card {
+        border: none !important;
+        box-shadow: none !important;
+    }
+}
+
+.payslip-print {
+    font-family: 'Arial', sans-serif;
+}
+
+.card {
+    transition: box-shadow 0.2s ease-in-out;
+}
+</style>
+{% endblock %}

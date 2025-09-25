@@ -1,0 +1,444 @@
+{% extends 'core/base1.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Add New Shift" %} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container-professional">
+    <div class="page-header-professional">
+        <div class="header-content">
+            <div class="header-main">
+                <h1 class="page-title">
+                    <i class="fas fa-calendar-plus me-3"></i>{% trans "Add New Shift" %}
+                </h1>
+                <p class="page-subtitle">{% trans "Schedule a new work shift for your calendar" %}</p>
+            </div>
+            <div class="header-actions">
+                <a href="{% url 'employees:schedules' %}" class="btn-secondary-professional">
+                    <i class="fas fa-arrow-left me-2"></i>{% trans "Back to Schedule" %}
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-card-professional">
+        <div class="card-header-professional">
+            <h3 class="card-title">
+                <i class="fas fa-clock me-2"></i>{% trans "Shift Details" %}
+            </h3>
+            <p class="card-subtitle">{% trans "Fill in the details for your new work shift" %}</p>
+        </div>
+
+        <div class="card-body-professional">
+            <form method="post" class="form-professional">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="alert-professional alert-error">
+                        <div class="alert-icon">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </div>
+                        <div class="alert-content">
+                            {% for error in form.non_field_errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+
+                <div class="form-grid">
+                    {% for field in form %}
+                        <div class="form-group-professional {% if field.name == 'notes' %}form-group-full{% endif %}">
+                            <label for="{{ field.id_for_label }}" class="form-label-professional">
+                                {% if field.name == 'date' %}
+                                    <i class="fas fa-calendar me-2"></i>
+                                {% elif field.name == 'start_time' %}
+                                    <i class="fas fa-clock me-2"></i>
+                                {% elif field.name == 'end_time' %}
+                                    <i class="fas fa-clock me-2"></i>
+                                {% elif field.name == 'location' %}
+                                    <i class="fas fa-map-marker-alt me-2"></i>
+                                {% elif field.name == 'notes' %}
+                                    <i class="fas fa-sticky-note me-2"></i>
+                                {% else %}
+                                    <i class="fas fa-info-circle me-2"></i>
+                                {% endif %}
+                                {{ field.label }}
+                                {% if field.field.required %}
+                                    <span class="required-indicator">*</span>
+                                {% endif %}
+                            </label>
+
+                            {% if field.name == 'notes' %}
+                                <textarea
+                                    name="{{ field.name }}"
+                                    id="{{ field.id_for_label }}"
+                                    class="form-control-professional form-textarea"
+                                    rows="4"
+                                    placeholder="{% trans 'Enter any additional notes or comments about this shift...' %}"
+                                    {% if field.field.required %}required{% endif %}
+                                >{{ field.value|default:'' }}</textarea>
+                            {% elif field.name == 'date' %}
+                                <input
+                                    type="date"
+                                    name="{{ field.name }}"
+                                    id="{{ field.id_for_label }}"
+                                    class="form-control-professional"
+                                    value="{{ field.value|default:'' }}"
+                                    {% if field.field.required %}required{% endif %}
+                                >
+                            {% elif field.name == 'start_time' or field.name == 'end_time' %}
+                                <input
+                                    type="time"
+                                    name="{{ field.name }}"
+                                    id="{{ field.id_for_label }}"
+                                    class="form-control-professional"
+                                    value="{{ field.value|default:'' }}"
+                                    {% if field.field.required %}required{% endif %}
+                                >
+                            {% else %}
+                                <input
+                                    type="text"
+                                    name="{{ field.name }}"
+                                    id="{{ field.id_for_label }}"
+                                    class="form-control-professional"
+                                    value="{{ field.value|default:'' }}"
+                                    {% if field.field.required %}required{% endif %}
+                                    {% if field.name == 'location' %}
+                                        placeholder="{% trans 'Enter work location or address' %}"
+                                    {% endif %}
+                                >
+                            {% endif %}
+
+                            {% if field.errors %}
+                                <div class="form-error">
+                                    <i class="fas fa-exclamation-circle me-1"></i>
+                                    {{ field.errors.0 }}
+                                </div>
+                            {% endif %}
+
+                            {% if field.help_text %}
+                                <div class="form-help">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    {{ field.help_text }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="form-actions">
+                    <a href="{% url 'employees:schedules' %}" class="btn-cancel-professional">
+                        <i class="fas fa-times me-2"></i>{% trans "Cancel" %}
+                    </a>
+                    <button type="submit" class="btn-primary-professional">
+                        <i class="fas fa-save me-2"></i>{% trans "Save Schedule" %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.container-professional {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.page-header-professional {
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary-medium));
+    color: white;
+    padding: 2.5rem;
+    border-radius: 12px 12px 0 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.page-header-professional::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+    opacity: 0.3;
+}
+
+.header-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 2rem;
+}
+
+.page-title {
+    font-size: 2.25rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem;
+    display: flex;
+    align-items: center;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.page-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin: 0;
+    font-weight: 300;
+}
+
+.content-card-professional {
+    background: white;
+    border-radius: 0 0 12px 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--border-color);
+    border-top: none;
+}
+
+.card-header-professional {
+    padding: 2rem 2.5rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+    background: #f8f9fa;
+}
+
+.card-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 0.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.card-subtitle {
+    color: var(--text-secondary);
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+.card-body-professional {
+    padding: 2.5rem;
+}
+
+.form-professional {
+    max-width: 800px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem 2rem;
+    margin-bottom: 2rem;
+}
+
+.form-group-professional {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group-full {
+    grid-column: 1 / -1;
+}
+
+.form-label-professional {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+}
+
+.required-indicator {
+    color: #dc3545;
+    margin-left: 0.25rem;
+    font-weight: bold;
+}
+
+.form-control-professional {
+    padding: 0.875rem 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: white;
+    color: var(--text-primary);
+}
+
+.form-control-professional:focus {
+    outline: none;
+    border-color: var(--primary-medium);
+    box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1);
+    transform: translateY(-1px);
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 100px;
+    font-family: inherit;
+}
+
+.form-control-professional::placeholder {
+    color: #6c757d;
+    opacity: 0.7;
+}
+
+.form-error {
+    color: #dc3545;
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.form-help {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.btn-primary-professional {
+    background: linear-gradient(135deg, var(--primary-medium), var(--primary-dark));
+    color: white;
+    border: none;
+    padding: 0.875rem 2rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(44, 62, 80, 0.3);
+}
+
+.btn-primary-professional:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(44, 62, 80, 0.4);
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary-medium));
+}
+
+.btn-secondary-professional {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    backdrop-filter: blur(10px);
+}
+
+.btn-secondary-professional:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-1px);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-cancel-professional {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 0.875rem 2rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+}
+
+.btn-cancel-professional:hover {
+    background: #5a6268;
+    transform: translateY(-1px);
+    color: white;
+    text-decoration: none;
+}
+
+.alert-professional.alert-error {
+    background: linear-gradient(135deg, #fff5f5, #fed7d7);
+    border: 1px solid #feb2b2;
+    color: #c53030;
+    margin-bottom: 2rem;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.alert-icon {
+    flex-shrink: 0;
+    font-size: 1.2rem;
+}
+
+.me-1 { margin-right: 0.25rem; }
+.me-2 { margin-right: 0.5rem; }
+.me-3 { margin-right: 0.75rem; }
+
+@media (max-width: 768px) {
+    .container-professional {
+        padding: 1rem;
+    }
+
+    .page-header-professional {
+        padding: 2rem 1.5rem;
+    }
+
+    .header-content {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1.5rem;
+    }
+
+    .page-title {
+        font-size: 1.75rem;
+    }
+
+    .card-header-professional,
+    .card-body-professional {
+        padding: 1.5rem;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .form-actions {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .btn-primary-professional,
+    .btn-cancel-professional {
+        justify-content: center;
+    }
+}
+</style>
+{% endblock %}
