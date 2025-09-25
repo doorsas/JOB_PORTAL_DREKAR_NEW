@@ -1,0 +1,265 @@
+{% extends 'core/base1.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Employee Assignments" %} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-users me-2"></i>{% trans "Employee Assignments" %}
+                    </h3>
+                    <div>
+                        <a href="{% url 'employers:dashboard' %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-arrow-left"></i> {% trans "Back to Dashboard" %}
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Filter Tabs -->
+                    <ul class="nav nav-tabs mb-3" id="statusTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link {% if not status_filter %}active{% endif %}"
+                               href="?">
+                                {% trans "All" %} ({{ status_counts.all }})
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link {% if status_filter == 'ACTIVE' %}active{% endif %}"
+                               href="?status=ACTIVE">
+                                {% trans "Active" %} ({{ status_counts.active }})
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link {% if status_filter == 'PENDING_START' %}active{% endif %}"
+                               href="?status=PENDING_START">
+                                {% trans "Pending Start" %} ({{ status_counts.pending_start }})
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link {% if status_filter == 'COMPLETED' %}active{% endif %}"
+                               href="?status=COMPLETED">
+                                {% trans "Completed" %} ({{ status_counts.completed }})
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link {% if status_filter == 'TERMINATED' %}active{% endif %}"
+                               href="?status=TERMINATED">
+                                {% trans "Terminated" %} ({{ status_counts.terminated }})
+                            </a>
+                        </li>
+                    </ul>
+
+                    <!-- Assignments Table -->
+                    {% if assignments %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>{% trans "Employee" %}</th>
+                                        <th>{% trans "Job Position" %}</th>
+                                        <th>{% trans "Start Date" %}</th>
+                                        <th>{% trans "End Date" %}</th>
+                                        <th>{% trans "Status" %}</th>
+                                        <th>{% trans "Contract" %}</th>
+                                        <th>{% trans "Actions" %}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for assignment in assignments %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar-circle me-2">
+                                                    {{ assignment.employee.first_name|first|upper }}{{ assignment.employee.last_name|first|upper }}
+                                                </div>
+                                                <div>
+                                                    <strong>{{ assignment.employee.first_name }} {{ assignment.employee.last_name }}</strong>
+                                                    {% if assignment.employee.phone %}
+                                                        <br><small class="text-muted">{{ assignment.employee.phone }}</small>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            {% if assignment.job_posting %}
+                                                <a href="{% url 'employers:job_posting_detail' assignment.job_posting.id %}"
+                                                   class="text-decoration-none">
+                                                    {{ assignment.job_posting.title }}
+                                                </a>
+                                                <br><small class="text-muted">{{ assignment.job_posting.location }}</small>
+                                            {% else %}
+                                                <span class="text-muted">{% trans "No job posting" %}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ assignment.start_date }}</td>
+                                        <td>
+                                            {% if assignment.end_date %}
+                                                {{ assignment.end_date }}
+                                            {% else %}
+                                                <span class="text-muted">{% trans "Ongoing" %}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if assignment.status == 'ACTIVE' %}
+                                                <span class="badge bg-success">{% trans "Active" %}</span>
+                                            {% elif assignment.status == 'PENDING_START' %}
+                                                <span class="badge bg-warning text-dark">{% trans "Pending Start" %}</span>
+                                            {% elif assignment.status == 'COMPLETED' %}
+                                                <span class="badge bg-info">{% trans "Completed" %}</span>
+                                            {% elif assignment.status == 'TERMINATED' %}
+                                                <span class="badge bg-danger">{% trans "Terminated" %}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if assignment.employment_contract %}
+                                                <i class="fas fa-file-contract text-success" title="{% trans 'Contract available' %}"></i>
+                                            {% else %}
+                                                <i class="fas fa-file-contract text-muted" title="{% trans 'No contract' %}"></i>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a href="{% url 'employers:assignment_detail' assignment.id %}"
+                                                   class="btn btn-sm btn-outline-primary"
+                                                   title="{% trans 'View Details' %}">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        {% if page_obj.has_other_pages %}
+                        <nav aria-label="{% trans 'Assignments pagination' %}">
+                            <ul class="pagination justify-content-center">
+                                {% if page_obj.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                                            {% trans "Previous" %}
+                                        </a>
+                                    </li>
+                                {% endif %}
+
+                                {% for num in page_obj.paginator.page_range %}
+                                    {% if page_obj.number == num %}
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ num }}</span>
+                                        </li>
+                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ num }}{% if status_filter %}&status={{ status_filter }}{% endif %}">{{ num }}</a>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% if page_obj.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                                            {% trans "Next" %}
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                        {% endif %}
+
+                    {% else %}
+                        <!-- Empty State -->
+                        <div class="text-center py-5">
+                            <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">{% trans "No employee assignments found" %}</h5>
+                            <p class="text-muted">
+                                {% if status_filter %}
+                                    {% trans "No assignments match the selected filter." %}
+                                    <a href="{% url 'employers:assignments_list' %}" class="text-decoration-none">{% trans "View all assignments" %}</a>
+                                {% else %}
+                                    {% trans "You haven't assigned any employees yet." %}
+                                {% endif %}
+                            </p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom CSS -->
+<style>
+.avatar-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #007bff;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.nav-tabs .nav-link {
+    color: #495057;
+    border: 1px solid transparent;
+}
+
+.nav-tabs .nav-link.active {
+    color: #007bff;
+    background-color: #fff;
+    border-color: #dee2e6 #dee2e6 #fff;
+}
+
+.badge {
+    font-size: 0.75em;
+    padding: 0.5em 0.75em;
+}
+
+.btn-group .btn {
+    margin-right: 2px;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+
+    .card-header {
+        flex-direction: column;
+        gap: 10px;
+        align-items: stretch !important;
+    }
+
+    .nav-tabs {
+        flex-wrap: wrap;
+        border-bottom: none;
+    }
+
+    .nav-tabs .nav-item {
+        margin-bottom: 5px;
+    }
+
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+
+    .avatar-circle {
+        width: 30px;
+        height: 30px;
+        font-size: 12px;
+    }
+}
+</style>
+{% endblock %}

@@ -1,6 +1,10 @@
 from django.contrib import admin
-from .models import Address, Qualification, Skill, Contract, Invoice, Payment, Notification, Profession
-
+from django.contrib.contenttypes.models import ContentType
+from django import forms
+from .models import (
+    Address, Qualification, Skill, Contract, Invoice,
+    Payment, Notification, Profession, InvoiceLineItem # Make sure InvoiceLineItem is imported
+)
 
 @admin.register(Address)
 class AddressAdmin(admin.ModelAdmin):
@@ -21,6 +25,25 @@ class SkillAdmin(admin.ModelAdmin):
     list_filter = ['category']
     search_fields = ['name']
 
+class InvoiceForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Add help text for the GenericForeignKey fields
+        self.fields['client_content_type'].help_text = "Select the type of client (EmployerProfile or EORClientProfile)"
+        self.fields['client_object_id'].help_text = "Enter the ID of the specific client. You can find client IDs in the respective client admin pages."
+
+        # Make these fields required
+        self.fields['client_content_type'].required = True
+        self.fields['client_object_id'].required = True
+
+    class Meta:
+        model = Invoice
+        fields = '__all__'
+
+class InvoiceLineItemInline(admin.TabularInline):
+    model = InvoiceLineItem
+    extra = 1 # Show one extra blank line item form by default
 
 @admin.register(Contract)
 class ContractAdmin(admin.ModelAdmin):
@@ -41,20 +64,38 @@ class ContractAdmin(admin.ModelAdmin):
 
 @admin.register(Invoice)
 class InvoiceAdmin(admin.ModelAdmin):
+    form = InvoiceForm
+    inlines = [InvoiceLineItemInline]
     list_display = ['invoice_number', 'get_client', 'get_total_amount', 'status', 'issue_date', 'due_date']
     list_filter = ['status', 'issue_date']
+    list_display_links = ['invoice_number']
     search_fields = ['invoice_number']
     date_hierarchy = 'issue_date'
 
     def get_client(self, obj):
         """Display the client for this invoice"""
-        return str(obj.client)
+        if obj.client:
+            return str(obj.client)
+        return "No client assigned"
     get_client.short_description = 'Client'
 
     def get_total_amount(self, obj):
         """Display the total amount for this invoice"""
         return f"€{obj.total_amount:.2f}"
     get_total_amount.short_description = 'Total Amount'
+
+    fieldsets = (
+        ('Invoice Information', {
+            'fields': ('invoice_number', 'issue_date', 'due_date', 'status')
+        }),
+        ('Client Information', {
+            'fields': ('client_content_type', 'client_object_id'),
+            'description': 'Select the client type (EmployerProfile or EORClientProfile) and enter the client ID. You can find client IDs in the respective admin pages.'
+        }),
+        ('Files', {
+            'fields': ('pdf_file',)
+        }),
+    )
 
 
 @admin.register(Payment)

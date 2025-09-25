@@ -1,0 +1,335 @@
+{% extends 'core/base1.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Invoices" %} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-file-invoice-dollar me-2"></i>{% trans "Invoices" %}
+                    </h3>
+                    <div>
+                        <a href="{% url 'employers:create_invoice' %}" class="btn btn-primary btn-sm me-2">
+                            <i class="fas fa-plus"></i> {% trans "Create Invoice" %}
+                        </a>
+                        <a href="{% url 'employers:dashboard' %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-arrow-left"></i> {% trans "Back to Dashboard" %}
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Filter Tabs -->
+                    <ul class="nav nav-tabs mb-3" id="statusTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link {% if not status_filter %}active{% endif %}"
+                               href="?">
+                                {% trans "All" %} ({{ status_counts.all }})
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link {% if status_filter == 'PENDING' %}active{% endif %}"
+                               href="?status=PENDING">
+                                {% trans "Pending" %} ({{ status_counts.pending }})
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link {% if status_filter == 'PAID' %}active{% endif %}"
+                               href="?status=PAID">
+                                {% trans "Paid" %} ({{ status_counts.paid }})
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link {% if status_filter == 'OVERDUE' %}active{% endif %}"
+                               href="?status=OVERDUE">
+                                {% trans "Overdue" %} ({{ status_counts.overdue }})
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link {% if status_filter == 'CANCELED' %}active{% endif %}"
+                               href="?status=CANCELED">
+                                {% trans "Canceled" %} ({{ status_counts.canceled }})
+                            </a>
+                        </li>
+                    </ul>
+
+                    <!-- Invoices Table -->
+                    {% if invoices %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>{% trans "Invoice #" %}</th>
+                                        <th>{% trans "Issue Date" %}</th>
+                                        <th>{% trans "Due Date" %}</th>
+                                        <th>{% trans "Total Amount" %}</th>
+                                        <th>{% trans "Status" %}</th>
+                                        <th>{% trans "PDF" %}</th>
+                                        <th>{% trans "Actions" %}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for invoice in invoices %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ invoice.invoice_number }}</strong>
+                                        </td>
+                                        <td>{{ invoice.issue_date }}</td>
+                                        <td>
+                                            {{ invoice.due_date }}
+                                            {% if invoice.status == 'OVERDUE' %}
+                                                <br><small class="text-danger">
+                                                    <i class="fas fa-exclamation-triangle"></i> {% trans "Overdue" %}
+                                                </small>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <strong>
+                                                {% if invoice.total_amount_calculated %}
+                                                    €{{ invoice.total_amount_calculated|floatformat:2 }}
+                                                {% else %}
+                                                    €0.00
+                                                {% endif %}
+                                            </strong>
+                                        </td>
+                                        <td>
+                                            {% if invoice.status == 'PENDING' %}
+                                                <span class="badge bg-warning text-dark">{% trans "Pending" %}</span>
+                                            {% elif invoice.status == 'PAID' %}
+                                                <span class="badge bg-success">{% trans "Paid" %}</span>
+                                            {% elif invoice.status == 'OVERDUE' %}
+                                                <span class="badge bg-danger">{% trans "Overdue" %}</span>
+                                            {% elif invoice.status == 'CANCELED' %}
+                                                <span class="badge bg-secondary">{% trans "Canceled" %}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if invoice.pdf_file %}
+                                                <a href="{{ invoice.pdf_file.url }}" target="_blank"
+                                                   class="btn btn-sm btn-outline-primary"
+                                                   title="{% trans 'Download PDF' %}">
+                                                    <i class="fas fa-file-pdf"></i>
+                                                </a>
+                                            {% else %}
+                                                <span class="text-muted">
+                                                    <i class="fas fa-file-pdf"></i> {% trans "N/A" %}
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a href="{% url 'employers:invoice_detail' invoice.id %}"
+                                                   class="btn btn-sm btn-outline-primary"
+                                                   title="{% trans 'View Details' %}">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Summary Statistics -->
+                        <div class="row mt-4">
+                            <div class="col-md-3 col-sm-6 mb-3">
+                                <div class="card bg-primary text-white">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <h6 class="card-title">{% trans "Total Invoices" %}</h6>
+                                                <h4>{{ status_counts.all }}</h4>
+                                            </div>
+                                            <div class="align-self-center">
+                                                <i class="fas fa-file-invoice fa-2x"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-sm-6 mb-3">
+                                <div class="card bg-warning text-dark">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <h6 class="card-title">{% trans "Pending" %}</h6>
+                                                <h4>{{ status_counts.pending }}</h4>
+                                            </div>
+                                            <div class="align-self-center">
+                                                <i class="fas fa-clock fa-2x"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-sm-6 mb-3">
+                                <div class="card bg-success text-white">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <h6 class="card-title">{% trans "Paid" %}</h6>
+                                                <h4>{{ status_counts.paid }}</h4>
+                                            </div>
+                                            <div class="align-self-center">
+                                                <i class="fas fa-check-circle fa-2x"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-sm-6 mb-3">
+                                <div class="card bg-danger text-white">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <h6 class="card-title">{% trans "Overdue" %}</h6>
+                                                <h4>{{ status_counts.overdue }}</h4>
+                                            </div>
+                                            <div class="align-self-center">
+                                                <i class="fas fa-exclamation-triangle fa-2x"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pagination -->
+                        {% if page_obj.has_other_pages %}
+                        <nav aria-label="{% trans 'Invoices pagination' %}">
+                            <ul class="pagination justify-content-center">
+                                {% if page_obj.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                                            {% trans "Previous" %}
+                                        </a>
+                                    </li>
+                                {% endif %}
+
+                                {% for num in page_obj.paginator.page_range %}
+                                    {% if page_obj.number == num %}
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ num }}</span>
+                                        </li>
+                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ num }}{% if status_filter %}&status={{ status_filter }}{% endif %}">{{ num }}</a>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% if page_obj.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                                            {% trans "Next" %}
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                        {% endif %}
+
+                    {% else %}
+                        <!-- Empty State -->
+                        <div class="text-center py-5">
+                            <i class="fas fa-file-invoice-dollar fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">{% trans "No invoices found" %}</h5>
+                            <p class="text-muted">
+                                {% if status_filter %}
+                                    {% trans "No invoices match the selected filter." %}
+                                    <a href="{% url 'employers:invoices_list' %}" class="text-decoration-none">{% trans "View all invoices" %}</a>
+                                {% else %}
+                                    {% trans "You don't have any invoices yet." %}
+                                    <br>
+                                    <a href="{% url 'employers:create_invoice' %}" class="btn btn-primary mt-2">
+                                        <i class="fas fa-plus"></i> {% trans "Create Your First Invoice" %}
+                                    </a>
+                                {% endif %}
+                            </p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom CSS -->
+<style>
+.nav-tabs .nav-link {
+    color: #495057;
+    border: 1px solid transparent;
+}
+
+.nav-tabs .nav-link.active {
+    color: #007bff;
+    background-color: #fff;
+    border-color: #dee2e6 #dee2e6 #fff;
+}
+
+.badge {
+    font-size: 0.75em;
+    padding: 0.5em 0.75em;
+}
+
+.btn-group .btn {
+    margin-right: 2px;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.card .card-body {
+    padding: 1rem;
+}
+
+.card h4 {
+    margin: 0;
+    font-weight: bold;
+}
+
+.card h6 {
+    margin: 0 0 0.5rem 0;
+    font-weight: normal;
+    opacity: 0.8;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+
+    .card-header {
+        flex-direction: column;
+        gap: 10px;
+        align-items: stretch !important;
+    }
+
+    .nav-tabs {
+        flex-wrap: wrap;
+        border-bottom: none;
+    }
+
+    .nav-tabs .nav-item {
+        margin-bottom: 5px;
+    }
+
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+
+    .col-md-3 {
+        margin-bottom: 1rem;
+    }
+
+    .card .card-body {
+        padding: 0.75rem;
+    }
+}
+</style>
+{% endblock %}

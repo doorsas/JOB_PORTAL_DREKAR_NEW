@@ -1,0 +1,319 @@
+{% extends 'core/base1.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% if is_new %}Create CV{% else %}Update CV{% endif %} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar">
+            <div class="position-sticky pt-3">
+                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                    <span>Employee Portal</span>
+                </h6>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'employees:dashboard' %}">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'employees:my_assignments' %}">
+                            <i class="fas fa-briefcase"></i> My Assignments
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'employees:schedules' %}">
+                            <i class="fas fa-calendar-alt"></i> Work Schedule
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'employees:payslips' %}">
+                            <i class="fas fa-file-invoice-dollar"></i> Payslips
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'employees:profile_view' %}">
+                            <i class="fas fa-user"></i> Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'employees:cv_view' %}">
+                            <i class="fas fa-file-alt"></i> My CV
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">
+                    <i class="fas fa-file-alt me-2"></i>
+                    {% if is_new %}{% trans "Create Your CV" %}{% else %}{% trans "Update Your CV" %}{% endif %}
+                </h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        {% if not is_new %}
+                        <a href="{% url 'employees:cv_view' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-eye me-1"></i>{% trans "View CV" %}
+                        </a>
+                        {% endif %}
+                        <a href="{% url 'employees:profile_view' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-arrow-left me-1"></i>{% trans "Back to Profile" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-edit me-2"></i>
+                                {% if is_new %}{% trans "Create Your Professional CV" %}{% else %}{% trans "Update Your Professional CV" %}{% endif %}
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+
+                                <!-- Core Information -->
+                                <div class="row mb-4">
+                                    <div class="col-12">
+                                        <h6 class="text-primary border-bottom pb-2 mb-3">
+                                            <i class="fas fa-star me-1"></i>{% trans "Core Information (Required)" %}
+                                        </h6>
+                                    </div>
+                                    <div class="col-md-12 mb-3">
+                                        <label for="{{ form.education.id_for_label }}" class="form-label">
+                                            <strong>{{ form.education.label }}</strong>
+                                        </label>
+                                        {{ form.education }}
+                                        <div class="form-text">{{ form.education.help_text }}</div>
+                                        {% if form.education.errors %}
+                                            <div class="text-danger">{{ form.education.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-12 mb-3">
+                                        <label for="{{ form.experience.id_for_label }}" class="form-label">
+                                            <strong>{{ form.experience.label }}</strong>
+                                        </label>
+                                        {{ form.experience }}
+                                        <div class="form-text">{{ form.experience.help_text }}</div>
+                                        {% if form.experience.errors %}
+                                            <div class="text-danger">{{ form.experience.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-12 mb-3">
+                                        <label for="{{ form.skills.id_for_label }}" class="form-label">
+                                            <strong>{{ form.skills.label }}</strong>
+                                        </label>
+                                        {{ form.skills }}
+                                        <div class="form-text">{{ form.skills.help_text }}</div>
+                                        {% if form.skills.errors %}
+                                            <div class="text-danger">{{ form.skills.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- Personal Information -->
+                                <div class="row mb-4">
+                                    <div class="col-12">
+                                        <h6 class="text-info border-bottom pb-2 mb-3">
+                                            <i class="fas fa-user me-1"></i>{% trans "Personal Information" %}
+                                        </h6>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.date_of_birth.id_for_label }}" class="form-label">{{ form.date_of_birth.label }}</label>
+                                        {{ form.date_of_birth }}
+                                        {% if form.date_of_birth.errors %}
+                                            <div class="text-danger">{{ form.date_of_birth.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.civil_status.id_for_label }}" class="form-label">{{ form.civil_status.label }}</label>
+                                        {{ form.civil_status }}
+                                        {% if form.civil_status.errors %}
+                                            <div class="text-danger">{{ form.civil_status.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.place_of_birth.id_for_label }}" class="form-label">{{ form.place_of_birth.label }}</label>
+                                        {{ form.place_of_birth }}
+                                        {% if form.place_of_birth.errors %}
+                                            <div class="text-danger">{{ form.place_of_birth.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.place_of_residence.id_for_label }}" class="form-label">{{ form.place_of_residence.label }}</label>
+                                        {{ form.place_of_residence }}
+                                        {% if form.place_of_residence.errors %}
+                                            <div class="text-danger">{{ form.place_of_residence.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-12 mb-3">
+                                        <label for="{{ form.contacts.id_for_label }}" class="form-label">{{ form.contacts.label }}</label>
+                                        {{ form.contacts }}
+                                        {% if form.contacts.errors %}
+                                            <div class="text-danger">{{ form.contacts.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- Professional Details -->
+                                <div class="row mb-4">
+                                    <div class="col-12">
+                                        <h6 class="text-success border-bottom pb-2 mb-3">
+                                            <i class="fas fa-briefcase me-1"></i>{% trans "Professional Details" %}
+                                        </h6>
+                                    </div>
+                                    <div class="col-md-12 mb-3">
+                                        <label for="{{ form.professional_experience.id_for_label }}" class="form-label">{{ form.professional_experience.label }}</label>
+                                        {{ form.professional_experience }}
+                                        <div class="form-text">{{ form.professional_experience.help_text }}</div>
+                                        {% if form.professional_experience.errors %}
+                                            <div class="text-danger">{{ form.professional_experience.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-12 mb-3">
+                                        <label for="{{ form.languages.id_for_label }}" class="form-label">{{ form.languages.label }}</label>
+                                        {{ form.languages }}
+                                        <div class="form-text">{{ form.languages.help_text }}</div>
+                                        {% if form.languages.errors %}
+                                            <div class="text-danger">{{ form.languages.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- Additional Information -->
+                                <div class="row mb-4">
+                                    <div class="col-12">
+                                        <h6 class="text-secondary border-bottom pb-2 mb-3">
+                                            <i class="fas fa-plus-circle me-1"></i>{% trans "Additional Information" %}
+                                        </h6>
+                                    </div>
+                                    <div class="col-md-12 mb-3">
+                                        <label for="{{ form.characteristics.id_for_label }}" class="form-label">{{ form.characteristics.label }}</label>
+                                        {{ form.characteristics }}
+                                        <div class="form-text">{{ form.characteristics.help_text }}</div>
+                                        {% if form.characteristics.errors %}
+                                            <div class="text-danger">{{ form.characteristics.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-12 mb-3">
+                                        <label for="{{ form.other_relevant_information.id_for_label }}" class="form-label">{{ form.other_relevant_information.label }}</label>
+                                        {{ form.other_relevant_information }}
+                                        <div class="form-text">{{ form.other_relevant_information.help_text }}</div>
+                                        {% if form.other_relevant_information.errors %}
+                                            <div class="text-danger">{{ form.other_relevant_information.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-12 mb-3">
+                                        <label for="{{ form.hobby.id_for_label }}" class="form-label">{{ form.hobby.label }}</label>
+                                        {{ form.hobby }}
+                                        <div class="form-text">{{ form.hobby.help_text }}</div>
+                                        {% if form.hobby.errors %}
+                                            <div class="text-danger">{{ form.hobby.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- CV Attachment -->
+                                <div class="row mb-4">
+                                    <div class="col-12">
+                                        <h6 class="text-warning border-bottom pb-2 mb-3">
+                                            <i class="fas fa-paperclip me-1"></i>{% trans "CV Document" %}
+                                        </h6>
+                                    </div>
+                                    <div class="col-md-12 mb-3">
+                                        <label for="{{ form.attachment.id_for_label }}" class="form-label">{{ form.attachment.label }}</label>
+                                        {{ form.attachment }}
+                                        <div class="form-text">{{ form.attachment.help_text }}</div>
+                                        {% if cv.attachment %}
+                                        <div class="mt-2">
+                                            <small class="text-muted">
+                                                {% trans "Current file:" %}
+                                                <a href="{{ cv.attachment.url }}" target="_blank" class="text-primary">
+                                                    <i class="fas fa-file me-1"></i>{{ cv.attachment.name|truncatechars:50 }}
+                                                </a>
+                                            </small>
+                                        </div>
+                                        {% endif %}
+                                        {% if form.attachment.errors %}
+                                            <div class="text-danger">{{ form.attachment.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- Form Actions -->
+                                <div class="row">
+                                    <div class="col-12">
+                                        <hr>
+                                        <div class="d-flex justify-content-end gap-2">
+                                            <a href="{% url 'employees:profile_view' %}" class="btn btn-secondary">
+                                                <i class="fas fa-times me-1"></i>{% trans "Cancel" %}
+                                            </a>
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-save me-1"></i>
+                                                {% if is_new %}{% trans "Create CV" %}{% else %}{% trans "Update CV" %}{% endif %}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<style>
+.sidebar {
+    background-color: #f8f9fa;
+    border-right: 1px solid #dee2e6;
+    min-height: calc(100vh - 56px);
+}
+
+.sidebar .nav-link {
+    color: #495057;
+    padding: 0.75rem 1rem;
+    border-radius: 0.375rem;
+    margin: 0.125rem 0.5rem;
+}
+
+.sidebar .nav-link:hover {
+    background-color: #e9ecef;
+    color: #495057;
+}
+
+.sidebar .nav-link.active {
+    background-color: #0d6efd;
+    color: white;
+}
+
+.sidebar .nav-link i {
+    width: 16px;
+    margin-right: 8px;
+}
+
+.card {
+    transition: box-shadow 0.2s ease-in-out;
+}
+
+.form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.border-bottom {
+    border-bottom: 2px solid #e9ecef !important;
+}
+</style>
+{% endblock %}

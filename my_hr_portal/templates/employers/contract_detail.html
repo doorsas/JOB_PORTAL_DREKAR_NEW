@@ -1,0 +1,401 @@
+{% extends 'core/base1.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Contract Details" %} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="card-title mb-0">
+                            <i class="fas fa-file-contract me-2"></i>{% trans "Contract Details" %}
+                        </h3>
+                        <p class="text-muted mb-0 mt-1">{{ contract.get_contract_type_display }} - {% trans "Created" %} {{ contract.created_at|date:"M d, Y" }}</p>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        {% if contract.status == 'DRAFT' %}
+                            <span class="badge bg-secondary">{% trans "Draft" %}</span>
+                        {% elif contract.status == 'PENDING_SIGNATURE' %}
+                            <span class="badge bg-warning text-dark">{% trans "Pending" %}</span>
+                        {% elif contract.status == 'ACTIVE' %}
+                            <span class="badge bg-success">{% trans "Active" %}</span>
+                        {% elif contract.status == 'EXPIRED' %}
+                            <span class="badge bg-danger">{% trans "Expired" %}</span>
+                        {% elif contract.status == 'CANCELLED' %}
+                            <span class="badge bg-dark">{% trans "Cancelled" %}</span>
+                        {% endif %}
+                        <a href="{% url 'employers:contracts_list' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>{% trans "Back to Contracts" %}
+                        </a>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                        <!-- Main Contract Information -->
+                        <div class="col-lg-8">
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">
+                                        <i class="fas fa-info-circle me-2"></i>{% trans "Contract Information" %}
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <div class="p-3 bg-light rounded">
+                                                <label class="fw-bold text-muted small text-uppercase">{% trans "Contract Type" %}</label>
+                                                <div class="mt-1">
+                                                    <i class="fas fa-file-alt text-primary me-2"></i>
+                                                    {{ contract.get_contract_type_display }}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <div class="p-3 bg-light rounded">
+                                                <label class="fw-bold text-muted small text-uppercase">{% trans "Template Used" %}</label>
+                                                <div class="mt-1">
+                                                    {% if contract.template_used %}
+                                                        <i class="fas fa-template text-secondary me-2"></i>
+                                                        {{ contract.template_used.name }}
+                                                    {% else %}
+                                                        <span class="text-muted">{% trans "Custom Contract" %}</span>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <div class="p-3 bg-light rounded">
+                                                <label class="fw-bold text-muted small text-uppercase">{% trans "Effective Date" %}</label>
+                                                <div class="mt-1">
+                                                    <i class="fas fa-calendar text-success me-2"></i>
+                                                    {{ contract.effective_date|date:"F d, Y" }}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <div class="p-3 bg-light rounded">
+                                                <label class="fw-bold text-muted small text-uppercase">{% trans "Expiry Date" %}</label>
+                                                <div class="mt-1">
+                                                    {% if contract.expiry_date %}
+                                                        <i class="fas fa-calendar-times text-warning me-2"></i>
+                                                        {{ contract.expiry_date|date:"F d, Y" }}
+                                                    {% else %}
+                                                        <i class="fas fa-infinity text-info me-2"></i>
+                                                        {% trans "Indefinite" %}
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {% if contract.signed_date %}
+                                        <div class="col-md-6">
+                                            <div class="p-3 bg-light rounded">
+                                                <label class="fw-bold text-muted small text-uppercase">{% trans "Signed Date" %}</label>
+                                                <div class="mt-1">
+                                                    <i class="fas fa-pen text-success me-2"></i>
+                                                    {{ contract.signed_date|date:"F d, Y" }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+
+                                        <div class="col-md-6">
+                                            <div class="p-3 bg-light rounded">
+                                                <label class="fw-bold text-muted small text-uppercase">{% trans "Created" %}</label>
+                                                <div class="mt-1">
+                                                    <i class="fas fa-clock text-secondary me-2"></i>
+                                                    {{ contract.created_at|date:"F d, Y \a\t g:i A" }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Document Section -->
+                            {% if contract.document_file %}
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">
+                                        <i class="fas fa-file-pdf me-2"></i>{% trans "Contract Document" %}
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="text-center p-4 border-2 border-dashed rounded bg-light">
+                                        <i class="fas fa-file-pdf text-danger fa-3x mb-3"></i>
+                                        <h5>{% trans "Contract Document" %}</h5>
+                                        <p class="text-muted">{% trans "Signed contract document" %}</p>
+                                        <div class="d-flex gap-2 justify-content-center mt-3">
+                                            <a href="{{ contract.document_file.url }}" target="_blank"
+                                               class="btn btn-primary">
+                                                <i class="fas fa-external-link-alt me-2"></i>{% trans "View Document" %}
+                                            </a>
+                                            <a href="{{ contract.document_file.url }}" download
+                                               class="btn btn-outline-primary">
+                                                <i class="fas fa-download me-2"></i>{% trans "Download" %}
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Sidebar -->
+                        <div class="col-lg-4">
+                            <!-- Status Actions -->
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">
+                                        <i class="fas fa-tasks me-2"></i>{% trans "Actions" %}
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-grid gap-2">
+                                        {% if contract.status == 'DRAFT' %}
+                                            <button onclick="updateContractStatus('PENDING_SIGNATURE')"
+                                                    class="btn btn-success">
+                                                <i class="fas fa-paper-plane me-2"></i>
+                                                {% trans "Send for Signature" %}
+                                            </button>
+                                            <button onclick="updateContractStatus('CANCELLED')"
+                                                    class="btn btn-danger">
+                                                <i class="fas fa-times me-2"></i>
+                                                {% trans "Cancel Contract" %}
+                                            </button>
+                                        {% elif contract.status == 'PENDING_SIGNATURE' %}
+                                            <button onclick="updateContractStatus('ACTIVE')"
+                                                    class="btn btn-primary">
+                                                <i class="fas fa-check me-2"></i>
+                                                {% trans "Mark as Active" %}
+                                            </button>
+                                            <button onclick="updateContractStatus('CANCELLED')"
+                                                    class="btn btn-danger">
+                                                <i class="fas fa-times me-2"></i>
+                                                {% trans "Cancel Contract" %}
+                                            </button>
+                                        {% elif contract.status == 'ACTIVE' %}
+                                            {% if contract.expiry_date %}
+                                                <button onclick="updateContractStatus('EXPIRED')"
+                                                        class="btn btn-warning">
+                                                    <i class="fas fa-calendar-times me-2"></i>
+                                                    {% trans "Mark as Expired" %}
+                                                </button>
+                                            {% endif %}
+                                            <button onclick="updateContractStatus('CANCELLED')"
+                                                    class="btn btn-danger">
+                                                <i class="fas fa-ban me-2"></i>
+                                                {% trans "Terminate Contract" %}
+                                            </button>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Company Information -->
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">
+                                        <i class="fas fa-building me-2"></i>{% trans "Company Information" %}
+                                    </h5>
+                                </div>
+                                <div class="card-body text-center">
+                                    {% if employer_profile.logo %}
+                                        <img src="{{ employer_profile.logo.url }}" alt="Company Logo"
+                                             class="rounded-circle mb-3" style="width: 80px; height: 80px; object-fit: cover;">
+                                    {% endif %}
+                                    <h5>{{ employer_profile.company_name }}</h5>
+                                    <p class="text-muted mb-3">{{ employer_profile.registration_code }}</p>
+
+                                    <div class="text-start">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <i class="fas fa-user text-primary me-2" style="width: 20px;"></i>
+                                            <span>{{ employer_profile.contact_person_name }}</span>
+                                        </div>
+                                        <div class="d-flex align-items-center mb-2">
+                                            <i class="fas fa-envelope text-primary me-2" style="width: 20px;"></i>
+                                            <span>{{ employer_profile.contact_person_email }}</span>
+                                        </div>
+                                        {% if employer_profile.phone %}
+                                        <div class="d-flex align-items-center mb-2">
+                                            <i class="fas fa-phone text-primary me-2" style="width: 20px;"></i>
+                                            <span>{{ employer_profile.phone }}</span>
+                                        </div>
+                                        {% endif %}
+                                        {% if employer_profile.address %}
+                                        <div class="d-flex align-items-center mb-2">
+                                            <i class="fas fa-map-marker-alt text-primary me-2" style="width: 20px;"></i>
+                                            <span>{{ employer_profile.address }}</span>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Contract Timeline -->
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">
+                                        <i class="fas fa-history me-2"></i>{% trans "Contract Timeline" %}
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="timeline-contract">
+                                        <div class="timeline-item-contract completed">
+                                            <div class="timeline-icon-contract bg-primary">
+                                                <i class="fas fa-plus"></i>
+                                            </div>
+                                            <div class="timeline-content-contract">
+                                                <h6 class="mb-1">{% trans "Contract Created" %}</h6>
+                                                <small class="text-muted">{{ contract.created_at|date:"M d, Y \a\t g:i A" }}</small>
+                                            </div>
+                                        </div>
+
+                                        {% if contract.status != 'DRAFT' %}
+                                        <div class="timeline-item-contract completed">
+                                            <div class="timeline-icon-contract bg-primary">
+                                                <i class="fas fa-paper-plane"></i>
+                                            </div>
+                                            <div class="timeline-content-contract">
+                                                <h6 class="mb-1">{% trans "Sent for Signature" %}</h6>
+                                                <small class="text-muted">{% trans "Status updated" %}</small>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+
+                                        {% if contract.signed_date %}
+                                        <div class="timeline-item-contract completed">
+                                            <div class="timeline-icon-contract bg-success">
+                                                <i class="fas fa-pen"></i>
+                                            </div>
+                                            <div class="timeline-content-contract">
+                                                <h6 class="mb-1">{% trans "Contract Signed" %}</h6>
+                                                <small class="text-muted">{{ contract.signed_date|date:"M d, Y" }}</small>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+
+                                        {% if contract.status == 'ACTIVE' %}
+                                        <div class="timeline-item-contract completed">
+                                            <div class="timeline-icon-contract bg-success">
+                                                <i class="fas fa-check"></i>
+                                            </div>
+                                            <div class="timeline-content-contract">
+                                                <h6 class="mb-1">{% trans "Contract Active" %}</h6>
+                                                <small class="text-muted">{{ contract.effective_date|date:"M d, Y" }}</small>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+
+                                        {% if contract.expiry_date and contract.status == 'ACTIVE' %}
+                                        <div class="timeline-item-contract pending">
+                                            <div class="timeline-icon-contract bg-warning">
+                                                <i class="fas fa-calendar-times"></i>
+                                            </div>
+                                            <div class="timeline-content-contract">
+                                                <h6 class="mb-1">{% trans "Contract Expires" %}</h6>
+                                                <small class="text-muted">{{ contract.expiry_date|date:"M d, Y" }}</small>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.timeline-contract {
+    position: relative;
+}
+
+.timeline-item-contract {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.timeline-item-contract::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 35px;
+    bottom: -15px;
+    width: 2px;
+    background: #dee2e6;
+}
+
+.timeline-item-contract:last-child::before {
+    display: none;
+}
+
+.timeline-icon-contract {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.8rem;
+    margin-right: 1rem;
+    flex-shrink: 0;
+}
+
+.timeline-content-contract h6 {
+    font-weight: 600;
+}
+</style>
+
+<script>
+function updateContractStatus(newStatus) {
+    const statusMessages = {
+        'PENDING_SIGNATURE': 'send this contract for signature',
+        'ACTIVE': 'activate this contract',
+        'EXPIRED': 'mark this contract as expired',
+        'CANCELLED': 'cancel this contract'
+    };
+
+    const message = statusMessages[newStatus] || 'update this contract status';
+
+    if (!confirm(`Are you sure you want to ${message}?`)) {
+        return;
+    }
+
+    fetch(`/employers/contracts/{{ contract.id }}/update-status/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        },
+        body: JSON.stringify({
+            status: newStatus
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error updating contract status: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while updating the contract status.');
+    });
+}
+</script>
+{% endblock %}

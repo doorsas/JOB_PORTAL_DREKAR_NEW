@@ -114,6 +114,9 @@ class SalaryBenchmark(TimeStampedModel):
 
     class Meta:
         unique_together = ('profession', 'location', 'experience_level')
+        
+    def __str__(self):
+        return f"{self.profession.name} in {self.location.city} ({self.get_experience_level_display()})"
 
 
 # 3. TRANSACTIONAL & LOGIC MODELS
@@ -149,6 +152,13 @@ class Contract(TimeStampedModel):
         if sum(p is not None for p in client_profiles) != 1:
             raise ValidationError("Contract must be linked to exactly one client profile (Employer or EOR).")
 
+    def __str__(self):
+        client_name = ""
+        if self.employer_profile:
+            client_name = self.employer_profile.company_name
+        elif self.eor_client_profile:
+            client_name = self.eor_client_profile.company_name
+        return f"{self.get_contract_type_display()} for {client_name}"
 
 class Invoice(TimeStampedModel):
     class InvoiceStatus(models.TextChoices):

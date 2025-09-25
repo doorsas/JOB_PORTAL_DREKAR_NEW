@@ -225,6 +225,7 @@
                             {% elif application.status == 'REVIEWED' %}bg-info
                             {% elif application.status == 'INVITED' %}bg-warning
                             {% elif application.status == 'HIRED' %}bg-success
+                            {% elif application.status == 'RESERVED' %}bg-secondary
                             {% elif application.status == 'REJECTED' %}bg-danger
                             {% endif %}" style="font-size: 1rem; padding: 0.6rem 1.2rem;">
                             {{ application.get_status_display }}
@@ -251,6 +252,12 @@
                             {% if application.status != 'HIRED' %}
                             <button type="submit" name="status" value="HIRED" class="btn btn-outline-success btn-sm">
                                 <i class="fas fa-check-circle"></i> {% trans "Hire Candidate" %}
+                            </button>
+                            {% endif %}
+
+                            {% if application.status != 'RESERVED' %}
+                            <button type="submit" name="status" value="RESERVED" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-bookmark"></i> {% trans "Reserve Candidate" %}
                             </button>
                             {% endif %}
 

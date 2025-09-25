@@ -6,8 +6,9 @@ from django.contrib import messages
 from django.http import JsonResponse, HttpResponse
 from django.core.paginator import Paginator
 from django.db.models import Q
-from .models import EmployeeProfile, Document,Payslip,WorkSchedule,Timesheet
-from .forms import EmployeeProfileForm, JobSearchForm, JobApplicationForm, DocumentUploadForm,WorkScheduleForm, TimesheetForm
+from django.utils import timezone
+from .models import EmployeeProfile, Document, Payslip, WorkSchedule, Timesheet, CV
+from .forms import EmployeeProfileForm, JobSearchForm, JobApplicationForm, DocumentUploadForm, WorkScheduleForm, TimesheetForm, CVForm
 from employers.models import JobPosting, Application
 from django.views.generic import CreateView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
@@ -24,6 +25,31 @@ def payslips_view(request):
     profile = getattr(request.user, 'employeeprofile', None)
     payslips = profile.payslips.order_by('-issue_date') if profile else []
     return render(request, 'employees/payslips.html', {'payslips': payslips})
+
+
+@login_required
+@user_passes_test(is_employee)
+def payslip_detail(request, payslip_id):
+    """View payslip details"""
+    try:
+        employee_profile = request.user.employeeprofile
+    except EmployeeProfile.DoesNotExist:
+        messages.error(request, 'Employee profile not found.')
+        return redirect('employees:dashboard')
+
+    payslip = get_object_or_404(Payslip, id=payslip_id, employee=employee_profile)
+
+    # Mark payslip as viewed
+    if not payslip.viewed_at:
+        payslip.viewed_at = timezone.now()
+        if payslip.status == 'SENT':
+            payslip.status = 'VIEWED'
+        payslip.save()
+
+    context = {
+        'payslip': payslip,
+    }
+    return render(request, 'employees/payslip_detail.html', context)
 
 class WorkScheduleCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = WorkSchedule
@@ -100,31 +126,97 @@ def submit_timesheet(request, schedule_id=None):
 @login_required
 @user_passes_test(is_employee)
 def dashboard(request):
-    """Employee dashboard view"""
-    context = {
-        'user': request.user,
-        'has_profile': hasattr(request.user, 'employeeprofile'),
+    """Enhanced employee dashboard view with assignment tracking"""
+    try:
+        employee_profile = request.user.employeeprofile
+        has_profile = True
+    except EmployeeProfile.DoesNotExist:
+        return render(request, 'employees/dashboard.html', {
+            'user': request.user,
+            'has_profile': False,
+        })
+
+    from django.utils import timezone
+    from employers.models import Assignment
+    today = timezone.now().date()
+
+    # Assignment queries with time-based filtering
+    current_assignments = Assignment.objects.filter(
+        employee=employee_profile,
+        status=Assignment.AssignmentStatus.ACTIVE,
+        start_date__lte=today
+    ).exclude(
+        actual_end_date__lt=today
+    ).select_related('employer', 'employment_contract')
+
+    future_assignments = Assignment.objects.filter(
+        employee=employee_profile,
+        status=Assignment.AssignmentStatus.PENDING_START,
+        start_date__gt=today
+    ).select_related('employer', 'employment_contract')
+
+    past_assignments = Assignment.objects.filter(
+        employee=employee_profile,
+        status__in=[Assignment.AssignmentStatus.COMPLETED, Assignment.AssignmentStatus.TERMINATED]
+    ).select_related('employer', 'employment_contract')[:5]  # Latest 5
+
+    # Check if CV is uploaded
+    cv_document = Document.objects.filter(
+        employee=employee_profile,
+        document_type=Document.DocumentType.CV
+    ).order_by('-created_at').first()
+
+    # Statistics
+    stats = {
+        'total_applications': employee_profile.applications.count(),
+        'pending_applications': employee_profile.applications.filter(status='SUBMITTED').count(),
+        'total_assignments': Assignment.objects.filter(employee=employee_profile).count(),
+        'active_assignments': current_assignments.count(),
+        'completed_assignments': past_assignments.count(),
+        'total_employers': Assignment.objects.filter(employee=employee_profile).values('employer').distinct().count(),
     }
 
-    if context['has_profile']:
-        profile = request.user.employeeprofile
-        context['profile'] = profile
+    # Recent work schedules
+    recent_schedules = WorkSchedule.objects.filter(
+        employee=employee_profile,
+        date__gte=today - timezone.timedelta(days=30)
+    ).select_related('assignment__employer').order_by('-date')[:10]
 
-        # Check if CV is uploaded
-        cv_document = Document.objects.filter(
-            employee=profile,
-            document_type=Document.DocumentType.CV
-        ).order_by('-created_at').first()
-        context['has_cv'] = cv_document is not None
+    # Pending timesheets
+    pending_timesheets = Timesheet.objects.filter(
+        employee=employee_profile,
+        status='PENDING'
+    ).select_related('assignment__employer').order_by('-date')
 
-        # Add some basic stats
-        context.update({
-            'total_applications': profile.applications.count(),
-            'pending_applications': profile.applications.filter(status='SUBMITTED').count(),
-            'total_assignments': profile.assignments.count(),
-            'active_assignments': profile.assignments.filter(status='ACTIVE').count(),
-            'payslips': profile.payslips.order_by('-issue_date') if hasattr(profile, 'payslips') else [],
-        })
+    # Get CV information
+    cv_document = Document.objects.filter(
+        employee=employee_profile,
+        document_type='CV'
+    ).first()
+
+    # Check if CV model exists
+    try:
+        cv = CV.objects.get(employee=employee_profile)
+    except CV.DoesNotExist:
+        cv = None
+
+    context = {
+        'user': request.user,
+        'has_profile': has_profile,
+        'profile': employee_profile,
+        'has_cv': cv_document is not None,
+        'cv': cv,
+        'current_assignments': current_assignments,
+        'future_assignments': future_assignments,
+        'past_assignments': past_assignments,
+        'recent_schedules': recent_schedules,
+        'pending_timesheets': pending_timesheets,
+        # Legacy stats for existing dashboard template
+        'total_applications': stats['total_applications'],
+        'pending_applications': stats['pending_applications'],
+        'total_assignments': stats['total_assignments'],
+        'active_assignments': stats['active_assignments'],
+    }
 
     return render(request, 'employees/dashboard.html', context)
 
@@ -187,9 +279,16 @@ def profile_view(request):
         document_type=Document.DocumentType.CV
     ).order_by('-created_at').first()
 
+    # Get the CV model instance
+    try:
+        cv = CV.objects.get(employee=profile)
+    except CV.DoesNotExist:
+        cv = None
+
     context = {
         'profile': profile,
-        'cv_document': cv_document
+        'cv_document': cv_document,
+        'cv': cv
     }
 
     return render(request, 'employees/profile_view.html', context)
@@ -229,7 +328,21 @@ def cv_download(request):
 def job_search(request):
     """Search for available job postings"""
     form = JobSearchForm(request.GET or None)
+
+    # Debug: Show all jobs first
+    all_jobs = JobPosting.objects.all()
+    print(f"DEBUG: Total jobs in database: {all_jobs.count()}")
+    for job in all_jobs:
+        print(f"DEBUG: Job '{job.title}' has status '{job.status}'")
+
+    # Filter for OPEN jobs
     jobs = JobPosting.objects.filter(status='OPEN').select_related('employer', 'location').prefetch_related('required_skills', 'required_qualifications')
+    print(f"DEBUG: OPEN jobs found: {jobs.count()}")
+
+    # Temporary: if no OPEN jobs, show all jobs for debugging
+    if not jobs.exists():
+        print("DEBUG: No OPEN jobs found, showing all jobs for debugging")
+        jobs = JobPosting.objects.all().select_related('employer', 'location').prefetch_related('required_skills', 'required_qualifications')
 
     # Apply search filters
     if form.is_valid():
@@ -360,10 +473,14 @@ def apply_for_job(request, job_id):
             employee_profile=employee_profile
         )
 
+    # Check if employee has uploaded CV
+    has_cv = employee_profile.documents.filter(document_type='CV').exists()
+
     context = {
         'form': form,
         'job': job,
-        'employee_profile': employee_profile
+        'employee_profile': employee_profile,
+        'has_cv': has_cv
     }
 
     return render(request, 'employees/apply_for_job.html', context)
@@ -505,3 +622,236 @@ def document_delete(request, document_id):
     }
 
     return render(request, 'employees/document_delete.html', context)
+
+
+@login_required
+@user_passes_test(is_employee)
+def schedules_view(request):
+    """View employee work schedules"""
+    try:
+        profile = request.user.employeeprofile
+    except EmployeeProfile.DoesNotExist:
+        messages.info(request, 'Please complete your employee profile first.')
+        return redirect('employees:profile_setup')
+
+    schedules = WorkSchedule.objects.filter(employee=profile).order_by('-date')
+
+    # Filter by status if requested
+    status_filter = request.GET.get('status')
+    if status_filter:
+        schedules = schedules.filter(status=status_filter)
+
+    # Pagination
+    paginator = Paginator(schedules, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'page_obj': page_obj,
+        'schedules': page_obj,
+        'status_filter': status_filter,
+        'profile': profile
+    }
+
+    return render(request, 'employees/schedules.html', context)
+
+
+@login_required
+@user_passes_test(is_employee)
+def submit_timesheet(request, schedule_id):
+    """Submit a timesheet for a work schedule"""
+    try:
+        profile = request.user.employeeprofile
+    except EmployeeProfile.DoesNotExist:
+        messages.error(request, 'Profile not found.')
+        return redirect('employees:profile_setup')
+
+    # Get the work schedule
+    schedule = get_object_or_404(WorkSchedule, id=schedule_id, employee=profile)
+
+    # Check if timesheet already exists
+    existing_timesheet = Timesheet.objects.filter(work_schedule=schedule).first()
+
+    if request.method == 'POST':
+        form = TimesheetForm(request.POST, instance=existing_timesheet)
+        if form.is_valid():
+            timesheet = form.save(commit=False)
+            timesheet.work_schedule = schedule
+            timesheet.employee = profile
+            timesheet.save()
+
+            # Update schedule status to completed
+            schedule.status = 'COMPLETED'
+            schedule.save()
+
+            messages.success(request, 'Timesheet submitted successfully.')
+            return redirect('employees:schedules')
+    else:
+        form = TimesheetForm(instance=existing_timesheet)
+
+    context = {
+        'form': form,
+        'schedule': schedule,
+        'existing_timesheet': existing_timesheet
+    }
+
+    return render(request, 'employees/submit_timesheet.html', context)
+
+
+@login_required
+@user_passes_test(is_employee)
+def my_assignments(request):
+    """View all assignments for the employee"""
+    try:
+        employee_profile = request.user.employeeprofile
+    except EmployeeProfile.DoesNotExist:
+        messages.error(request, 'Profile not found.')
+        return redirect('employees:profile_setup')
+
+    from employers.models import Assignment
+    filter_status = request.GET.get('status', 'all')
+
+    assignments = Assignment.objects.filter(employee=employee_profile).select_related('employer', 'employment_contract')
+
+    if filter_status == 'current':
+        assignments = assignments.filter(status=Assignment.AssignmentStatus.ACTIVE)
+    elif filter_status == 'future':
+        assignments = assignments.filter(status=Assignment.AssignmentStatus.PENDING_START)
+    elif filter_status == 'past':
+        assignments = assignments.filter(status__in=[Assignment.AssignmentStatus.COMPLETED, Assignment.AssignmentStatus.TERMINATED])
+
+    assignments = assignments.order_by('-start_date')
+
+    # Pagination
+    paginator = Paginator(assignments, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'page_obj': page_obj,
+        'assignments': page_obj,
+        'filter_status': filter_status,
+        'employee_profile': employee_profile
+    }
+
+    return render(request, 'employees/my_assignments.html', context)
+
+
+@login_required
+@user_passes_test(is_employee)
+def assignment_detail(request, assignment_id):
+    """View assignment details for employee"""
+    try:
+        employee_profile = request.user.employeeprofile
+    except EmployeeProfile.DoesNotExist:
+        messages.error(request, 'Profile not found.')
+        return redirect('employees:profile_setup')
+
+    from employers.models import Assignment
+    assignment = get_object_or_404(Assignment, id=assignment_id, employee=employee_profile)
+
+    # Get related work schedules and timesheets
+    work_schedules = WorkSchedule.objects.filter(assignment=assignment).order_by('-date')[:10]
+    timesheets = Timesheet.objects.filter(assignment=assignment).order_by('-date')[:10]
+    payslips = assignment.payslips.order_by('-period_start_date')[:10]
+
+    context = {
+        'assignment': assignment,
+        'work_schedules': work_schedules,
+        'timesheets': timesheets,
+        'payslips': payslips,
+        'employee_profile': employee_profile,
+    }
+
+    return render(request, 'employees/assignment_detail.html', context)
+
+
+@login_required
+@user_passes_test(is_employee)
+def cv_form(request):
+    """Create or update employee CV"""
+    try:
+        employee_profile = request.user.employeeprofile
+    except EmployeeProfile.DoesNotExist:
+        messages.error(request, 'Please complete your employee profile first.')
+        return redirect('employees:profile_setup')
+
+    # Get or create CV
+    cv, created = CV.objects.get_or_create(employee=employee_profile)
+
+    if request.method == 'POST':
+        form = CVForm(request.POST, request.FILES, instance=cv)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Your CV has been saved successfully!')
+            return redirect('employees:cv_view')
+    else:
+        form = CVForm(instance=cv)
+
+    context = {
+        'form': form,
+        'cv': cv,
+        'employee_profile': employee_profile,
+        'is_new': created
+    }
+
+    return render(request, 'employees/cv_form.html', context)
+
+
+@login_required
+@user_passes_test(is_employee)
+def cv_view(request):
+    """View employee CV"""
+    try:
+        employee_profile = request.user.employeeprofile
+    except EmployeeProfile.DoesNotExist:
+        messages.error(request, 'Please complete your employee profile first.')
+        return redirect('employees:profile_setup')
+
+    try:
+        cv = CV.objects.get(employee=employee_profile)
+    except CV.DoesNotExist:
+        messages.info(request, 'You haven\'t created your CV yet.')
+        return redirect('employees:cv_form')
+
+    context = {
+        'cv': cv,
+        'employee_profile': employee_profile
+    }
+
+    return render(request, 'employees/cv_view.html', context)
+
+
+@login_required
+@user_passes_test(is_employee)
+def cv_download(request):
+    """Download CV as PDF or redirect to attachment"""
+    try:
+        employee_profile = request.user.employeeprofile
+    except EmployeeProfile.DoesNotExist:
+        messages.error(request, 'Profile not found.')
+        return redirect('employees:profile_setup')
+
+    try:
+        cv = CV.objects.get(employee=employee_profile)
+    except CV.DoesNotExist:
+        messages.error(request, 'CV not found. Please create your CV first.')
+        return redirect('employees:cv_form')
+
+    # If there's an attachment, serve that
+    if cv.attachment:
+        from django.http import FileResponse
+        import os
+
+        file_path = cv.attachment.path
+        if os.path.exists(file_path):
+            response = FileResponse(
+                open(file_path, 'rb'),
+                as_attachment=True,
+                filename=f"{employee_profile.full_name}_CV.{cv.attachment.name.split('.')[-1]}"
+            )
+            return response
+
+    # Otherwise, render the CV as HTML for now (could be enhanced to generate PDF)
+    messages.info(request, 'No CV attachment found. Showing CV details below.')
+    return redirect('employees:cv_view')

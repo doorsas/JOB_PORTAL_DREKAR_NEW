@@ -1,7 +1,7 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
 from .models import JobPosting, EmployerProfile
-from core.models import Address, Qualification, Skill
+from core.models import Address, Qualification, Skill, Contract, ContractTemplate
 
 
 class JobPostingForm(forms.ModelForm):
@@ -240,3 +240,91 @@ class EmployerProfileForm(forms.ModelForm):
         if commit:
             instance.save()
         return instance
+
+
+class ContractForm(forms.ModelForm):
+    """Form for creating and editing contracts"""
+
+    class Meta:
+        model = Contract
+        fields = [
+            'contract_type', 'template_used', 'effective_date',
+            'expiry_date', 'document_file'
+        ]
+        widgets = {
+            'contract_type': forms.Select(attrs={
+                'class': 'form-control',
+                'required': True
+            }),
+            'template_used': forms.Select(attrs={
+                'class': 'form-control'
+            }),
+            'effective_date': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date',
+                'required': True
+            }),
+            'expiry_date': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date'
+            }),
+            'document_file': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': '.pdf,.doc,.docx'
+            })
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Filter active templates only
+        self.fields['template_used'].queryset = ContractTemplate.objects.filter(is_active=True)
+        self.fields['template_used'].empty_label = _('Select a template (optional)')
+
+        # Add help text
+        self.fields['contract_type'].help_text = _('Type of contract you want to create')
+        self.fields['template_used'].help_text = _('Pre-defined template to use as a base (optional)')
+        self.fields['effective_date'].help_text = _('When this contract becomes effective')
+        self.fields['expiry_date'].help_text = _('When this contract expires (optional for indefinite contracts)')
+        self.fields['document_file'].help_text = _('Upload signed contract document (PDF recommended)')
+
+        # Set field labels
+        self.fields['contract_type'].label = _('Contract Type')
+        self.fields['template_used'].label = _('Contract Template')
+        self.fields['effective_date'].label = _('Effective Date')
+        self.fields['expiry_date'].label = _('Expiry Date')
+        self.fields['document_file'].label = _('Contract Document')
+
+    def clean_expiry_date(self):
+        """Validate that expiry date is after effective date"""
+        effective_date = self.cleaned_data.get('effective_date')
+        expiry_date = self.cleaned_data.get('expiry_date')
+
+        if effective_date and expiry_date:
+            if expiry_date <= effective_date:
+                raise forms.ValidationError(
+                    _('Expiry date must be after the effective date.')
+                )
+
+        return expiry_date
+
+    def clean_document_file(self):
+        """Validate uploaded document file"""
+        document_file = self.cleaned_data.get('document_file')
+
+        if document_file:
+            # Check file size (max 10MB)
+            if document_file.size > 10 * 1024 * 1024:
+                raise forms.ValidationError(
+                    _('File size cannot exceed 10MB.')
+                )
+
+            # Check file extension
+            allowed_extensions = ['.pdf', '.doc', '.docx']
+            file_name = document_file.name.lower()
+            if not any(file_name.endswith(ext) for ext in allowed_extensions):
+                raise forms.ValidationError(
+                    _('Only PDF, DOC, and DOCX files are allowed.')
+                )
+
+        return document_file

@@ -144,23 +144,75 @@
                             <strong>{% trans "CV/Resume:" %}</strong>
                         </div>
                         <div class="col-sm-9">
-                            {% if cv_document %}
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-file-pdf text-danger me-2"></i>
-                                    <a href="{{ cv_document.file.url }}" class="me-3" target="_blank">
-                                        {{ cv_document.file.name|cut:"employee_documents/" }}
-                                    </a>
-                                    <small class="text-muted">
-                                        {% trans "Uploaded" %} {{ cv_document.created_at|date:"M d, Y" }}
-                                    </small>
+                            <div class="row g-2">
+                                <!-- Professional CV -->
+                                <div class="col-12">
+                                    <div class="card border-primary">
+                                        <div class="card-body p-3">
+                                            <h6 class="card-title text-primary mb-2">
+                                                <i class="fas fa-file-alt me-1"></i>{% trans "Professional CV" %}
+                                            </h6>
+                                            {% if cv %}
+                                                <p class="card-text small mb-2">
+                                                    {% if cv.is_complete %}
+                                                        <span class="badge bg-success">{% trans "Complete" %}</span>
+                                                    {% else %}
+                                                        <span class="badge bg-warning">{% trans "Incomplete" %}</span>
+                                                    {% endif %}
+                                                    {% trans "Last updated:" %} {{ cv.updated_at|date:"M d, Y" }}
+                                                </p>
+                                                <div class="d-flex gap-2">
+                                                    <a href="{% url 'employees:cv_view' %}" class="btn btn-sm btn-primary">
+                                                        <i class="fas fa-eye me-1"></i>{% trans "View CV" %}
+                                                    </a>
+                                                    <a href="{% url 'employees:cv_form' %}" class="btn btn-sm btn-outline-primary">
+                                                        <i class="fas fa-edit me-1"></i>{% trans "Edit" %}
+                                                    </a>
+                                                    {% if cv.attachment %}
+                                                    <a href="{% url 'employees:cv_download' %}" class="btn btn-sm btn-outline-success">
+                                                        <i class="fas fa-download me-1"></i>{% trans "Download" %}
+                                                    </a>
+                                                    {% endif %}
+                                                </div>
+                                            {% else %}
+                                                <p class="card-text small text-muted mb-2">{% trans "Create a comprehensive professional CV with detailed information about your background, education, and experience." %}</p>
+                                                <a href="{% url 'employees:cv_form' %}" class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-plus me-1"></i>{% trans "Create CV" %}
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
                                 </div>
-                            {% else %}
-                                <div class="text-muted">
-                                    <i class="fas fa-upload me-2"></i>
-                                    {% trans "No CV uploaded" %}
-                                    <a href="{% url 'employees:document_upload' %}" class="ms-2">{% trans "Upload now" %}</a>
+
+                                <!-- CV Document Upload -->
+                                <div class="col-12">
+                                    <div class="card border-secondary">
+                                        <div class="card-body p-3">
+                                            <h6 class="card-title text-secondary mb-2">
+                                                <i class="fas fa-file-pdf me-1"></i>{% trans "CV Document" %}
+                                            </h6>
+                                            {% if cv_document %}
+                                                <div class="d-flex align-items-center justify-content-between">
+                                                    <div>
+                                                        <i class="fas fa-file-pdf text-danger me-2"></i>
+                                                        <a href="{{ cv_document.file.url }}" target="_blank">
+                                                            {{ cv_document.file.name|cut:"employee_documents/" }}
+                                                        </a>
+                                                        <small class="text-muted d-block">
+                                                            {% trans "Uploaded" %} {{ cv_document.created_at|date:"M d, Y" }}
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            {% else %}
+                                                <p class="card-text small text-muted mb-2">{% trans "Upload a CV document file (PDF, DOC, DOCX)" %}</p>
+                                                <a href="{% url 'employees:document_upload' %}" class="btn btn-sm btn-secondary">
+                                                    <i class="fas fa-upload me-1"></i>{% trans "Upload Document" %}
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
                                 </div>
-                            {% endif %}
+                            </div>
                         </div>
                     </div>
                 </div>

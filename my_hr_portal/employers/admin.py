@@ -16,7 +16,7 @@ def generate_invoice_action(modeladmin, request, queryset):
 
 @admin.register(EmployerProfile)
 class EmployerProfileAdmin(admin.ModelAdmin):
-    list_display = ['company_name', 'contact_person_name', 'phone', 'internal_verification_status', 'has_logo']
+    list_display = ['id', 'company_name', 'contact_person_name', 'phone', 'internal_verification_status', 'has_logo']
     list_filter = ['internal_verification_status']
     search_fields = ['company_name', 'registration_code', 'contact_person_name', 'contact_person_email']
     fields = ['user', 'company_name', 'registration_code', 'address', 'contact_person_name',

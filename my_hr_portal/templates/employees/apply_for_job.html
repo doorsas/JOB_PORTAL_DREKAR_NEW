@@ -53,10 +53,14 @@
                                 </div>
                                 <div class="col-md-6">
                                     <p class="mb-1"><strong>{% trans "CV:" %}</strong>
-                                        {% if employee_profile.cv_file %}
-                                            <span class="text-success">{% trans "Uploaded" %}</span>
+                                        {% if has_cv %}
+                                            <span class="text-success">
+                                                <i class="fas fa-check-circle me-1"></i>{% trans "Uploaded" %}
+                                            </span>
                                         {% else %}
-                                            <span class="text-warning">{% trans "Not uploaded" %}</span>
+                                            <span class="text-warning">
+                                                <i class="fas fa-exclamation-circle me-1"></i>{% trans "Not uploaded" %}
+                                            </span>
                                         {% endif %}
                                     </p>
                                     {% if employee_profile.expected_salary %}
@@ -64,12 +68,12 @@
                                     {% endif %}
                                 </div>
                             </div>
-                            {% if not employee_profile.cv_file %}
+                            {% if not has_cv %}
                             <div class="alert alert-warning mt-2 mb-0">
                                 <small>
                                     <i class="fas fa-exclamation-triangle me-1"></i>
                                     {% trans "Consider uploading your CV to improve your application." %}
-                                    <a href="{% url 'employees:profile_setup' %}">{% trans "Upload now" %}</a>
+                                    <a href="{% url 'employees:document_upload' %}">{% trans "Upload now" %}</a>
                                 </small>
                             </div>
                             {% endif %}

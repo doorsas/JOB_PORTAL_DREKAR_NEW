@@ -1,0 +1,197 @@
+{% extends 'core/base1.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Work Schedules" %} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 1200px; margin: 0 auto; padding: 30px 0;">
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2 style="margin:0;">{% trans "Your Work Schedules" %}</h2>
+            <a href="{% url 'employees:schedule_create' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> {% trans "Add Schedule" %}
+            </a>
+        </div>
+        <div class="card-body">
+            <!-- Filter tabs -->
+            <div class="mb-3">
+                <ul class="nav nav-pills">
+                    <li class="nav-item">
+                        <a class="nav-link {% if not status_filter %}active{% endif %}"
+                           href="{% url 'employees:schedules' %}">
+                            {% trans "All" %}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if status_filter == 'PLANNED' %}active{% endif %}"
+                           href="{% url 'employees:schedules' %}?status=PLANNED">
+                            {% trans "Planned" %}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if status_filter == 'COMPLETED' %}active{% endif %}"
+                           href="{% url 'employees:schedules' %}?status=COMPLETED">
+                            {% trans "Completed" %}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if status_filter == 'CANCELED' %}active{% endif %}"
+                           href="{% url 'employees:schedules' %}?status=CANCELED">
+                            {% trans "Canceled" %}
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>{% trans "Date" %}</th>
+                            <th>{% trans "Start Time" %}</th>
+                            <th>{% trans "End Time" %}</th>
+                            <th>{% trans "Total Hours" %}</th>
+                            <th>{% trans "Break (mins)" %}</th>
+                            <th>{% trans "Assignment" %}</th>
+                            <th>{% trans "Status" %}</th>
+                            <th>{% trans "Actions" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for schedule in schedules %}
+                        <tr>
+                            <td>{{ schedule.date }}</td>
+                            <td>{{ schedule.start_time }}</td>
+                            <td>{{ schedule.end_time }}</td>
+                            <td>{{ schedule.total_hours|floatformat:1 }}h</td>
+                            <td>{{ schedule.break_duration_minutes }}</td>
+                            <td>
+                                {% if schedule.assignment %}
+                                    {{ schedule.assignment }}
+                                {% else %}
+                                    <span class="text-muted">{% trans "No assignment" %}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if schedule.status == 'PLANNED' %}
+                                    <span class="badge bg-warning text-dark">{% trans "Planned" %}</span>
+                                {% elif schedule.status == 'COMPLETED' %}
+                                    <span class="badge bg-success">{% trans "Completed" %}</span>
+                                {% elif schedule.status == 'CANCELED' %}
+                                    <span class="badge bg-danger">{% trans "Canceled" %}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if schedule.status == 'PLANNED' %}
+                                    <a href="{% url 'employees:submit_timesheet' schedule.id %}"
+                                       class="btn btn-sm btn-outline-primary"
+                                       title="{% trans 'Submit Timesheet' %}">
+                                        <i class="fas fa-clock"></i>
+                                    </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center py-4">
+                                <div class="text-muted">
+                                    <i class="fas fa-calendar-alt fa-2x mb-2"></i>
+                                    <br>
+                                    {% trans "No work schedules found." %}
+                                    <br>
+                                    <a href="{% url 'employees:schedule_create' %}" class="btn btn-primary mt-2">
+                                        {% trans "Add Your First Schedule" %}
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if page_obj.has_other_pages %}
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                                {% trans "Previous" %}
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}{% if status_filter %}&status={{ status_filter }}{% endif %}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                                {% trans "Next" %}
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.nav-pills .nav-link {
+    color: #495057;
+    border-radius: 0.375rem;
+}
+
+.nav-pills .nav-link.active {
+    background-color: #0d6efd;
+    color: white;
+}
+
+.badge {
+    font-size: 0.75em;
+    padding: 0.5em 0.75em;
+}
+
+.table-responsive {
+    border-radius: 0.375rem;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+
+    .card-header {
+        flex-direction: column;
+        gap: 10px;
+        align-items: stretch !important;
+    }
+
+    .nav-pills {
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+}
+</style>
+{% endblock %}

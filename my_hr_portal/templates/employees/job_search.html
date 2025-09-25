@@ -4,59 +4,80 @@
 {% block title %}{% trans "Job Search" %} - {{ block.super }}{% endblock %}
 
 {% block content %}
-<div class="container-fluid mt-4">
-    <div class="row">
+<div class="container-professional">
+    <div class="page-header-professional">
+        <div class="header-content">
+            <div class="header-main">
+                <h1 class="page-title">
+                    <i class="fas fa-search me-3"></i>{% trans "Find Your Next Opportunity" %}
+                </h1>
+                <p class="page-subtitle">{% trans "Discover amazing career opportunities that match your skills and aspirations" %}</p>
+            </div>
+            <div class="header-actions">
+                <a href="{% url 'employees:my_applications' %}" class="btn-secondary-professional">
+                    <i class="fas fa-file-alt me-2"></i>{% trans "My Applications" %}
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-grid-professional">
         <!-- Search Filters Sidebar -->
-        <div class="col-lg-3">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">
+        <div class="filters-sidebar">
+            <div class="card-professional">
+                <div class="card-header-professional">
+                    <h3 class="card-title">
                         <i class="fas fa-filter me-2"></i>{% trans "Search Filters" %}
-                    </h5>
+                    </h3>
                 </div>
-                <div class="card-body">
-                    <form method="get" id="searchForm">
+                <div class="card-body-professional">
+                    <form method="get" id="searchForm" class="filter-form">
                         <!-- Search Query -->
-                        <div class="mb-3">
-                            <label for="{{ form.search_query.id_for_label }}" class="form-label">
-                                {{ form.search_query.label }}
+                        <div class="form-group-professional">
+                            <label for="{{ form.search_query.id_for_label }}" class="form-label-professional">
+                                <i class="fas fa-search me-2"></i>{{ form.search_query.label }}
                             </label>
-                            {{ form.search_query }}
+                            <input type="text" name="search_query" id="{{ form.search_query.id_for_label }}"
+                                   class="form-control-professional"
+                                   value="{{ form.search_query.value|default:'' }}"
+                                   placeholder="{% trans 'Job title, company, keywords...' %}">
                         </div>
 
                         <!-- Location Filter -->
-                        <div class="mb-3">
-                            <label for="{{ form.location.id_for_label }}" class="form-label">
-                                {{ form.location.label }}
+                        <div class="form-group-professional">
+                            <label for="{{ form.location.id_for_label }}" class="form-label-professional">
+                                <i class="fas fa-map-marker-alt me-2"></i>{{ form.location.label }}
                             </label>
                             {{ form.location }}
                         </div>
 
                         <!-- Job Type Filter -->
-                        <div class="mb-3">
-                            <label for="{{ form.job_type.id_for_label }}" class="form-label">
-                                {{ form.job_type.label }}
+                        <div class="form-group-professional">
+                            <label for="{{ form.job_type.id_for_label }}" class="form-label-professional">
+                                <i class="fas fa-briefcase me-2"></i>{{ form.job_type.label }}
                             </label>
                             {{ form.job_type }}
                         </div>
 
                         <!-- Minimum Salary -->
-                        <div class="mb-3">
-                            <label for="{{ form.min_salary.id_for_label }}" class="form-label">
-                                {{ form.min_salary.label }}
+                        <div class="form-group-professional">
+                            <label for="{{ form.min_salary.id_for_label }}" class="form-label-professional">
+                                <i class="fas fa-euro-sign me-2"></i>{{ form.min_salary.label }}
                             </label>
                             {{ form.min_salary }}
                         </div>
 
                         <!-- Skills Filter -->
                         {% if form.skills.field.queryset %}
-                        <div class="mb-3">
-                            <label class="form-label">{{ form.skills.label }}</label>
-                            <div class="skills-filter" style="max-height: 200px; overflow-y: auto;">
+                        <div class="form-group-professional">
+                            <label class="form-label-professional">
+                                <i class="fas fa-tools me-2"></i>{{ form.skills.label }}
+                            </label>
+                            <div class="skills-filter-professional">
                                 {% for choice in form.skills %}
-                                <div class="form-check mb-1">
+                                <div class="skill-check">
                                     {{ choice.tag }}
-                                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                                    <label class="skill-label" for="{{ choice.id_for_label }}">
                                         {{ choice.choice_label }}
                                     </label>
                                 </div>
@@ -65,12 +86,12 @@
                         </div>
                         {% endif %}
 
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-search"></i> {% trans "Search Jobs" %}
+                        <div class="filter-actions">
+                            <button type="submit" class="btn-primary-professional">
+                                <i class="fas fa-search me-2"></i>{% trans "Search Jobs" %}
                             </button>
-                            <a href="{% url 'employees:job_search' %}" class="btn btn-outline-secondary">
-                                <i class="fas fa-refresh"></i> {% trans "Clear Filters" %}
+                            <a href="{% url 'employees:job_search' %}" class="btn-outline-professional">
+                                <i class="fas fa-refresh me-2"></i>{% trans "Clear Filters" %}
                             </a>
                         </div>
                     </form>
@@ -79,99 +100,103 @@
         </div>
 
         <!-- Job Results -->
-        <div class="col-lg-9">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2>{% trans "Available Jobs" %}</h2>
-                <div class="d-flex align-items-center">
-                    <span class="text-muted me-3">
-                        {{ total_jobs }} {% trans "jobs found" %}
-                    </span>
-                    <a href="{% url 'employees:my_applications' %}" class="btn btn-outline-info">
-                        <i class="fas fa-file-alt"></i> {% trans "My Applications" %}
-                    </a>
+        <div class="jobs-content">
+            <div class="jobs-header">
+                <div class="jobs-title">
+                    <h2>{% trans "Available Positions" %}</h2>
+                    <p class="jobs-count">{{ total_jobs }} {% trans "opportunities found" %}</p>
                 </div>
             </div>
 
+            <!-- Debug information -->
+            {% if user.is_staff %}
+            <div class="debug-info" style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 1rem; margin-bottom: 1rem; border-radius: 6px;">
+                <strong>Debug Info (visible to staff only):</strong>
+                <p>Total jobs in context: {{ total_jobs }}</p>
+                <p>Jobs found: {{ jobs|length }}</p>
+            </div>
+            {% endif %}
+
             {% if jobs %}
-                <div class="row">
+                <div class="jobs-grid">
                     {% for job in jobs %}
-                    <div class="col-md-6 mb-4">
-                        <div class="card job-card h-100">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <h5 class="card-title mb-0">
-                                        <a href="{% url 'employees:job_detail' job.id %}" class="text-decoration-none">
-                                            {{ job.title }}
-                                        </a>
-                                    </h5>
-                                    {% if job.user_applied %}
-                                        <span class="badge bg-success">{% trans "Applied" %}</span>
+                    <div class="job-card-professional">
+                        <div class="job-card-header">
+                            <div class="job-title-section">
+                                <h3 class="job-title">
+                                    <a href="{% url 'employees:job_detail' job.id %}">{{ job.title }}</a>
+                                    {% if user.is_staff %}
+                                        <small style="color: #6c757d; font-weight: normal; font-size: 0.8rem;">(Status: {{ job.status }})</small>
                                     {% endif %}
-                                </div>
-
-                                <h6 class="card-subtitle mb-2 text-muted">
-                                    <i class="fas fa-building"></i> {{ job.employer.company_name }}
-                                </h6>
-
-                                <div class="job-details mb-3">
-                                    <div class="mb-1">
-                                        <i class="fas fa-map-marker-alt text-primary"></i>
-                                        <small>{{ job.location }}</small>
-                                    </div>
-                                    <div class="mb-1">
-                                        <i class="fas fa-briefcase text-primary"></i>
-                                        <small>{{ job.get_job_type_display }}</small>
-                                    </div>
-                                    {% if job.estimated_salary_min or job.estimated_salary_max %}
-                                    <div class="mb-1">
-                                        <i class="fas fa-euro-sign text-primary"></i>
-                                        <small>
-                                            {% if job.estimated_salary_min and job.estimated_salary_max %}
-                                                €{{ job.estimated_salary_min|floatformat:0 }} - €{{ job.estimated_salary_max|floatformat:0 }}
-                                            {% elif job.estimated_salary_min %}
-                                                {% trans "From" %} €{{ job.estimated_salary_min|floatformat:0 }}
-                                            {% elif job.estimated_salary_max %}
-                                                {% trans "Up to" %} €{{ job.estimated_salary_max|floatformat:0 }}
-                                            {% endif %}
-                                        </small>
-                                    </div>
-                                    {% endif %}
-                                    <div>
-                                        <i class="fas fa-calendar text-primary"></i>
-                                        <small>{% trans "Posted" %} {{ job.created_at|timesince }} {% trans "ago" %}</small>
-                                    </div>
-                                </div>
-
-                                <p class="card-text">
-                                    {{ job.description|truncatechars:120 }}
+                                </h3>
+                                <p class="company-name">
+                                    <i class="fas fa-building me-2"></i>{{ job.employer.company_name }}
                                 </p>
-
-                                {% if job.required_skills.exists %}
-                                <div class="skills-tags mb-3">
-                                    {% for skill in job.required_skills.all|slice:":3" %}
-                                        <span class="badge bg-secondary me-1">{{ skill.name }}</span>
-                                    {% endfor %}
-                                    {% if job.required_skills.count > 3 %}
-                                        <span class="badge bg-light text-dark">+{{ job.required_skills.count|add:"-3" }}</span>
-                                    {% endif %}
-                                </div>
-                                {% endif %}
-
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <a href="{% url 'employees:job_detail' job.id %}" class="btn btn-outline-primary">
-                                        {% trans "View Details" %}
-                                    </a>
-                                    {% if not job.user_applied %}
-                                        <a href="{% url 'employees:apply_for_job' job.id %}" class="btn btn-success">
-                                            <i class="fas fa-paper-plane"></i> {% trans "Apply Now" %}
-                                        </a>
-                                    {% else %}
-                                        <button class="btn btn-secondary" disabled>
-                                            <i class="fas fa-check"></i> {% trans "Applied" %}
-                                        </button>
-                                    {% endif %}
-                                </div>
                             </div>
+                            {% if job.user_applied %}
+                                <div class="application-status applied">
+                                    <i class="fas fa-check-circle me-1"></i>{% trans "Applied" %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="job-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>{{ job.location }}</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-briefcase"></i>
+                                <span>{{ job.get_job_type_display }}</span>
+                            </div>
+                            {% if job.estimated_salary_min or job.estimated_salary_max %}
+                            <div class="meta-item">
+                                <i class="fas fa-euro-sign"></i>
+                                <span>
+                                    {% if job.estimated_salary_min and job.estimated_salary_max %}
+                                        €{{ job.estimated_salary_min|floatformat:0 }} - €{{ job.estimated_salary_max|floatformat:0 }}
+                                    {% elif job.estimated_salary_min %}
+                                        {% trans "From" %} €{{ job.estimated_salary_min|floatformat:0 }}
+                                    {% elif job.estimated_salary_max %}
+                                        {% trans "Up to" %} €{{ job.estimated_salary_max|floatformat:0 }}
+                                    {% endif %}
+                                </span>
+                            </div>
+                            {% endif %}
+                            <div class="meta-item">
+                                <i class="fas fa-clock"></i>
+                                <span>{{ job.created_at|timesince }} {% trans "ago" %}</span>
+                            </div>
+                        </div>
+
+                        <div class="job-description">
+                            {{ job.description|truncatechars:150 }}
+                        </div>
+
+                        {% if job.required_skills.exists %}
+                        <div class="job-skills">
+                            {% for skill in job.required_skills.all|slice:":4" %}
+                                <span class="skill-tag">{{ skill.name }}</span>
+                            {% endfor %}
+                            {% if job.required_skills.count > 4 %}
+                                <span class="skill-tag more">+{{ job.required_skills.count|add:"-4" }}</span>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        <div class="job-actions">
+                            <a href="{% url 'employees:job_detail' job.id %}" class="btn-outline-professional">
+                                <i class="fas fa-eye me-2"></i>{% trans "View Details" %}
+                            </a>
+                            {% if not job.user_applied %}
+                                <a href="{% url 'employees:apply_for_job' job.id %}" class="btn-apply-professional">
+                                    <i class="fas fa-paper-plane me-2"></i>{% trans "Apply Now" %}
+                                </a>
+                            {% else %}
+                                <button class="btn-applied-professional" disabled>
+                                    <i class="fas fa-check me-2"></i>{% trans "Applied" %}
+                                </button>
+                            {% endif %}
                         </div>
                     </div>
                     {% endfor %}
@@ -179,117 +204,583 @@
 
                 <!-- Pagination -->
                 {% if page_obj.has_other_pages %}
-                <nav aria-label="Job search pagination" class="mt-4">
-                    <ul class="pagination justify-content-center">
-                        {% if page_obj.has_previous %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page=1{% if request.GET.search_query %}&search_query={{ request.GET.search_query }}{% endif %}{% if request.GET.location %}&location={{ request.GET.location }}{% endif %}{% if request.GET.job_type %}&job_type={{ request.GET.job_type }}{% endif %}{% if request.GET.min_salary %}&min_salary={{ request.GET.min_salary }}{% endif %}">
-                                    {% trans "First" %}
-                                </a>
-                            </li>
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search_query %}&search_query={{ request.GET.search_query }}{% endif %}{% if request.GET.location %}&location={{ request.GET.location }}{% endif %}{% if request.GET.job_type %}&job_type={{ request.GET.job_type }}{% endif %}{% if request.GET.min_salary %}&min_salary={{ request.GET.min_salary }}{% endif %}">
-                                    {% trans "Previous" %}
-                                </a>
-                            </li>
-                        {% endif %}
+                <div class="pagination-professional">
+                    {% if page_obj.has_previous %}
+                        <a href="?page=1{% if request.GET.search_query %}&search_query={{ request.GET.search_query }}{% endif %}{% if request.GET.location %}&location={{ request.GET.location }}{% endif %}{% if request.GET.job_type %}&job_type={{ request.GET.job_type }}{% endif %}{% if request.GET.min_salary %}&min_salary={{ request.GET.min_salary }}{% endif %}" class="page-btn">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                        <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.search_query %}&search_query={{ request.GET.search_query }}{% endif %}{% if request.GET.location %}&location={{ request.GET.location }}{% endif %}{% if request.GET.job_type %}&job_type={{ request.GET.job_type }}{% endif %}{% if request.GET.min_salary %}&min_salary={{ request.GET.min_salary }}{% endif %}" class="page-btn">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                    {% endif %}
 
-                        <li class="page-item active">
-                            <span class="page-link">
-                                {% trans "Page" %} {{ page_obj.number }} {% trans "of" %} {{ page_obj.paginator.num_pages }}
-                            </span>
-                        </li>
+                    <span class="page-info">
+                        {% trans "Page" %} {{ page_obj.number }} {% trans "of" %} {{ page_obj.paginator.num_pages }}
+                    </span>
 
-                        {% if page_obj.has_next %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search_query %}&search_query={{ request.GET.search_query }}{% endif %}{% if request.GET.location %}&location={{ request.GET.location }}{% endif %}{% if request.GET.job_type %}&job_type={{ request.GET.job_type }}{% endif %}{% if request.GET.min_salary %}&min_salary={{ request.GET.min_salary }}{% endif %}">
-                                    {% trans "Next" %}
-                                </a>
-                            </li>
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search_query %}&search_query={{ request.GET.search_query }}{% endif %}{% if request.GET.location %}&location={{ request.GET.location }}{% endif %}{% if request.GET.job_type %}&job_type={{ request.GET.job_type }}{% endif %}{% if request.GET.min_salary %}&min_salary={{ request.GET.min_salary }}{% endif %}">
-                                    {% trans "Last" %}
-                                </a>
-                            </li>
-                        {% endif %}
-                    </ul>
-                </nav>
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}{% if request.GET.search_query %}&search_query={{ request.GET.search_query }}{% endif %}{% if request.GET.location %}&location={{ request.GET.location }}{% endif %}{% if request.GET.job_type %}&job_type={{ request.GET.job_type }}{% endif %}{% if request.GET.min_salary %}&min_salary={{ request.GET.min_salary }}{% endif %}" class="page-btn">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search_query %}&search_query={{ request.GET.search_query }}{% endif %}{% if request.GET.location %}&location={{ request.GET.location }}{% endif %}{% if request.GET.job_type %}&job_type={{ request.GET.job_type }}{% endif %}{% if request.GET.min_salary %}&min_salary={{ request.GET.min_salary }}{% endif %}" class="page-btn">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    {% endif %}
+                </div>
                 {% endif %}
 
             {% else %}
                 <!-- No jobs found -->
-                <div class="card">
-                    <div class="card-body text-center py-5">
-                        <i class="fas fa-search fa-3x text-muted mb-3"></i>
-                        <h4 class="text-muted">{% trans "No jobs found" %}</h4>
-                        <p class="text-muted">{% trans "Try adjusting your search criteria or check back later for new opportunities." %}</p>
-                        <a href="{% url 'employees:job_search' %}" class="btn btn-primary">
-                            {% trans "Clear Filters" %}
-                        </a>
+                <div class="empty-state-professional">
+                    <div class="empty-icon">
+                        <i class="fas fa-search"></i>
                     </div>
+                    <h3>{% trans "No positions found" %}</h3>
+                    <p>{% trans "Try adjusting your search criteria or check back later for new opportunities." %}</p>
+                    <a href="{% url 'employees:job_search' %}" class="btn-primary-professional">
+                        <i class="fas fa-refresh me-2"></i>{% trans "Clear Filters" %}
+                    </a>
                 </div>
             {% endif %}
         </div>
     </div>
 </div>
 
-<!-- Custom CSS -->
 <style>
-    .job-card {
-        transition: all 0.3s ease;
-        border: 1px solid #e3e6f0;
+/* Professional Job Search Styling */
+.container-professional {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.page-header-professional {
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary-medium));
+    color: white;
+    padding: 3rem 2.5rem;
+    border-radius: 12px 12px 0 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.page-header-professional::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+    opacity: 0.3;
+}
+
+.header-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 2rem;
+}
+
+.page-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem;
+    display: flex;
+    align-items: center;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.page-subtitle {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    margin: 0;
+    font-weight: 300;
+}
+
+.content-grid-professional {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 2rem;
+    background: white;
+    border-radius: 0 0 12px 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--border-color);
+    border-top: none;
+    overflow: hidden;
+}
+
+.filters-sidebar {
+    background: #f8f9fa;
+    padding: 2rem;
+    border-right: 1px solid var(--border-color);
+}
+
+.card-professional {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid var(--border-color);
+}
+
+.card-header-professional {
+    padding: 1.5rem 1.5rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+
+.card-body-professional {
+    padding: 1.5rem;
+}
+
+.form-group-professional {
+    margin-bottom: 1.5rem;
+}
+
+.form-label-professional {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+}
+
+.form-control-professional {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background: white;
+    color: var(--text-primary);
+}
+
+.form-control-professional:focus {
+    outline: none;
+    border-color: var(--primary-medium);
+    box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1);
+}
+
+.skills-filter-professional {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 0.75rem;
+    background: #f8f9fa;
+}
+
+.skill-check {
+    display: flex;
+    align-items: center;
+    padding: 0.25rem 0;
+}
+
+.skill-label {
+    margin-left: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.filter-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.btn-primary-professional {
+    background: linear-gradient(135deg, var(--primary-medium), var(--primary-dark));
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 3px 8px rgba(44, 62, 80, 0.3);
+}
+
+.btn-primary-professional:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(44, 62, 80, 0.4);
+}
+
+.btn-outline-professional {
+    background: transparent;
+    color: var(--primary-medium);
+    border: 2px solid var(--primary-medium);
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-outline-professional:hover {
+    background: var(--primary-medium);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-secondary-professional {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    backdrop-filter: blur(10px);
+}
+
+.btn-secondary-professional:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-1px);
+    color: white;
+    text-decoration: none;
+}
+
+.jobs-content {
+    padding: 2rem;
+}
+
+.jobs-header {
+    margin-bottom: 2rem;
+}
+
+.jobs-title h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 0.5rem;
+}
+
+.jobs-count {
+    color: var(--text-secondary);
+    margin: 0;
+    font-size: 1rem;
+}
+
+.jobs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.job-card-professional {
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    position: relative;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.job-card-professional:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
+    border-color: var(--primary-medium);
+}
+
+.job-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.job-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0 0 0.25rem;
+}
+
+.job-title a {
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.job-title a:hover {
+    color: var(--primary-medium);
+}
+
+.company-name {
+    color: var(--text-secondary);
+    margin: 0;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+}
+
+.application-status {
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+
+.application-status.applied {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.job-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem 1rem;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.meta-item i {
+    width: 16px;
+    margin-right: 0.5rem;
+    color: var(--primary-medium);
+}
+
+.job-description {
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+}
+
+.job-skills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.skill-tag {
+    background: var(--primary-medium);
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.skill-tag.more {
+    background: #6c757d;
+}
+
+.job-actions {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.btn-apply-professional {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    flex: 1;
+    justify-content: center;
+}
+
+.btn-apply-professional:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-applied-professional {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: not-allowed;
+    display: inline-flex;
+    align-items: center;
+    flex: 1;
+    justify-content: center;
+    opacity: 0.8;
+}
+
+.pagination-professional {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 2rem;
+    padding: 1rem;
+}
+
+.page-btn {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.page-btn:hover {
+    background: var(--primary-medium);
+    color: white;
+    border-color: var(--primary-medium);
+    text-decoration: none;
+}
+
+.page-info {
+    padding: 0 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.empty-state-professional {
+    text-align: center;
+    padding: 4rem 2rem;
+}
+
+.empty-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, var(--primary-medium), var(--primary-dark));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+}
+
+.empty-icon i {
+    font-size: 2rem;
+    color: white;
+}
+
+.empty-state-professional h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.empty-state-professional p {
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+}
+
+.me-1 { margin-right: 0.25rem; }
+.me-2 { margin-right: 0.5rem; }
+.me-3 { margin-right: 0.75rem; }
+
+@media (max-width: 1200px) {
+    .content-grid-professional {
+        grid-template-columns: 300px 1fr;
     }
 
-    .job-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    .jobs-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .container-professional {
+        padding: 1rem;
     }
 
-    .card-title a {
-        color: #2c3e50;
+    .page-header-professional {
+        padding: 2rem 1.5rem;
     }
 
-    .card-title a:hover {
-        color: #3498db;
+    .header-content {
+        flex-direction: column;
+        gap: 1.5rem;
     }
 
-    .job-details i {
-        width: 16px;
-        margin-right: 8px;
+    .page-title {
+        font-size: 2rem;
     }
 
-    .skills-tags .badge {
-        font-size: 0.75rem;
+    .content-grid-professional {
+        grid-template-columns: 1fr;
+        gap: 0;
     }
 
-    .skills-filter {
-        border: 1px solid #dee2e6;
-        border-radius: 0.375rem;
-        padding: 0.5rem;
+    .filters-sidebar {
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
     }
 
-    /* Responsive improvements */
-    @media (max-width: 991px) {
-        .col-lg-3 {
-            margin-bottom: 2rem;
-        }
+    .jobs-content {
+        padding: 1.5rem;
     }
 
-    @media (max-width: 768px) {
-        .d-flex.justify-content-between {
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .job-card .d-flex.justify-content-between {
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .job-card .btn {
-            width: 100%;
-        }
+    .jobs-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
     }
+
+    .job-meta {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+
+    .job-actions {
+        flex-direction: column;
+    }
+}
 </style>
 
 <!-- JavaScript for enhanced functionality -->

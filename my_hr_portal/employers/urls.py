@@ -17,4 +17,13 @@ urlpatterns = [
     path('applications/<int:application_id>/', views.application_detail, name='application_detail'),
     path('applications/<int:application_id>/update-status/', views.update_application_status, name='update_application_status'),
     path('applications/<int:application_id>/update-status-ajax/', views.update_application_status_ajax, name='update_application_status_ajax'),
+    path('assignments/', views.assignments_list, name='assignments_list'),
+    path('assignments/<int:assignment_id>/', views.assignment_detail, name='assignment_detail'),
+    path('invoices/', views.invoices_list, name='invoices_list'),
+    path('invoices/create/', views.create_invoice, name='create_invoice'),
+    path('invoices/<int:invoice_id>/', views.invoice_detail, name='invoice_detail'),
+    path('contracts/', views.contracts_list, name='contracts_list'),
+    path('contracts/create/', views.create_contract, name='create_contract'),
+    path('contracts/<int:contract_id>/', views.contract_detail, name='contract_detail'),
+    path('contracts/<int:contract_id>/update-status/', views.update_contract_status, name='update_contract_status'),
 ]

@@ -1,7 +1,7 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
-from .models import EmployeeProfile, Document
+from .models import EmployeeProfile, Document, CV
 from core.models import Skill, Profession, Address
 from employers.models import JobPosting, Application
 from employees.models import Timesheet,WorkSchedule
@@ -390,3 +390,114 @@ class DocumentUploadForm(forms.ModelForm):
                 )
 
         return file
+
+
+class CVForm(forms.ModelForm):
+    class Meta:
+        model = CV
+        fields = [
+            'education', 'experience', 'skills', 'date_of_birth', 'place_of_birth',
+            'place_of_residence', 'contacts', 'languages', 'civil_status',
+            'professional_experience', 'other_relevant_information', 'characteristics',
+            'hobby', 'attachment'
+        ]
+        widgets = {
+            'education': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4,
+                'placeholder': _('Describe your educational background, degrees, certifications...')
+            }),
+            'experience': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4,
+                'placeholder': _('Describe your work experience and achievements...')
+            }),
+            'skills': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': _('List your professional skills, technologies, certifications...')
+            }),
+            'date_of_birth': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date'
+            }),
+            'place_of_birth': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': _('City, Country')
+            }),
+            'place_of_residence': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': _('Current city and country')
+            }),
+            'contacts': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': _('Emergency contact information')
+            }),
+            'languages': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 2,
+                'placeholder': _('Languages and proficiency levels (e.g., English - Fluent, Spanish - Intermediate)')
+            }),
+            'civil_status': forms.Select(choices=[
+                ('', _('Select civil status')),
+                ('Single', _('Single')),
+                ('Married', _('Married')),
+                ('Divorced', _('Divorced')),
+                ('Widowed', _('Widowed')),
+            ], attrs={
+                'class': 'form-control'
+            }),
+            'professional_experience': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 5,
+                'placeholder': _('Detailed description of your professional experience, responsibilities, and achievements...')
+            }),
+            'other_relevant_information': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': _('Any other relevant information, awards, publications, volunteer work...')
+            }),
+            'characteristics': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': _('Personal characteristics, soft skills, personality traits...')
+            }),
+            'hobby': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 2,
+                'placeholder': _('Your hobbies and interests...')
+            }),
+            'attachment': forms.ClearableFileInput(attrs={
+                'class': 'form-control',
+                'accept': '.pdf,.doc,.docx'
+            })
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Make most fields optional
+        optional_fields = [
+            'place_of_birth', 'place_of_residence', 'contacts', 'languages',
+            'civil_status', 'professional_experience', 'other_relevant_information',
+            'characteristics', 'hobby', 'attachment', 'date_of_birth'
+        ]
+        for field_name in optional_fields:
+            self.fields[field_name].required = False
+
+        # Set help text for attachment
+        self.fields['attachment'].help_text = _('Upload your CV document (PDF, DOC, or DOCX format, max 5MB)')
+
+    def clean_attachment(self):
+        attachment = self.cleaned_data.get('attachment')
+        if attachment:
+            # Check file size (5MB limit)
+            if attachment.size > 5 * 1024 * 1024:
+                raise ValidationError(_('File size must be less than 5MB.'))
+
+            # Check file extension
+            allowed_extensions = ['.pdf', '.doc', '.docx']
+            file_extension = attachment.name.lower()
+            if not any(file_extension.endswith(ext) for ext in allowed_extensions):
+                raise ValidationError(_('Only PDF, DOC, and DOCX files are allowed.'))
+
+        return attachment

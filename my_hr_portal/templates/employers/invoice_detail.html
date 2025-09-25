@@ -1,0 +1,312 @@
+{% extends 'core/base1.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Invoice" %} {{ invoice.invoice_number }} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Navigation -->
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'employers:dashboard' %}">{% trans "Dashboard" %}</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'employers:invoices_list' %}">{% trans "Invoices" %}</a></li>
+                    <li class="breadcrumb-item active">{{ invoice.invoice_number }}</li>
+                </ol>
+            </nav>
+
+            <!-- Invoice Header Card -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-file-invoice-dollar me-2"></i>{% trans "Invoice" %} {{ invoice.invoice_number }}
+                    </h3>
+                    <div>
+                        {% if invoice.pdf_file %}
+                            <a href="{{ invoice.pdf_file.url }}" target="_blank" class="btn btn-primary btn-sm me-2">
+                                <i class="fas fa-file-pdf"></i> {% trans "Download PDF" %}
+                            </a>
+                        {% endif %}
+                        <a href="{% url 'employers:invoices_list' %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-arrow-left"></i> {% trans "Back to Invoices" %}
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Invoice Information -->
+                        <div class="col-md-6 mb-4">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-info-circle me-2"></i>{% trans "Invoice Information" %}
+                            </h5>
+
+                            <p class="mb-2">
+                                <strong>{% trans "Invoice Number:" %}</strong> {{ invoice.invoice_number }}
+                            </p>
+
+                            <p class="mb-2">
+                                <strong>{% trans "Issue Date:" %}</strong> {{ invoice.issue_date }}
+                            </p>
+
+                            <p class="mb-2">
+                                <strong>{% trans "Due Date:" %}</strong> {{ invoice.due_date }}
+                                {% if invoice.status == 'OVERDUE' %}
+                                    <span class="text-danger ms-2">
+                                        <i class="fas fa-exclamation-triangle"></i> {% trans "Overdue" %}
+                                    </span>
+                                {% endif %}
+                            </p>
+
+                            <p class="mb-2">
+                                <strong>{% trans "Status:" %}</strong>
+                                {% if invoice.status == 'PENDING' %}
+                                    <span class="badge bg-warning text-dark">{% trans "Pending" %}</span>
+                                {% elif invoice.status == 'PAID' %}
+                                    <span class="badge bg-success">{% trans "Paid" %}</span>
+                                {% elif invoice.status == 'OVERDUE' %}
+                                    <span class="badge bg-danger">{% trans "Overdue" %}</span>
+                                {% elif invoice.status == 'CANCELED' %}
+                                    <span class="badge bg-secondary">{% trans "Canceled" %}</span>
+                                {% endif %}
+                            </p>
+
+                            <p class="mb-2">
+                                <strong>{% trans "Created:" %}</strong> {{ invoice.created_at|date:"M d, Y H:i" }}
+                            </p>
+                        </div>
+
+                        <!-- Payment Summary -->
+                        <div class="col-md-6 mb-4">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-calculator me-2"></i>{% trans "Payment Summary" %}
+                            </h5>
+
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <tr>
+                                        <td><strong>{% trans "Total Amount:" %}</strong></td>
+                                        <td class="text-end">
+                                            <strong>
+                                                {% if invoice.total_amount_calculated %}
+                                                    €{{ invoice.total_amount_calculated|floatformat:2 }}
+                                                {% else %}
+                                                    €0.00
+                                                {% endif %}
+                                            </strong>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>{% trans "Total Paid:" %}</strong></td>
+                                        <td class="text-end">
+                                            <strong class="text-success">€{{ total_paid|floatformat:2 }}</strong>
+                                        </td>
+                                    </tr>
+                                    <tr class="table-warning">
+                                        <td><strong>{% trans "Remaining Balance:" %}</strong></td>
+                                        <td class="text-end">
+                                            <strong>
+                                                {% if remaining_balance > 0 %}
+                                                    <span class="text-danger">€{{ remaining_balance|floatformat:2 }}</span>
+                                                {% else %}
+                                                    <span class="text-success">€0.00</span>
+                                                {% endif %}
+                                            </strong>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Line Items -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-list me-2"></i>{% trans "Invoice Line Items" %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if line_items %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>{% trans "Description" %}</th>
+                                        <th class="text-center">{% trans "Quantity" %}</th>
+                                        <th class="text-end">{% trans "Unit Price" %}</th>
+                                        <th class="text-end">{% trans "Total" %}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in line_items %}
+                                    <tr>
+                                        <td>{{ item.description }}</td>
+                                        <td class="text-center">{{ item.quantity|floatformat:2 }}</td>
+                                        <td class="text-end">€{{ item.unit_price|floatformat:2 }}</td>
+                                        <td class="text-end">
+                                            <strong>€{{ item.total|floatformat:2 }}</strong>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot class="table-light">
+                                    <tr>
+                                        <th colspan="3" class="text-end">{% trans "Total Amount:" %}</th>
+                                        <th class="text-end">
+                                            {% if invoice.total_amount_calculated %}
+                                                €{{ invoice.total_amount_calculated|floatformat:2 }}
+                                            {% else %}
+                                                €0.00
+                                            {% endif %}
+                                        </th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-list fa-2x text-muted mb-2"></i>
+                            <p class="text-muted">{% trans "No line items found for this invoice." %}</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Payment History -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-credit-card me-2"></i>{% trans "Payment History" %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if payments %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>{% trans "Payment Date" %}</th>
+                                        <th>{% trans "Amount" %}</th>
+                                        <th>{% trans "Method" %}</th>
+                                        <th>{% trans "Transaction ID" %}</th>
+                                        <th>{% trans "Status" %}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for payment in payments %}
+                                    <tr>
+                                        <td>{{ payment.payment_date|date:"M d, Y H:i" }}</td>
+                                        <td>
+                                            <strong>€{{ payment.amount_paid|floatformat:2 }}</strong>
+                                        </td>
+                                        <td>{{ payment.get_method_display }}</td>
+                                        <td>
+                                            {% if payment.transaction_id %}
+                                                <code>{{ payment.transaction_id }}</code>
+                                            {% else %}
+                                                <span class="text-muted">{% trans "N/A" %}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if payment.status == 'SUCCESS' %}
+                                                <span class="badge bg-success">{% trans "Success" %}</span>
+                                            {% elif payment.status == 'FAILED' %}
+                                                <span class="badge bg-danger">{% trans "Failed" %}</span>
+                                            {% elif payment.status == 'PENDING' %}
+                                                <span class="badge bg-warning text-dark">{% trans "Pending" %}</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-credit-card fa-2x text-muted mb-2"></i>
+                            <p class="text-muted">{% trans "No payments have been made for this invoice yet." %}</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom CSS -->
+<style>
+.breadcrumb {
+    background-color: transparent;
+    padding: 0;
+    margin-bottom: 1rem;
+}
+
+.card {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border: 1px solid #e3e6f0;
+}
+
+.text-primary {
+    color: #4e73df !important;
+}
+
+.badge {
+    font-size: 0.75em;
+    padding: 0.5em 0.75em;
+}
+
+.table-sm td, .table-sm th {
+    padding: 0.5rem;
+}
+
+code {
+    background-color: #f8f9fa;
+    color: #495057;
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+    font-size: 0.875em;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+
+    .card-header {
+        flex-direction: column;
+        gap: 10px;
+        align-items: stretch !important;
+    }
+
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+
+    .col-md-6:first-child {
+        margin-bottom: 2rem;
+    }
+}
+
+@media print {
+    .card-header .btn,
+    .breadcrumb,
+    .btn {
+        display: none !important;
+    }
+
+    .container {
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .card {
+        border: none !important;
+        box-shadow: none !important;
+    }
+}
+</style>
+{% endblock %}

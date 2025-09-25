@@ -9,14 +9,14 @@ from .utils import generate_invoice_pdf # Assuming this utility exists
 def get_next_invoice_number():
     last_invoice = Invoice.objects.order_by('id').last()
     if not last_invoice:
-        return f"INV-{timezone.now().year}-0001"
+        return f"DRE-{timezone.now().year}-0001"
     
     # This logic is safe for single-threaded generation but can have race conditions under high load.
     # For production, consider a database sequence or a more robust method.
     last_num_str = last_invoice.invoice_number.split('-')[-1]
     last_num = int(last_num_str)
     new_num = last_num + 1
-    return f"INV-{timezone.now().year}-{new_num:04d}"
+    return f"DRE-{timezone.now().year}-{new_num:04d}"
 
 
 # The single, combined function

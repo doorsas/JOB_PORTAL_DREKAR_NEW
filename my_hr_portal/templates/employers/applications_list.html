@@ -52,6 +52,12 @@
                             </a>
                         </li>
                         <li class="nav-item" role="presentation">
+                            <a class="nav-link {% if status_filter == 'RESERVED' %}active{% endif %}"
+                               href="?status=RESERVED{% if job_filter %}&job={{ job_filter }}{% endif %}">
+                                {% trans "Reserved" %} ({{ status_counts.reserved }})
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
                             <a class="nav-link {% if status_filter == 'REJECTED' %}active{% endif %}"
                                href="?status=REJECTED{% if job_filter %}&job={{ job_filter }}{% endif %}">
                                 {% trans "Rejected" %} ({{ status_counts.rejected }})
@@ -121,6 +127,7 @@
                                                 {% elif application.status == 'REVIEWED' %}bg-info
                                                 {% elif application.status == 'INVITED' %}bg-warning
                                                 {% elif application.status == 'HIRED' %}bg-success
+                                                {% elif application.status == 'RESERVED' %}bg-secondary
                                                 {% elif application.status == 'REJECTED' %}bg-danger
                                                 {% endif %}">
                                                 {{ application.get_status_display }}
