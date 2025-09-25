@@ -9,7 +9,8 @@
       "Bash(python manage.py shell:*)",
       "Bash(python manage.py:*)",
       "Bash(find:*)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(pip install:*)"
     ],
     "deny": [],
     "ask": []

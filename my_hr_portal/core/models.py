@@ -103,7 +103,7 @@ class SalaryBenchmark(TimeStampedModel):
         MID = 'MID', 'Mid-Level'
         SENIOR = 'SENIOR', 'Senior'
 
-    # Note: 'Profession' is now defined above, so this works
+    
     profession = models.ForeignKey(Profession, on_delete=models.CASCADE, related_name='benchmarks')
     # Note: Assumes you merged 'Location' into 'Address'
     location = models.ForeignKey(Address, on_delete=models.CASCADE, related_name='benchmarks')
