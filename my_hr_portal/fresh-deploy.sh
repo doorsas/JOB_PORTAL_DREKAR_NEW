@@ -95,23 +95,24 @@ sudo -u $APP_USER $APP_DIR/venv/bin/pip install --upgrade pip
 
 # Install dependencies
 print_status "Installing Python dependencies..."
-sudo -u $APP_USER $APP_DIR/venv/bin/pip install -r requirements.txt
+sudo -u $APP_USER $APP_DIR/venv/bin/pip install -r $APP_DIR/my_hr_portal/requirements.txt
 
 # Set up directories
 print_status "Creating necessary directories..."
-sudo -u $APP_USER mkdir -p logs
-sudo -u $APP_USER mkdir -p media
-sudo -u $APP_USER mkdir -p staticfiles
+sudo -u $APP_USER mkdir -p $APP_DIR/my_hr_portal/logs
+sudo -u $APP_USER mkdir -p $APP_DIR/my_hr_portal/media
+sudo -u $APP_USER mkdir -p $APP_DIR/my_hr_portal/staticfiles
 
 # Copy environment file if it exists in the repo
-if [ -f ".env.example" ]; then
+if [ -f "$APP_DIR/my_hr_portal/.env.example" ]; then
     print_status "Setting up environment file..."
-    sudo -u $APP_USER cp .env.example .env
+    sudo -u $APP_USER cp $APP_DIR/my_hr_portal/.env.example $APP_DIR/my_hr_portal/.env
     print_warning "Please update .env file with your production settings!"
 fi
 
 # Run database migrations
 print_status "Running database migrations..."
+cd $APP_DIR/my_hr_portal
 sudo -u $APP_USER $APP_DIR/venv/bin/python manage.py makemigrations
 sudo -u $APP_USER $APP_DIR/venv/bin/python manage.py migrate
 
@@ -132,7 +133,7 @@ chmod -R 644 $APP_DIR/staticfiles/ 2>/dev/null || true
 # Create systemd service file if it doesn't exist
 if [ ! -f "/etc/systemd/system/$SERVICE_NAME.service" ]; then
     print_status "Creating systemd service file..."
-    cp hr-portal.service /etc/systemd/system/
+    cp $APP_DIR/my_hr_portal/hr-portal.service /etc/systemd/system/
     systemctl daemon-reload
     systemctl enable $SERVICE_NAME
 fi
@@ -140,7 +141,7 @@ fi
 # Create Nginx configuration if it doesn't exist
 if [ ! -f "/etc/nginx/sites-available/$APP_NAME" ]; then
     print_status "Setting up Nginx configuration..."
-    cp nginx-hr-portal.conf /etc/nginx/sites-available/$APP_NAME
+    cp $APP_DIR/my_hr_portal/nginx-hr-portal.conf /etc/nginx/sites-available/$APP_NAME
     ln -sf /etc/nginx/sites-available/$APP_NAME /etc/nginx/sites-enabled/
     nginx -t && systemctl reload nginx
 fi
@@ -177,8 +178,8 @@ print_success "🌐 Your HR Portal is now deployed!"
 
 echo
 echo "📋 Post-deployment checklist:"
-echo "1. Update .env file with production settings"
-echo "2. Create superuser: sudo -u $APP_USER $APP_DIR/venv/bin/python manage.py createsuperuser"
+echo "1. Update .env file with production settings: $APP_DIR/my_hr_portal/.env"
+echo "2. Create superuser: cd $APP_DIR/my_hr_portal && sudo -u $APP_USER $APP_DIR/venv/bin/python manage.py createsuperuser"
 echo "3. Test the application in your browser"
 echo "4. Set up SSL certificate with Let's Encrypt"
 echo "5. Configure domain name in Nginx if needed"
