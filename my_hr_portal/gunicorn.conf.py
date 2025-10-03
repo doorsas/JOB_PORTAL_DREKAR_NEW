@@ -7,8 +7,10 @@ import os
 bind = "127.0.0.1:8000"
 backlog = 2048
 
-# Worker processes - adjust based on server resources
-workers = multiprocessing.cpu_count() * 2 + 1
+# Worker processes - adjusted for low memory instances
+# For 1GB RAM instance (t2.micro), use 2-3 workers
+# For 2GB+ RAM, you can increase to 4-5 workers
+workers = 2
 worker_class = "sync"
 worker_connections = 1000
 timeout = 60
