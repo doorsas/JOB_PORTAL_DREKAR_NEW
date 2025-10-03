@@ -108,14 +108,7 @@
                 </div>
             </div>
 
-            <!-- Debug information -->
-            {% if user.is_staff %}
-            <div class="debug-info" style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 1rem; margin-bottom: 1rem; border-radius: 6px;">
-                <strong>Debug Info (visible to staff only):</strong>
-                <p>Total jobs in context: {{ total_jobs }}</p>
-                <p>Jobs found: {{ jobs|length }}</p>
-            </div>
-            {% endif %}
+
 
             {% if jobs %}
                 <div class="jobs-grid">

@@ -4,130 +4,234 @@
 {% block title %}{% trans "Welcome to HR Portal" %}{% endblock %}
 
 {% block content %}
-<div class="hero-section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 80px 0; text-align: center;">
-    <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
-        <h1 style="font-size: 3.5rem; margin-bottom: 20px; font-weight: 300;">{% trans "Welcome to HR Portal" %}</h1>
-        <p style="font-size: 1.5rem; margin-bottom: 40px; opacity: 0.9;">
-            {% trans "Your comprehensive solution for human resources management" %}
-        </p>
+<div class="container mt-4">
+    <!-- Hero Header Card -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                <div class="card-body py-5 text-center">
+                    <h1 class="mb-3">
+                        <i class="fas fa-building-user me-3 text-white"></i>{% trans "Welcome to DREKARR HR Portal" %}
+                    </h1>
+                    <p class="lead mb-4 opacity-75">
+                        {% trans "Your comprehensive solution for human resources management" %}
+                    </p>
 
-        {% if not user.is_authenticated %}
-            <div class="cta-buttons">
-                <a href="{% url 'accounts:register' %}" class="btn btn-primary" style="background: #fff; color: #667eea; padding: 15px 30px; text-decoration: none; border-radius: 25px; font-weight: bold; margin-right: 20px; display: inline-block;">
-                    {% trans "Get Started" %}
-                </a>
-                <a href="{% url 'accounts:login' %}" class="btn btn-secondary" style="border: 2px solid #fff; color: #fff; background: transparent; padding: 13px 30px; text-decoration: none; border-radius: 25px; font-weight: bold; display: inline-block;">
-                    {% trans "Sign In" %}
-                </a>
-            </div>
-        {% else %}
-            <div class="welcome-back" style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 10px; margin-top: 20px; display: inline-block;">
-                <h3 style="margin-bottom: 10px;">{% trans "Welcome back" %}, {{ user.first_name|default:user.username }}!</h3>
-                <p style="margin-bottom: 20px;">{% trans "You are logged in as" %} <strong>{{ user_type_display }}</strong></p>
-                <a href="{% url 'accounts:dashboard' %}" class="btn btn-primary" style="background: #fff; color: #667eea; padding: 12px 25px; text-decoration: none; border-radius: 20px; font-weight: bold;">
-                    {% trans "Go to Dashboard" %}
-                </a>
-            </div>
-        {% endif %}
-    </div>
-</div>
-
-<div class="features-section" style="padding: 80px 0; background: #f8f9fa;">
-    <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
-        <h2 style="text-align: center; font-size: 2.5rem; margin-bottom: 60px; color: #333;">{% trans "Our Services" %}</h2>
-
-        <div class="features-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px;">
-            <!-- Employers Section -->
-            <div class="feature-card" style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: center;">
-                <div class="feature-icon" style="font-size: 3rem; color: #007bff; margin-bottom: 20px;">🏢</div>
-                <h3 style="color: #333; margin-bottom: 15px;">{% trans "For Employers" %}</h3>
-                <p style="color: #666; margin-bottom: 20px;">
-                    {% trans "Post jobs, manage applications, track employees, and handle payroll efficiently." %}
-                </p>
-                <ul style="text-align: left; color: #666; margin-bottom: 20px;">
-                    <li>{% trans "Job posting management" %}</li>
-                    <li>{% trans "Application tracking" %}</li>
-                    <li>{% trans "Employee management" %}</li>
-                    <li>{% trans "Invoicing system" %}</li>
-                </ul>
-            </div>
-
-            <!-- Employees Section -->
-            <div class="feature-card" style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: center;">
-                <div class="feature-icon" style="font-size: 3rem; color: #28a745; margin-bottom: 20px;">👥</div>
-                <h3 style="color: #333; margin-bottom: 15px;">{% trans "For Employees" %}</h3>
-                <p style="color: #666; margin-bottom: 20px;">
-                    {% trans "Find jobs, manage your schedule, track timesheets, and access payslips." %}
-                </p>
-                <ul style="text-align: left; color: #666; margin-bottom: 20px;">
-                    <li>{% trans "Job search & applications" %}</li>
-                    <li>{% trans "Schedule management" %}</li>
-                    <li>{% trans "Timesheet tracking" %}</li>
-                    <li>{% trans "Payslip access" %}</li>
-                </ul>
-            </div>
-
-            <!-- EOR Services Section -->
-            <div class="feature-card" style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: center;">
-                <div class="feature-icon" style="font-size: 3rem; color: #17a2b8; margin-bottom: 20px;">⚖️</div>
-                <h3 style="color: #333; margin-bottom: 15px;">{% trans "EOR Services" %}</h3>
-                <p style="color: #666; margin-bottom: 20px;">
-                    {% trans "Employer of Record services for international hiring and compliance." %}
-                </p>
-                <ul style="text-align: left; color: #666; margin-bottom: 20px;">
-                    <li>{% trans "International compliance" %}</li>
-                    <li>{% trans "Employee placement" %}</li>
-                    <li>{% trans "Payroll processing" %}</li>
-                    <li>{% trans "Contract management" %}</li>
-                </ul>
+                    {% if not user.is_authenticated %}
+                        <div class="d-flex gap-3 justify-content-center flex-wrap">
+                            <a href="{% url 'accounts:register' %}" class="btn btn-light btn-lg">
+                                <i class="fas fa-user-plus me-2"></i>{% trans "Get Started" %}
+                            </a>
+                            <a href="{% url 'accounts:login' %}" class="btn btn-outline-light btn-lg">
+                                <i class="fas fa-sign-in-alt me-2"></i>{% trans "Sign In" %}
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="card bg-white bg-opacity-10 border-0 d-inline-block">
+                            <div class="card-body py-3">
+                                <h4 class="mb-2">
+                                    <i class="fas fa-user-circle me-2"></i>{% trans "Welcome back" %}, {{ user.first_name|default:user.username }}!
+                                </h4>
+                                <p class="mb-3">
+                                    {% trans "You are logged in as" %}
+                                    <span class="badge bg-light text-dark">{{ user.get_user_type_display }}</span>
+                                </p>
+                                <a href="{% url 'accounts:dashboard' %}" class="btn btn-light">
+                                    <i class="fas fa-tachometer-alt me-2"></i>{% trans "Go to Dashboard" %}
+                                </a>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<div class="cta-section" style="padding: 80px 0; background: #333; color: white; text-align: center;">
-    <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
-        <h2 style="font-size: 2.5rem; margin-bottom: 20px;">{% trans "Ready to get started?" %}</h2>
-        <p style="font-size: 1.2rem; margin-bottom: 40px; opacity: 0.8;">
-            {% trans "Join thousands of employers and employees using our platform" %}
-        </p>
+    <!-- Services Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body py-4">
+                    <h2 class="text-center mb-4">
+                        <i class="fas fa-concierge-bell me-2 text-primary"></i>{% trans "Our Services" %}
+                    </h2>
 
-        {% if not user.is_authenticated %}
-            <a href="{% url 'accounts:register' %}" class="btn btn-primary" style="background: #007bff; color: white; padding: 15px 30px; text-decoration: none; border-radius: 25px; font-weight: bold; font-size: 1.1rem;">
-                {% trans "Create Account Today" %}
-            </a>
-        {% endif %}
+                    <div class="row g-4">
+                        <!-- Employers Section -->
+                        <div class="col-lg-4 col-md-6">
+                            <div class="card border-0 shadow-sm h-100 service-card">
+                                <div class="card-body text-center">
+                                    <div class="mb-3">
+                                        <i class="fas fa-building fa-3x text-primary"></i>
+                                    </div>
+                                    <h5 class="card-title">{% trans "For Employers" %}</h5>
+                                    <p class="card-text text-muted mb-3">
+                                        {% trans "Post jobs, manage applications, track employees, and handle payroll efficiently." %}
+                                    </p>
+                                    <ul class="list-unstyled text-start">
+                                        <li class="mb-2">
+                                            <i class="fas fa-check-circle text-success me-2"></i>{% trans "Job posting management" %}
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-check-circle text-success me-2"></i>{% trans "Application tracking" %}
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-check-circle text-success me-2"></i>{% trans "Employee management" %}
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-check-circle text-success me-2"></i>{% trans "Invoicing system" %}
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Employees Section -->
+                        <div class="col-lg-4 col-md-6">
+                            <div class="card border-0 shadow-sm h-100 service-card">
+                                <div class="card-body text-center">
+                                    <div class="mb-3">
+                                        <i class="fas fa-users fa-3x text-success"></i>
+                                    </div>
+                                    <h5 class="card-title">{% trans "For Employees" %}</h5>
+                                    <p class="card-text text-muted mb-3">
+                                        {% trans "Find jobs, manage your schedule, track timesheets, and access payslips." %}
+                                    </p>
+                                    <ul class="list-unstyled text-start">
+                                        <li class="mb-2">
+                                            <i class="fas fa-check-circle text-success me-2"></i>{% trans "Job search & applications" %}
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-check-circle text-success me-2"></i>{% trans "Schedule management" %}
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-check-circle text-success me-2"></i>{% trans "Timesheet tracking" %}
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-check-circle text-success me-2"></i>{% trans "Payslip access" %}
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- EOR Services Section -->
+                        <div class="col-lg-4 col-md-12">
+                            <div class="card border-0 shadow-sm h-100 service-card">
+                                <div class="card-body text-center">
+                                    <div class="mb-3">
+                                        <i class="fas fa-balance-scale fa-3x text-info"></i>
+                                    </div>
+                                    <h5 class="card-title">{% trans "EOR Services" %}</h5>
+                                    <p class="card-text text-muted mb-3">
+                                        {% trans "Employer of Record services for international hiring and compliance." %}
+                                    </p>
+                                    <ul class="list-unstyled text-start">
+                                        <li class="mb-2">
+                                            <i class="fas fa-check-circle text-success me-2"></i>{% trans "International compliance" %}
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-check-circle text-success me-2"></i>{% trans "Employee placement" %}
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-check-circle text-success me-2"></i>{% trans "Payroll processing" %}
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-check-circle text-success me-2"></i>{% trans "Contract management" %}
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
+    <!-- Quick Stats Row (if user is authenticated) -->
+    {% if user.is_authenticated %}
+    <div class="row mb-4 g-3">
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center py-3">
+                    <i class="fas fa-users fa-2x text-primary mb-2"></i>
+                    <h6 class="mb-0">{% trans "Total Users" %}</h6>
+                    <small class="text-muted">{% trans "Growing community" %}</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center py-3">
+                    <i class="fas fa-briefcase fa-2x text-success mb-2"></i>
+                    <h6 class="mb-0">{% trans "Active Jobs" %}</h6>
+                    <small class="text-muted">{% trans "Find opportunities" %}</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center py-3">
+                    <i class="fas fa-handshake fa-2x text-info mb-2"></i>
+                    <h6 class="mb-0">{% trans "Successful Placements" %}</h6>
+                    <small class="text-muted">{% trans "Career matches" %}</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center py-3">
+                    <i class="fas fa-star fa-2x text-warning mb-2"></i>
+                    <h6 class="mb-0">{% trans "Satisfaction Rate" %}</h6>
+                    <small class="text-muted">{% trans "High quality service" %}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Call to Action -->
+    {% if not user.is_authenticated %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm bg-dark text-white">
+                <div class="card-body py-5 text-center">
+                    <h3 class="mb-3">
+                        <i class="fas fa-rocket me-2"></i>{% trans "Ready to get started?" %}
+                    </h3>
+                    <p class="lead mb-4">
+                        {% trans "Join thousands of employers and employees using our platform" %}
+                    </p>
+                    <a href="{% url 'accounts:register' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-user-plus me-2"></i>{% trans "Create Account Today" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 </div>
 
 <style>
-    .btn:hover {
-        transform: translateY(-2px);
-        transition: all 0.3s ease;
-    }
+.service-card:hover {
+    transform: translateY(-5px);
+    transition: all 0.3s ease;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
 
-    .feature-card:hover {
-        transform: translateY(-5px);
-        transition: all 0.3s ease;
-    }
+.service-card {
+    transition: all 0.3s ease;
+}
 
-    .feature-card ul {
-        list-style: none;
-        padding-left: 0;
-    }
+.card:hover {
+    transform: translateY(-2px);
+    transition: all 0.3s ease;
+}
 
-    .feature-card ul li {
-        padding: 5px 0;
-        position: relative;
-        padding-left: 20px;
-    }
-
-    .feature-card ul li:before {
-        content: "✓";
-        color: #28a745;
-        font-weight: bold;
-        position: absolute;
-        left: 0;
-    }
+.btn:hover {
+    transform: translateY(-1px);
+    transition: all 0.3s ease;
+}
 </style>
 {% endblock %}
