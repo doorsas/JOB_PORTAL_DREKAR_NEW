@@ -87,7 +87,8 @@ cd $APP_DIR
 
 # Create virtual environment
 print_status "Creating Python virtual environment..."
-sudo -u $APP_USER python3 -m venv venv
+python3 -m venv venv
+chown -R $APP_USER:$APP_USER venv
 
 # Upgrade pip
 print_status "Upgrading pip..."
@@ -95,7 +96,12 @@ sudo -u $APP_USER $APP_DIR/venv/bin/pip install --upgrade pip
 
 # Install dependencies
 print_status "Installing Python dependencies..."
-sudo -u $APP_USER $APP_DIR/venv/bin/pip install -r $APP_DIR/my_hr_portal/requirements.txt
+if [ -f "$APP_DIR/my_hr_portal/requirements.txt" ]; then
+    sudo -u $APP_USER $APP_DIR/venv/bin/pip install -r $APP_DIR/my_hr_portal/requirements.txt
+else
+    print_error "requirements.txt not found at $APP_DIR/my_hr_portal/requirements.txt"
+    exit 1
+fi
 
 # Set up directories
 print_status "Creating necessary directories..."
@@ -103,11 +109,24 @@ sudo -u $APP_USER mkdir -p $APP_DIR/my_hr_portal/logs
 sudo -u $APP_USER mkdir -p $APP_DIR/my_hr_portal/media
 sudo -u $APP_USER mkdir -p $APP_DIR/my_hr_portal/staticfiles
 
-# Copy environment file if it exists in the repo
-if [ -f "$APP_DIR/my_hr_portal/.env.example" ]; then
-    print_status "Setting up environment file..."
+# Copy environment file if it exists in the repo or restore from backup
+if [ -f ~/hr-portal-backup.env ]; then
+    print_status "Restoring .env from backup..."
+    cp ~/hr-portal-backup.env $APP_DIR/my_hr_portal/.env
+    chown $APP_USER:$APP_USER $APP_DIR/my_hr_portal/.env
+elif [ -f "$APP_DIR/my_hr_portal/.env.example" ]; then
+    print_status "Setting up environment file from example..."
     sudo -u $APP_USER cp $APP_DIR/my_hr_portal/.env.example $APP_DIR/my_hr_portal/.env
     print_warning "Please update .env file with your production settings!"
+else
+    print_warning "No .env file found. Please create one at $APP_DIR/my_hr_portal/.env"
+fi
+
+# Restore database from backup if exists
+if [ -f ~/hr-portal-backup-db.sqlite3 ]; then
+    print_status "Restoring database from backup..."
+    cp ~/hr-portal-backup-db.sqlite3 $APP_DIR/my_hr_portal/db.sqlite3
+    chown $APP_USER:$APP_USER $APP_DIR/my_hr_portal/db.sqlite3
 fi
 
 # Run database migrations
