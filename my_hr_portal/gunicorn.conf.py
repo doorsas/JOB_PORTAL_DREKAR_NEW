@@ -21,7 +21,7 @@ max_requests = 1000
 max_requests_jitter = 100
 
 # Logging
-base_dir = "/var/www/hr-portal"
+base_dir = "/var/www/hr-portal/my_hr_portal"
 accesslog = f"{base_dir}/logs/gunicorn_access.log"
 errorlog = f"{base_dir}/logs/gunicorn_error.log"
 loglevel = "info"
